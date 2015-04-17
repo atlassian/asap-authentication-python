@@ -25,6 +25,8 @@ def validate_key_identifier(identifier):
         raise ValueError(_error_msg)
     if normalised.startswith('/'):
         raise ValueError(_error_msg)
+    if '..' in normalised:
+        raise ValueError(_error_msg)
     return identifier
 
 
