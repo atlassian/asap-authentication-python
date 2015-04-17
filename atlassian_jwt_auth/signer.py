@@ -33,7 +33,7 @@ class JWTAuthSigner(object):
             'exp': now + self.lifetime,
             'iat': now,
             'aud': audience,
-            'jti': '%s:%s' % (now, SystemRandom().getrandbits(32)),
+            'jti': '%s:%s' % (now.timestamp(), SystemRandom().getrandbits(32)),
             'nbf': now,
             'sub': self.issuer,
         }
