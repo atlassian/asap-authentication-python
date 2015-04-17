@@ -12,7 +12,7 @@ class KeyIdentifier(object):
         self.key_id = validate_key_identifier(identifier)
 
 
-def validate_key_identifier(self, identifier):
+def validate_key_identifier(identifier):
     """ returns a validated key identifier. """
     regex = re.compile('^[\w.\-\+/]*$')
     _error_msg = 'Invalid key identifier %s' % identifier
