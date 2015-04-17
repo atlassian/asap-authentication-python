@@ -4,7 +4,7 @@ from random import SystemRandom
 import jwt
 
 from . import get_permitted_algorithm_names
-from .key import KeyIdentifer
+from .key import KeyIdentifier
 
 
 class JWTAuthSigner(object):
@@ -16,8 +16,8 @@ class JWTAuthSigner(object):
         self.lifetime = kwargs.get('lifetime', datetime.timedelta(hours=1))
         self.algorithm = kwargs.get('algorithm', 'RS256')
 
-        if not isinstance(self.key_identifier, KeyIdentifer):
-            self.key_identifier = KeyIdentifer(key_identifier)
+        if not isinstance(self.key_identifier, KeyIdentifier):
+            self.key_identifier = KeyIdentifier(key_identifier)
         if self.algorithm not in set(get_permitted_algorithm_names()):
             raise ValueError("Algorithm, '%s', is not permitted." %
                              self.algorithm)
@@ -35,7 +35,7 @@ class JWTAuthSigner(object):
             'aud': audience,
             'jti': '%s:%s' % (now, SystemRandom().getrandbits(32)),
             'nbf': now,
-            'sub': self.issuerm,
+            'sub': self.issuer,
         }
 
     def get_signed_claims(self, audience):
