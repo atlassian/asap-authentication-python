@@ -76,7 +76,7 @@ class TestJWTAuthVerifier(unittest.TestCase):
     @mock.patch('atlassian_jwt_auth.verifier.jwt.decode')
     def test_verify_claims_with_jwt_lasting_gt_max_time(self, m_j_decode):
         """ tests that verify_claims rejects a jwt if the claims
-            validity time is greater than the allowed maximum.
+            period of validity is greater than the allowed maximum.
         """
         expected_msg = 'exceeds the maximum'
         claims = self._jwt_auth_signer._get_claims(self._example_aud)
