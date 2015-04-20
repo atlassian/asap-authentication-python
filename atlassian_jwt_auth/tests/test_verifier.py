@@ -6,7 +6,6 @@ import mock
 from ..signer import JWTAuthSigner
 from ..verifier import JWTAuthVerifier
 from .utils import (
-    get_new_rsa_private_key_in_pem_format,
     get_public_key_pem_for_private_key_pem,
     RS256KeyTestMixin,
     ES256KeyTestMixin,
