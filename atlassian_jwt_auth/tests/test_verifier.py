@@ -109,14 +109,14 @@ class BaseJWTAuthVerifierTest(object):
 
 
 class JWTAuthVerifierRS256Test(
-    BaseJWTAuthVerifierTest,
-    RS256KeyTestMixin,
-    unittest.TestCase):
+        BaseJWTAuthVerifierTest,
+        RS256KeyTestMixin,
+        unittest.TestCase):
     pass
 
 
 class JWTAuthVerifierES256Test(
-    BaseJWTAuthVerifierTest,
-    ES256KeyTestMixin,
-    unittest.TestCase):
+        BaseJWTAuthVerifierTest,
+        ES256KeyTestMixin,
+        unittest.TestCase):
     pass
