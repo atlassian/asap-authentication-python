@@ -2,6 +2,8 @@ from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives.asymmetric import rsa
 from cryptography.hazmat.primitives import serialization
 
+from ..signer import JWTAuthSigner
+
 
 def get_new_rsa_private_key_in_pem_format():
     """ returns a new rsa key in pem format. """
@@ -25,3 +27,11 @@ def get_public_key_pem_for_private_key_pem(private_key_pem):
         encoding=serialization.Encoding.PEM,
         format=serialization.PublicFormat.SubjectPublicKeyInfo
     )
+
+
+def get_example_jwt_auth_signer(**kwargs):
+    """ returns an example jwt_auth_signer instance. """
+    issuer = kwargs.get('issuer', 'egissuer')
+    key_id = kwargs.get('key_id', '%s/a' % issuer)
+    key = kwargs.get('key', get_new_rsa_private_key_in_pem_format())
+    return JWTAuthSigner(issuer, key_id, key)
