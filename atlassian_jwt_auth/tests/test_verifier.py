@@ -18,7 +18,7 @@ class BaseJWTAuthVerifierTest(object):
     """ tests for the JWTAuthVerifier class. """
 
     def setUp(self):
-        self._private_key_pem = self.get_new_private_key()
+        self._private_key_pem = self.get_new_private_key_in_pem_format()
         self._public_key_pem = get_public_key_pem_for_private_key_pem(
             self._private_key_pem)
         self._example_aud = 'aud_x'
@@ -108,15 +108,15 @@ class BaseJWTAuthVerifierTest(object):
             verifier.verify_claims(signed_claims, self._example_aud)
 
 
-class JWTAuthVerifierRSATest(
+class JWTAuthVerifierRS256Test(
     BaseJWTAuthVerifierTest,
-    PrivateRSAKeyTestMixin,
+    RS256KeyTestMixin,
     unittest.TestCase):
     pass
 
 
-class JWTAuthVerifierECDSATest(
+class JWTAuthVerifierES256Test(
     BaseJWTAuthVerifierTest,
-    PrivateECDSAKeyTestMixin,
+    ES256KeyTestMixin,
     unittest.TestCase):
     pass
