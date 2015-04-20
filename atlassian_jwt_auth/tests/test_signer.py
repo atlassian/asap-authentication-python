@@ -4,7 +4,10 @@ import unittest
 import mock
 
 from ..signer import JWTAuthSigner
-from .utils import get_new_rsa_private_key_in_pem_format
+from .utils import (
+    get_new_rsa_private_key_in_pem_format,
+    get_example_jwt_auth_signer,
+)
 
 
 class TestJWTAuthSigner(unittest.TestCase):
@@ -14,10 +17,6 @@ class TestJWTAuthSigner(unittest.TestCase):
     def setUp(self):
         self.key = get_new_rsa_private_key_in_pem_format()
         self.algorithm = 'RS256'
-
-    def get_example_jwt_auth_signer(self):
-        """ returns an example jwt_auth_signer instance. """
-        return JWTAuthSigner('issuer', 'key_id', self.key)
 
     def test__get_claims(self):
         """ tests that _get_claims works as expected. """
@@ -47,7 +46,7 @@ class TestJWTAuthSigner(unittest.TestCase):
         """ tests that the jti of a claim changes. """
         expected_now = datetime.datetime(year=2001, day=1, month=1)
         aud = 'aud'
-        jwt_auth_signer = self.get_example_jwt_auth_signer()
+        jwt_auth_signer = get_example_jwt_auth_signer()
         jwt_auth_signer._now = lambda: expected_now
         first = jwt_auth_signer._get_claims(aud)['jti']
         second = jwt_auth_signer._get_claims(aud)['jti']
