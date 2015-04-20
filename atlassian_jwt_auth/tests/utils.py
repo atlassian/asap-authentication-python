@@ -12,3 +12,16 @@ def get_new_rsa_private_key_in_pem_format():
         format=serialization.PrivateFormat.TraditionalOpenSSL,
         encryption_algorithm=serialization.NoEncryption()
     )
+
+
+def get_public_key_pem_for_private_key_pem(private_key_pem):
+    private_key = serialization.load_pem_private_key(
+        private_key_pem,
+        password=None,
+        backend=default_backend()
+    )
+    public_key = private_key.public_key()
+    return public_key.public_bytes(
+        encoding=serialization.Encoding.PEM,
+        format=serialization.PublicFormat.SubjectPublicKeyInfo
+    )
