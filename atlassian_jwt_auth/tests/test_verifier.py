@@ -81,8 +81,8 @@ class TestJWTAuthVerifier(unittest.TestCase):
         expected_msg = 'exceeds the maximum'
         claims = self._jwt_auth_signer._get_claims(self._example_aud)
         claims['iat'] = claims['exp'] - datetime.timedelta(minutes=61)
-        claims['iat'] = claims['iat'].timestamp()
-        claims['exp'] = claims['exp'].timestamp()
+        for key in ['iat', 'exp']:
+            claims[key] = claims[key].timestamp()
         m_j_decode.return_value = claims
         a_jwt = self._jwt_auth_signer.get_signed_claims(self._example_aud)
         verifier = self._setup_jwt_auth_verifier(self._public_key_pem)
