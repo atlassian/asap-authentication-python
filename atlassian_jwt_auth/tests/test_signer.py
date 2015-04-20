@@ -51,7 +51,7 @@ class BaseJWTAuthSignerTest(object):
         jwt_auth_signer._now = lambda: expected_now
         first = jwt_auth_signer._get_claims(aud)['jti']
         second = jwt_auth_signer._get_claims(aud)['jti']
-        self.assertNotEquals(first, second)
+        self.assertNotEqual(first, second)
         self.assertTrue(str(expected_now.strftime('%s')) in first)
         self.assertTrue(str(expected_now.strftime('%s')) in second)
 
