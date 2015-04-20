@@ -11,7 +11,7 @@ setup(
         'PyJWT==1.1.0',
         'requests==2.6.0',
     ],
-    tests_require=['mock', 'nose',],
+    tests_require=['mock', 'nose', ],
     test_suite='nose.collector',
     platforms=['any'],
     license='MIT',

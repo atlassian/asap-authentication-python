@@ -36,7 +36,7 @@ class TestJWTAuthSigner(unittest.TestCase):
             'aud': expected_audience,
             'nbf': expected_now,
             'sub': expected_iss,
-            }
+        }
         claims = jwt_auth_signer._get_claims(expected_audience)
         self.assertIsNotNone(claims['jti'])
         del claims['jti']

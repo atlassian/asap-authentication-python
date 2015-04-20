@@ -26,8 +26,8 @@ class JWTAuthVerifier(object):
             algorithms=self.algorithms,
             options=options,
             audience=audience)
-        if not (key_identifier.key_id.startswith('%s/' % claims['iss'])
-                or key_identifier.key_id == claims['iss']):
+        if not (key_identifier.key_id.startswith('%s/' % claims['iss']) or
+                key_identifier.key_id == claims['iss']):
             raise ValueError('Issuer does not own the supplied public key')
         if claims.get('sub') and claims['iss'] != claims['sub']:
             raise ValueError('Issuer does not match the subject.')
