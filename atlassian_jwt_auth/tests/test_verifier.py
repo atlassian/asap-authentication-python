@@ -8,15 +8,17 @@ from ..verifier import JWTAuthVerifier
 from .utils import (
     get_new_rsa_private_key_in_pem_format,
     get_public_key_pem_for_private_key_pem,
+    RS256KeyTestMixin,
+    ES256KeyTestMixin,
 )
 
 
-class TestJWTAuthVerifier(unittest.TestCase):
+class BaseJWTAuthVerifierTest(object):
 
     """ tests for the JWTAuthVerifier class. """
 
     def setUp(self):
-        self._private_key_pem = get_new_rsa_private_key_in_pem_format()
+        self._private_key_pem = self.get_new_private_key()
         self._public_key_pem = get_public_key_pem_for_private_key_pem(
             self._private_key_pem)
         self._example_aud = 'aud_x'
@@ -26,6 +28,7 @@ class TestJWTAuthVerifier(unittest.TestCase):
             self._example_issuer,
             self._example_key_id,
             self._private_key_pem.decode(),
+            algorithm=self.algorithm
         )
 
     def _setup_mock_public_key_retriever(self, pub_key_pem):
@@ -53,7 +56,9 @@ class TestJWTAuthVerifier(unittest.TestCase):
         """
         verifier = self._setup_jwt_auth_verifier(self._public_key_pem)
         signer = JWTAuthSigner(
-            'issuer', 'issuerx', self._private_key_pem.decode())
+            'issuer', 'issuerx', self._private_key_pem.decode(),
+            algorithm=self.algorithm,
+        )
         signed_claims = signer.get_signed_claims(self._example_aud)
         with self.assertRaisesRegex(ValueError, 'Issuer does not own'):
             verifier.verify_claims(signed_claims, self._example_aud)
@@ -101,3 +106,17 @@ class TestJWTAuthVerifier(unittest.TestCase):
             self._example_aud))
         with self.assertRaisesRegex(ValueError, 'has already been used'):
             verifier.verify_claims(signed_claims, self._example_aud)
+
+
+class JWTAuthVerifierRSATest(
+    BaseJWTAuthVerifierTest,
+    PrivateRSAKeyTestMixin,
+    unittest.TestCase):
+    pass
+
+
+class JWTAuthVerifierECDSATest(
+    BaseJWTAuthVerifierTest,
+    PrivateECDSAKeyTestMixin,
+    unittest.TestCase):
+    pass
