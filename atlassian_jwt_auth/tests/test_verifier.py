@@ -56,3 +56,18 @@ class TestJWTAuthVerifier(unittest.TestCase):
         signed_claims = signer.get_signed_claims(self._example_aud)
         with self.assertRaisesRegex(ValueError, 'Issuer does not own'):
             verifier.verify_claims(signed_claims, self._example_aud)
+
+    @mock.patch('atlassian_jwt_auth.verifier.jwt.decode')
+    def test_verify_claims_with_non_matching_sub_and_iss(self, m_j_decode):
+        """ tests that verify_claims rejects a jwt if the claims
+            contains a subject which does not match the issuer.
+        """
+        expected_msg = 'Issuer does not match the subject'
+        m_j_decode.return_value = {
+            'iss': self._example_issuer,
+            'sub': self._example_issuer[::-1]
+        }
+        a_jwt = self._jwt_auth_signer.get_signed_claims(self._example_aud)
+        verifier = self._setup_jwt_auth_verifier(self._public_key_pem)
+        with self.assertRaisesRegex(ValueError, expected_msg):
+            verifier.verify_claims(a_jwt, self._example_aud)
