@@ -45,3 +45,14 @@ class TestJWTAuthVerifier(unittest.TestCase):
         self.assertIsNotNone(v_claims)
         self.assertEqual(v_claims['aud'], self._example_aud)
         self.assertEqual(v_claims['iss'], self._example_issuer)
+
+    def test_verify_claims_with_key_identifier_not_starting_with_issuer(self):
+        """ tests that verify_claims rejects a jwt if the key identifier does
+            not start with the claimed issuer.
+        """
+        verifier = self._setup_jwt_auth_verifier(self._public_key_pem)
+        signer = JWTAuthSigner(
+            'issuer', 'issuerx', self._private_key_pem.decode())
+        signed_claims = signer.get_signed_claims(self._example_aud)
+        with self.assertRaisesRegex(ValueError, 'Issuer does not own'):
+            verifier.verify_claims(signed_claims, self._example_aud)
