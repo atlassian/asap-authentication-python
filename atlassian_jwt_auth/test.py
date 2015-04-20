@@ -4,6 +4,7 @@ import unittest
 from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives.asymmetric import rsa
 from cryptography.hazmat.primitives import serialization
+import mock
 
 from .key import KeyIdentifier
 from .signer import JWTAuthSigner
@@ -77,6 +78,23 @@ class TestJWTAuthSigner(unittest.TestCase):
         self.assertNotEquals(first, second)
         self.assertTrue(str(expected_now.timestamp()) in first)
         self.assertTrue(str(expected_now.timestamp()) in second)
+
+    @mock.patch('jwt.encode')
+    def test_get_signed_claims(self, m_jwt_encode):
+        """ tests that _get_signed_claims works as expected. """
+        expected_aud = 'aud_x'
+        expected_claims = {'eg': 'ex'}
+        expected_key_id = 'key_id'
+        expected_issuer = 'a_issuer'
+        jwt_auth_signer = JWTAuthSigner(
+            expected_issuer, expected_key_id, key=self.key)
+        jwt_auth_signer._get_claims = lambda aud: expected_claims
+        jwt_auth_signer.get_signed_claims(expected_aud)
+        m_jwt_encode.assert_called_with(
+            expected_claims,
+            key=self.key,
+            algorithm=self.algorithm,
+            headers={'kid': expected_key_id})
 
 
 def get_new_rsa_private_key_in_pem_format():

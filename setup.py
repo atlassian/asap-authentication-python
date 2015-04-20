@@ -11,6 +11,7 @@ setup(
         'PyJWT==1.1.0',
         'requests==2.6.0',
     ],
+    tests_require=['mock',],
     test_suite='atlassian_jwt_auth.test',
     platforms=['any'],
     license='MIT',
