@@ -40,7 +40,7 @@ class JWTAuthVerifier(object):
             raise ValueError(_msg)
         _jti = claims['jti']
         if _jti in self._seen_jti:
-            raise ValueError("The jti. '%s' has already been used!" % _jti)
+            raise ValueError("The jti, '%s', has already been used." % _jti)
         else:
             if len(self._seen_jti) > 100:
                 self._seen_jti = set()
