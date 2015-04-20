@@ -58,7 +58,7 @@ class RS256KeyTestMixin(object):
     def algorithm(self):
         return 'RS256'
 
-    def get_new_private_key(self):
+    def get_new_private_key_in_pem_format(self):
         return get_new_rsa_private_key_in_pem_format()
 
 
@@ -70,7 +70,7 @@ class ES256KeyTestMixin(object):
     def algorithm(self):
         return 'ES256'
 
-    def get_new_private_key(self):
+    def get_new_private_key_in_pem_format(self):
         private_key = ec.generate_private_key(
             ec.SECP256R1(), default_backend())
         return private_key.private_bytes(
