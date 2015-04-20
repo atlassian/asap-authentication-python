@@ -17,7 +17,7 @@ class TestJWTAuthSigner(unittest.TestCase):
 
     def get_example_jwt_auth_signer(self):
         """ returns an example jwt_auth_signer instance. """
-        return JWTAuthSigner('issuer', 'key_id', key=self.key)
+        return JWTAuthSigner('issuer', 'key_id', self.key)
 
     def test__get_claims(self):
         """ tests that _get_claims works as expected. """
