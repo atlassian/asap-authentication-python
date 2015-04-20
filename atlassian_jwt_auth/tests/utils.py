@@ -1,5 +1,6 @@
 from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives.asymmetric import rsa
+from cryptography.hazmat.primitives.asymmetric import ec
 from cryptography.hazmat.primitives import serialization
 
 from ..signer import JWTAuthSigner
@@ -34,4 +35,46 @@ def get_example_jwt_auth_signer(**kwargs):
     issuer = kwargs.get('issuer', 'egissuer')
     key_id = kwargs.get('key_id', '%s/a' % issuer)
     key = kwargs.get('key', get_new_rsa_private_key_in_pem_format())
-    return JWTAuthSigner(issuer, key_id, key)
+    algorithm = kwargs.get('algorithm', 'RS256')
+    return JWTAuthSigner(issuer, key_id, key, algorithm=algorithm)
+
+
+class BaseJWTAlgorithmTestMixin(object):
+
+    """ A mixin class to make testing different support for different
+        jwt algorithms easier.
+    """
+
+    def get_new_private_key_in_pem_format(self):
+        """ returns a new private key in pem format. """
+        raise NotImplementedError("not implemented.")
+
+
+class RS256KeyTestMixin(object):
+
+    """ Private rs256 test mixin. """
+
+    @property
+    def algorithm(self):
+        return 'RS256'
+
+    def get_new_private_key(self):
+        return get_new_rsa_private_key_in_pem_format()
+
+
+class ES256KeyTestMixin(object):
+
+    """ Private es256 test mixin. """
+
+    @property
+    def algorithm(self):
+        return 'ES256'
+
+    def get_new_private_key(self):
+        private_key = ec.generate_private_key(
+            ec.SECP256R1(), default_backend())
+        return private_key.private_bytes(
+            encoding=serialization.Encoding.PEM,
+            format=serialization.PrivateFormat.TraditionalOpenSSL,
+            encryption_algorithm=serialization.NoEncryption()
+        )
