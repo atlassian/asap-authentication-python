@@ -47,14 +47,15 @@ class HTTPSPublicKeyRetriever(object):
             base_url += '/'
         self.base_url = base_url
 
-    def retrieve(self, key_identifier):
+    def retrieve(self, key_identifier, **requests_kwargs):
         """ returns the public key for given key_identifier. """
         if not isinstance(key_identifier, KeyIdentifier):
             key_identifier = KeyIdentifier(key_identifier)
         PEM_FILE_TYPE = 'application/x-pem-file'
         url = self.base_url + key_identifier.key_id
         resp = requests.get(url,
-                            headers={'accept': PEM_FILE_TYPE})
+                            headers={'accept': PEM_FILE_TYPE},
+                            **requests_kwargs)
         resp.raise_for_status()
         if resp.headers['content-type'] != PEM_FILE_TYPE:
             raise ValueError("Invalid content-type, '%s', for url '%s' ." %
