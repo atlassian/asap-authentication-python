@@ -9,7 +9,11 @@ class KeyIdentifier(object):
     """ This class represents a key identifier """
 
     def __init__(self, identifier):
-        self.key_id = validate_key_identifier(identifier)
+        self.__key_id = validate_key_identifier(identifier)
+
+    @property
+    def key_id(self):
+        return self.__key_id
 
 
 def validate_key_identifier(identifier):
