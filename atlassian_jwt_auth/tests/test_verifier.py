@@ -88,3 +88,16 @@ class TestJWTAuthVerifier(unittest.TestCase):
         verifier = self._setup_jwt_auth_verifier(self._public_key_pem)
         with self.assertRaisesRegex(ValueError, expected_msg):
             verifier.verify_claims(a_jwt, self._example_aud)
+
+    def test_verify_claims_with_jwt_with_already_seen_jti(self):
+        """ tests that verify_claims rejects a jwt if the jti
+            has already been seen.
+        """
+        verifier = self._setup_jwt_auth_verifier(self._public_key_pem)
+        signed_claims = self._jwt_auth_signer.get_signed_claims(
+            self._example_aud)
+        self.assertIsNotNone(verifier.verify_claims(
+            signed_claims,
+            self._example_aud))
+        with self.assertRaisesRegex(ValueError, 'has already been used'):
+            verifier.verify_claims(signed_claims, self._example_aud)
