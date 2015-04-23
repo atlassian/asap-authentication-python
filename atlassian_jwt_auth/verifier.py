@@ -13,13 +13,14 @@ class JWTAuthVerifier(object):
         self.algorithms = get_permitted_algorithm_names()
         self._seen_jti = set()
 
-    def verify_jwt(self, a_jwt, audience):
+    def verify_jwt(self, a_jwt, audience, **requests_kwargs):
         """ returns the claims of the given jwt iff verification
             is successful.
         """
         options = {'verify_signature': True}
         key_identifier = _get_key_id_from_jwt_header(a_jwt)
-        public_key = self.public_key_retriever.retrieve(key_identifier)
+        public_key = self.public_key_retriever.retrieve(
+            key_identifier, **requests_kwargs)
         claims = jwt.decode(
             a_jwt, key=public_key,
             algorithms=self.algorithms,
