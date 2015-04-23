@@ -12,7 +12,7 @@ class JWTAuthSigner(object):
     def __init__(self, issuer, key_identifier, private_key_pem, **kwargs):
         self.issuer = issuer
         self.key_identifier = key_identifier
-        self._key = private_key_pem
+        self._private_key_pem = private_key_pem
         self.lifetime = kwargs.get('lifetime', datetime.timedelta(hours=1))
         self.algorithm = kwargs.get('algorithm', 'RS256')
 
@@ -46,6 +46,6 @@ class JWTAuthSigner(object):
         """ returns a new signed jwt for use. """
         return jwt.encode(
             self._generate_claims(audience),
-            key=self._key,
+            key=self._private_key_pem,
             algorithm=self.algorithm,
             headers={'kid': self.key_identifier.key_id})
