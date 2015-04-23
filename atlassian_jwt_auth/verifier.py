@@ -15,8 +15,10 @@ class JWTAuthVerifier(object):
         self.algorithms = get_permitted_algorithm_names()
         self._seen_jti = set()
 
-    def verify_claims(self, a_jwt, audience):
-        """ returns verified claims if verification is successful. """
+    def verify_jwt(self, a_jwt, audience):
+        """ returns the claims of the given jwt iff verification
+            is successful.
+        """
         options = {'verify_signature': True}
         payload, signing_input, header, signature = PyJWT()._load(a_jwt)
         key_identifier = KeyIdentifier(header['kid'])

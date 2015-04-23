@@ -25,7 +25,7 @@ This package provides an implementation of the [Service to Service Authenticatio
 
     public_key_retriever = HTTPSPublicKeyRetriever('https://example.com')
     verifier = JWTAuthVerifier(public_key_retriever)
-    verified_claims = verifier.verify_claims(a_jwt, 'audience')
+    verified_claims = verifier.verify_jwt(a_jwt, 'audience')
 ```
 
 ## Installation
