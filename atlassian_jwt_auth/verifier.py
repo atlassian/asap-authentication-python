@@ -1,9 +1,7 @@
 import jwt
 
-from jwt.api import PyJWT
-
 from . import get_permitted_algorithm_names
-from .key import KeyIdentifier
+from .key import _get_key_id_from_jwt_header
 
 
 class JWTAuthVerifier(object):
@@ -20,8 +18,7 @@ class JWTAuthVerifier(object):
             is successful.
         """
         options = {'verify_signature': True}
-        payload, signing_input, header, signature = PyJWT()._load(a_jwt)
-        key_identifier = KeyIdentifier(header['kid'])
+        key_identifier = _get_key_id_from_jwt_header(a_jwt)
         public_key = self.public_key_retriever.retrieve(key_identifier)
         claims = jwt.decode(
             a_jwt, key=public_key,
