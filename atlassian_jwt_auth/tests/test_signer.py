@@ -56,8 +56,8 @@ class BaseJWTAuthSignerTest(object):
         self.assertTrue(str(expected_now.strftime('%s')) in second)
 
     @mock.patch('jwt.encode')
-    def test_get_signed_claims(self, m_jwt_encode):
-        """ tests that _get_signed_claims works as expected. """
+    def test_generate_jwt(self, m_jwt_encode):
+        """ tests that generate_jwt works as expected. """
         expected_aud = 'aud_x'
         expected_claims = {'eg': 'ex'}
         expected_key_id = 'key_id'
@@ -69,7 +69,7 @@ class BaseJWTAuthSignerTest(object):
             algorithm=self.algorithm,
         )
         jwt_auth_signer._generate_claims = lambda aud: expected_claims
-        jwt_auth_signer.get_signed_claims(expected_aud)
+        jwt_auth_signer.generate_jwt(expected_aud)
         m_jwt_encode.assert_called_with(
             expected_claims,
             key=self._private_key_pem,

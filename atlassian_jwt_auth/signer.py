@@ -42,8 +42,8 @@ class JWTAuthSigner(object):
     def _now(self):
         return datetime.datetime.utcnow()
 
-    def get_signed_claims(self, audience):
-        """ returns a new signed claim for use. """
+    def generate_jwt(self, audience):
+        """ returns a new signed jwt for use. """
         return jwt.encode(
             self._generate_claims(audience),
             key=self._key,

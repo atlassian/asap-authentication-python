@@ -13,7 +13,7 @@ This package provides an implementation of the [Service to Service Authenticatio
 
 
     signer = JWTAuthSigner('issuer', KeyIdentifier('issuer/key'), private_key_pem)
-    a_jwt = signer.get_signed_claims('audience')
+    a_jwt = signer.generate_jwt('audience')
 ```
 
 
