@@ -27,7 +27,7 @@ class BaseJWTAuthSignerTest(object):
         jwt_auth_signer = JWTAuthSigner(
             expected_iss,
             expected_key_id,
-            key=self._private_key_pem)
+            self._private_key_pem)
         jwt_auth_signer._now = lambda: expected_now
         expected_claims = {
             'iss': expected_iss,
@@ -47,7 +47,7 @@ class BaseJWTAuthSignerTest(object):
         expected_now = datetime.datetime(year=2001, day=1, month=1)
         aud = 'aud'
         jwt_auth_signer = get_example_jwt_auth_signer(
-            algorithm=self.algorithm, key=self._private_key_pem)
+            algorithm=self.algorithm, private_key_pem=self._private_key_pem)
         jwt_auth_signer._now = lambda: expected_now
         first = jwt_auth_signer._get_claims(aud)['jti']
         second = jwt_auth_signer._get_claims(aud)['jti']
@@ -65,7 +65,7 @@ class BaseJWTAuthSignerTest(object):
         jwt_auth_signer = JWTAuthSigner(
             expected_issuer,
             expected_key_id,
-            key=self._private_key_pem,
+            private_key_pem=self._private_key_pem,
             algorithm=self.algorithm,
         )
         jwt_auth_signer._get_claims = lambda aud: expected_claims

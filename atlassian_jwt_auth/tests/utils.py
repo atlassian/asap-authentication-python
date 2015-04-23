@@ -34,7 +34,8 @@ def get_example_jwt_auth_signer(**kwargs):
     """ returns an example jwt_auth_signer instance. """
     issuer = kwargs.get('issuer', 'egissuer')
     key_id = kwargs.get('key_id', '%s/a' % issuer)
-    key = kwargs.get('key', get_new_rsa_private_key_in_pem_format())
+    key = kwargs.get(
+        'private_key_pem', get_new_rsa_private_key_in_pem_format())
     algorithm = kwargs.get('algorithm', 'RS256')
     return JWTAuthSigner(issuer, key_id, key, algorithm=algorithm)
 

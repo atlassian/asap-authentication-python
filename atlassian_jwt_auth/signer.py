@@ -9,10 +9,10 @@ from .key import KeyIdentifier
 
 class JWTAuthSigner(object):
 
-    def __init__(self, issuer, key_identifier, key, **kwargs):
+    def __init__(self, issuer, key_identifier, private_key_pem, **kwargs):
         self.issuer = issuer
         self.key_identifier = key_identifier
-        self._key = key
+        self._key = private_key_pem
         self.lifetime = kwargs.get('lifetime', datetime.timedelta(hours=1))
         self.algorithm = kwargs.get('algorithm', 'RS256')
 
