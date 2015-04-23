@@ -42,9 +42,9 @@ class BaseJWTAuthVerifierTest(object):
     def test_verify_jwt_with_valid_jwt(self):
         """ test that verify_jwt verifies a valid jwt. """
         verifier = self._setup_jwt_auth_verifier(self._public_key_pem)
-        signed_claims = self._jwt_auth_signer.generate_jwt(
+        signed_jwt = self._jwt_auth_signer.generate_jwt(
             self._example_aud)
-        v_claims = verifier.verify_jwt(signed_claims, self._example_aud)
+        v_claims = verifier.verify_jwt(signed_jwt, self._example_aud)
         self.assertIsNotNone(v_claims)
         self.assertEqual(v_claims['aud'], self._example_aud)
         self.assertEqual(v_claims['iss'], self._example_issuer)
@@ -58,9 +58,9 @@ class BaseJWTAuthVerifierTest(object):
             'issuer', 'issuerx', self._private_key_pem.decode(),
             algorithm=self.algorithm,
         )
-        signed_claims = signer.generate_jwt(self._example_aud)
+        a_jwt = signer.generate_jwt(self._example_aud)
         with self.assertRaisesRegexp(ValueError, 'Issuer does not own'):
-            verifier.verify_jwt(signed_claims, self._example_aud)
+            verifier.verify_jwt(a_jwt, self._example_aud)
 
     @mock.patch('atlassian_jwt_auth.verifier.jwt.decode')
     def test_verify_jwt_with_non_matching_sub_and_iss(self, m_j_decode):
@@ -98,13 +98,13 @@ class BaseJWTAuthVerifierTest(object):
             has already been seen.
         """
         verifier = self._setup_jwt_auth_verifier(self._public_key_pem)
-        signed_claims = self._jwt_auth_signer.generate_jwt(
+        a_jwt = self._jwt_auth_signer.generate_jwt(
             self._example_aud)
         self.assertIsNotNone(verifier.verify_jwt(
-            signed_claims,
+            a_jwt,
             self._example_aud))
         with self.assertRaisesRegexp(ValueError, 'has already been used'):
-            verifier.verify_jwt(signed_claims, self._example_aud)
+            verifier.verify_jwt(a_jwt, self._example_aud)
 
 
 class JWTAuthVerifierRS256Test(
