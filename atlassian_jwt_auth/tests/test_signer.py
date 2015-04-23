@@ -18,8 +18,8 @@ class BaseJWTAuthSignerTest(object):
     def setUp(self):
         self._private_key_pem = self.get_new_private_key_in_pem_format()
 
-    def test__get_claims(self):
-        """ tests that _get_claims works as expected. """
+    def test__generate_claims(self):
+        """ tests that _generate_claims works as expected. """
         expected_now = datetime.datetime(year=2001, day=1, month=1)
         expected_audience = 'example_aud'
         expected_iss = 'eg'
@@ -37,7 +37,7 @@ class BaseJWTAuthSignerTest(object):
             'nbf': expected_now,
             'sub': expected_iss,
         }
-        claims = jwt_auth_signer._get_claims(expected_audience)
+        claims = jwt_auth_signer._generate_claims(expected_audience)
         self.assertIsNotNone(claims['jti'])
         del claims['jti']
         self.assertEqual(claims, expected_claims)
@@ -49,8 +49,8 @@ class BaseJWTAuthSignerTest(object):
         jwt_auth_signer = get_example_jwt_auth_signer(
             algorithm=self.algorithm, private_key_pem=self._private_key_pem)
         jwt_auth_signer._now = lambda: expected_now
-        first = jwt_auth_signer._get_claims(aud)['jti']
-        second = jwt_auth_signer._get_claims(aud)['jti']
+        first = jwt_auth_signer._generate_claims(aud)['jti']
+        second = jwt_auth_signer._generate_claims(aud)['jti']
         self.assertNotEqual(first, second)
         self.assertTrue(str(expected_now.strftime('%s')) in first)
         self.assertTrue(str(expected_now.strftime('%s')) in second)
@@ -68,7 +68,7 @@ class BaseJWTAuthSignerTest(object):
             private_key_pem=self._private_key_pem,
             algorithm=self.algorithm,
         )
-        jwt_auth_signer._get_claims = lambda aud: expected_claims
+        jwt_auth_signer._generate_claims = lambda aud: expected_claims
         jwt_auth_signer.get_signed_claims(expected_aud)
         m_jwt_encode.assert_called_with(
             expected_claims,

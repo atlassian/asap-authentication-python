@@ -25,7 +25,7 @@ class JWTAuthSigner(object):
             raise ValueError("lifetime, '%s',exceeds the allowed 1 hour max" %
                              (self.lifetime))
 
-    def _get_claims(self, audience):
+    def _generate_claims(self, audience):
         """ returns a new dictionary of claims. """
         now = self._now()
         return {
@@ -45,7 +45,7 @@ class JWTAuthSigner(object):
     def get_signed_claims(self, audience):
         """ returns a new signed claim for use. """
         return jwt.encode(
-            self._get_claims(audience),
+            self._generate_claims(audience),
             key=self._key,
             algorithm=self.algorithm,
             headers={'kid': self.key_identifier.key_id})

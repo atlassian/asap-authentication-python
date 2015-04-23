@@ -83,7 +83,7 @@ class BaseJWTAuthVerifierTest(object):
             period of validity is greater than the allowed maximum.
         """
         expected_msg = 'exceeds the maximum'
-        claims = self._jwt_auth_signer._get_claims(self._example_aud)
+        claims = self._jwt_auth_signer._generate_claims(self._example_aud)
         claims['iat'] = claims['exp'] - datetime.timedelta(minutes=61)
         for key in ['iat', 'exp']:
             claims[key] = claims[key].strftime('%s')
