@@ -1,3 +1,6 @@
+__version__ = '1.0.4'
+
+
 def get_permitted_algorithm_names():
     """ returns permitted algorithm names. """
     return [
