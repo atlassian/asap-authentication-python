@@ -9,7 +9,7 @@ setup(
     install_requires=[
         'cryptography==0.8.2',
         'PyJWT==1.1.0',
-        'requests==2.6.0',
+        'requests==2.7.0',
         'CacheControl==0.11.2',
     ],
     tests_require=['mock', 'nose', ],
