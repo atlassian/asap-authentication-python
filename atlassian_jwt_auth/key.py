@@ -1,6 +1,7 @@
 import os
 import re
 
+from cachecontrol import CacheControlAdapter
 from jwt.api import PyJWT
 import requests
 
@@ -53,6 +54,15 @@ class HTTPSPublicKeyRetriever(object):
         if not base_url.endswith('/'):
             base_url += '/'
         self.base_url = base_url
+        self._session = None
+
+    def _get_session(self):
+        if self._session is not None:
+            return self._session
+        session = requests.Session()
+        session.mount('https://', CacheControlAdapter())
+        self._session = session
+        return self._session
 
     def retrieve(self, key_identifier, **requests_kwargs):
         """ returns the public key for given key_identifier. """
@@ -60,9 +70,10 @@ class HTTPSPublicKeyRetriever(object):
             key_identifier = KeyIdentifier(key_identifier)
         PEM_FILE_TYPE = 'application/x-pem-file'
         url = self.base_url + key_identifier.key_id
-        resp = requests.get(url,
-                            headers={'accept': PEM_FILE_TYPE},
-                            **requests_kwargs)
+        session = self._get_session()
+        resp = session.get(url,
+                           headers={'accept': PEM_FILE_TYPE},
+                           **requests_kwargs)
         resp.raise_for_status()
         if resp.headers['content-type'].lower() != PEM_FILE_TYPE.lower():
             raise ValueError("Invalid content-type, '%s', for url '%s' ." %
