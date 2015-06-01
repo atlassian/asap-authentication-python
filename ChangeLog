@@ -1,0 +1,80 @@
+CHANGES
+=======
+
+1.0.6
+-----
+
+* Update PyJWT from version 1.1.0 to 1.3.0
+* Upgrade CacheControl from version 0.11.2 to 0.11.5
+* Upgrade cryptography from 0.8.2 to 0.9
+
+1.0.5
+-----
+
+* update requests from 2.6.0 to 2.7.0
+* Add caching to public key retrieval requests via cachecontrol
+
+1.0.4
+-----
+
+* specify the version in setup.py from __init__.py - which now contains a __version__ field
+
+1.0.3
+-----
+
+* bump the version to 1.0.3
+* rename the private _key field of the JWTAuthSigner class to _private_key_pem
+* s/signed_claims/a_jwt/ in the test code
+* http headers are case insensitive - so the content-type check should be done in a case insensitive fashion
+* pass through requests_kwargs through to public_key_retriever.retrieve(...)
+* extract the key_id obtaining code from the jwt header out into a function
+* s/verify_claims/verify_jwt/
+* s/get_signed_claims/generate_jwt/
+* s/_get_claims/_generate_claims/
+* rename the JWTAuthSigner 'key' parameter to 'private_key_pem'
+* update the readme with example use of the package
+* set the pep8 version to 1.6.2 in the travis-ci file
+* Add a travis-ci yaml file
+
+0.0.2
+-----
+
+* add support for python 2.7.X
+
+0.0.1
+-----
+
+* Make HTTPSPublicKeyRetriever take in and pass through keyword arguments for the requests.get(.
+* remove the unused get_new_rsa_private_key_in_pem_format import from test_verifier
+* Add JWTAuthVerifierRSATest and JWTAuthVerifierECDSATest classes which used the new mixins. Also rename TestJWTAuthVerifier to BaseJWTAuthVerifierTest
+* Add some jwt algorithm mixins
+* Make the KeyIdentifier.key_id field a property
+* pep8 fix up
+* Add a test to check that an jwt with a jti that has already been used is rejected
+* update the jti rejection message
+* wording change
+* minor change to test_verify_claims_with_jwt_lasting_gt_max_time
+* Add a test to check that jwt with lifetimes longer than the allowed maximum by the specification are rejected
+* add a test to cover when claims['iss'] != claims['sub']
+* if a key identifier does not contain a / then check if the key_id is equal to the claims issuer in verify_claims
+* add a test to cover that if key_identifier does not start with issuer then an error is raised in verify_claims
+* remove the superfluous 'the' in the issuer does not own the supplied public key message
+* re-factor the TestJWTAuthVerifier class
+* use the utils.get_example_jwt_auth_signer method in test_signer
+* Add get_example_jwt_auth_signer to tests/utils
+* Add a test for the JWTAuthVerifier
+* Add a get_public_key_pem_for_private_key_pem to tests/utils
+* create the JWTAuthSigner instance in get_example_jwt_auth_signer with key as a non-keyword style argument
+* s/jws/a_jwt/ in verify_claims
+* restructure the tests
+* Use nose for running tests
+* Add a test for JWTAuthSigner.get_signed_claims
+* Set test_suite in setup.py
+* Add a test to check that the jti changes between _get_claims calls
+* use the timestamp of now in the jti instead of the string representation of the datetime object
+* Add some tests
+* Extract and fix getting the time in signer.py
+* Fix up some minor errors in signer.py
+* remove the unused os import from setup.py
+* '..' is not permitted in a key identifier
+* validate_key_identifier should never of taken in 'self' it only needs a key identifier
