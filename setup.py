@@ -10,7 +10,7 @@ setup(
         'cryptography==0.9',
         'PyJWT==1.1.0',
         'requests==2.7.0',
-        'CacheControl==0.11.2',
+        'CacheControl==0.11.5',
     ],
     tests_require=['mock', 'nose', ],
     test_suite='nose.collector',
