@@ -2,7 +2,7 @@ import os
 import re
 
 from cachecontrol import CacheControlAdapter
-from jwt.api import PyJWT
+from jwt.api_jwt import PyJWT
 import requests
 
 
