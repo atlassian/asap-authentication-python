@@ -7,7 +7,7 @@ setup(
     packages=find_packages(),
     version=__import__('atlassian_jwt_auth').__version__,
     install_requires=[
-        'cryptography==0.8.2',
+        'cryptography==0.9',
         'PyJWT==1.1.0',
         'requests==2.7.0',
         'CacheControl==0.11.2',
