@@ -2,7 +2,7 @@ import os
 import re
 
 from cachecontrol import CacheControlAdapter
-from jwt.api_jwt import PyJWT
+import jwt
 import requests
 
 
@@ -38,7 +38,7 @@ def validate_key_identifier(identifier):
 
 def _get_key_id_from_jwt_header(a_jwt):
     """ returns the key identifier from a jwt header. """
-    payload, signing_input, header, signature = PyJWT()._load(a_jwt)
+    header = jwt.get_unverified_header(a_jwt)
     return KeyIdentifier(header['kid'])
 
 
