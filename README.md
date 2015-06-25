@@ -33,3 +33,6 @@ To install simply run
 ```
 $ pip install git+ssh://git@bitbucket.org/db_atlass/jwt-authentication-python.git@master
 ```
+
+### CI builds
+CI builds are found at [https://identity-bamboo.internal.atlassian.com/browse/SEC-SECENG](https://identity-bamboo.internal.atlassian.com/browse/SEC-SECENG) .
