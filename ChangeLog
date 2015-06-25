@@ -1,9 +1,22 @@
 CHANGES
 =======
 
+1.0.7
+-----
+
+* Add CI build information to the readme file
+* Merged in update_cryptography_from_0.9_to_0.9.1 (pull request #4)
+* Merged in use_supported_jwt_api_to_get_header (pull request #3)
+* Use the new pyjwt api to get an verified header instead of calling their internal API
+* update cryptography from 0.9 to 0.9.1
+* Use pbr for setup configuration
+* Add a mostly-generated Changelog file
+
 1.0.6
 -----
 
+* Release version 1.0.6
+* Merged in update_dependencies_28_05_2015 (pull request #2)
 * Update PyJWT from version 1.1.0 to 1.3.0
 * Upgrade CacheControl from version 0.11.2 to 0.11.5
 * Upgrade cryptography from 0.8.2 to 0.9
@@ -11,6 +24,8 @@ CHANGES
 1.0.5
 -----
 
+* release 1.0.5
+* Merged in add_caching_for_key_retriever (pull request #1)
 * update requests from 2.6.0 to 2.7.0
 * Add caching to public key retrieval requests via cachecontrol
 
@@ -39,13 +54,20 @@ CHANGES
 0.0.2
 -----
 
+* release 0.0.2
+* s/assertNotEquals/assertNotEqual/
 * add support for python 2.7.X
+* README.md edited online with Bitbucket
 
 0.0.1
 -----
 
 * Make HTTPSPublicKeyRetriever take in and pass through keyword arguments for the requests.get(.
 * remove the unused get_new_rsa_private_key_in_pem_format import from test_verifier
+* pep8 fix ups
+* update the test_signer code to use the new mixins
+* Update the test_verifier code
+* s/get_new_private_key/get_new_private_key_in_pem_format/ in the mixin classes
 * Add JWTAuthVerifierRSATest and JWTAuthVerifierECDSATest classes which used the new mixins. Also rename TestJWTAuthVerifier to BaseJWTAuthVerifierTest
 * Add some jwt algorithm mixins
 * Make the KeyIdentifier.key_id field a property
@@ -78,3 +100,6 @@ CHANGES
 * remove the unused os import from setup.py
 * '..' is not permitted in a key identifier
 * validate_key_identifier should never of taken in 'self' it only needs a key identifier
+* add a setup.py file
+* Add completely untested code
+* init
