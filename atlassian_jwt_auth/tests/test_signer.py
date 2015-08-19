@@ -3,7 +3,7 @@ import unittest
 
 import mock
 
-from ..signer import JWTAuthSigner
+from ..signer import create_signer
 from .utils import (
     get_example_jwt_auth_signer,
     RS256KeyTestMixin,
@@ -24,7 +24,7 @@ class BaseJWTAuthSignerTest(object):
         expected_audience = 'example_aud'
         expected_iss = 'eg'
         expected_key_id = 'eg/ex'
-        jwt_auth_signer = JWTAuthSigner(
+        jwt_auth_signer = create_signer(
             expected_iss,
             expected_key_id,
             self._private_key_pem)
@@ -62,7 +62,7 @@ class BaseJWTAuthSignerTest(object):
         expected_claims = {'eg': 'ex'}
         expected_key_id = 'key_id'
         expected_issuer = 'a_issuer'
-        jwt_auth_signer = JWTAuthSigner(
+        jwt_auth_signer = create_signer(
             expected_issuer,
             expected_key_id,
             private_key_pem=self._private_key_pem,
