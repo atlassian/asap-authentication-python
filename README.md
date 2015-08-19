@@ -36,4 +36,4 @@ $ pip install atlassian-jwt-auth
 
 ### CI builds
 This project uses travis ci for builds.
-[![Build Status](https://travis-ci.org/atlassian/asap-authentication-python.svg)](https://travis-ci.org/atlassian/asap-authentication-python)
+[![Build Status](https://travis-ci.org/atlassian/asap-authentication-python.svg?branch=master)](https://travis-ci.org/atlassian/asap-authentication-python)
