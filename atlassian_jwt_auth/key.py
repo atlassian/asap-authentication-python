@@ -101,17 +101,18 @@ class FilePrivateKeyRetriever(object):
             private_key_repository_path)
 
     def load(self, issuer):
-        key_identifier = self._find_first_key_id(issuer)
+        key_identifier = self._find_last_key_id(issuer)
         private_key_pem = self.private_key_repository.load_key(key_identifier)
         return key_identifier, private_key_pem
 
-    def _find_first_key_id(self, issuer):
-        for key_identifier in self.private_key_repository.find_valid_key_id(
-                issuer):
-            return key_identifier
-        raise Exception(
-            'Issuer has no valid keys in directory: ' %
-            issuer)
+    def _find_last_key_id(self, issuer):
+        key_identifiers = list(
+            self.private_key_repository.find_valid_key_ids(issuer))
+
+        if key_identifiers:
+            return key_identifiers[-1]
+        else:
+            raise IOError('Issuer has no valid keys: %s' % issuer)
 
 
 class FilePrivateKeyRepository(object):
@@ -120,8 +121,8 @@ class FilePrivateKeyRepository(object):
         self.path = path
 
     def find_valid_key_ids(self, issuer):
-        issuer_directory = os.path.join(self.private_key_repository, issuer)
-        for filename in sorted(os.path.listdir(issuer_directory)):
+        issuer_directory = os.path.join(self.path, issuer)
+        for filename in sorted(os.listdir(issuer_directory)):
             if filename.endswith('.pem'):
                 yield KeyIdentifier('%s/%s' % (issuer, filename))
 

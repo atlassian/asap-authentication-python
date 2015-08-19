@@ -60,7 +60,6 @@ def create_signer(issuer, key_identifier, private_key_pem, **kwargs):
 
 def create_signer_from_file_private_key_repository(
         issuer, private_key_repository, **kwargs):
-    private_key_retriever = key.FilePrivateKeyRetriever(
-        issuer, private_key_repository)
+    private_key_retriever = key.FilePrivateKeyRetriever(private_key_repository)
     signer = JWTAuthSigner(issuer, private_key_retriever, **kwargs)
     return signer
