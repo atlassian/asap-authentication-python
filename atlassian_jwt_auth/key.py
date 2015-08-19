@@ -79,3 +79,53 @@ class HTTPSPublicKeyRetriever(object):
             raise ValueError("Invalid content-type, '%s', for url '%s' ." %
                              (resp.headers['content-type'], url))
         return resp.text
+
+
+class StaticPrivateKeyRetriever(object):
+
+    def __init__(self, key_identifier, private_key_pem):
+        if not isinstance(key_identifier, KeyIdentifier):
+            key_identifier = KeyIdentifier(key_identifier)
+
+        self.key_identifier = key_identifier
+        self.private_key_pem = private_key_pem
+
+    def load(self, issuer):
+        return self.key_identifier, self.private_key_pem
+
+
+class FilePrivateKeyRetriever(object):
+
+    def __init__(self, private_key_repository_path):
+        self.private_key_repository = FilePrivateKeyRepository(
+            private_key_repository_path)
+
+    def load(self, issuer):
+        key_identifier = self._find_first_key_id(issuer)
+        private_key_pem = self.private_key_repository.load_key(key_identifier)
+        return key_identifier, private_key_pem
+
+    def _find_first_key_id(self, issuer):
+        for key_identifier in self.private_key_repository.find_valid_key_id(
+                issuer):
+            return key_identifier
+        raise Exception(
+            'Issuer has no valid keys in directory: ' %
+            issuer)
+
+
+class FilePrivateKeyRepository(object):
+
+    def __init__(self, path):
+        self.path = path
+
+    def find_valid_key_ids(self, issuer):
+        issuer_directory = os.path.join(self.private_key_repository, issuer)
+        for filename in sorted(os.path.listdir(issuer_directory)):
+            if filename.endswith('.pem'):
+                yield KeyIdentifier('%s/%s' % (issuer, filename))
+
+    def load_key(self, key_identifier):
+        key_filename = os.path.join(self.path, key_identifier.key_id)
+        with open(key_filename, 'rb') as f:
+            return f.read().decode('utf-8')

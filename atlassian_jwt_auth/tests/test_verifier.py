@@ -3,7 +3,7 @@ import unittest
 
 import mock
 
-from ..signer import JWTAuthSigner
+from ..signer import create_signer
 from ..verifier import JWTAuthVerifier
 from .utils import (
     get_public_key_pem_for_private_key_pem,
@@ -23,7 +23,7 @@ class BaseJWTAuthVerifierTest(object):
         self._example_aud = 'aud_x'
         self._example_issuer = 'egissuer'
         self._example_key_id = '%s/a' % self._example_issuer
-        self._jwt_auth_signer = JWTAuthSigner(
+        self._jwt_auth_signer = create_signer(
             self._example_issuer,
             self._example_key_id,
             self._private_key_pem.decode(),
@@ -54,7 +54,7 @@ class BaseJWTAuthVerifierTest(object):
             not start with the claimed issuer.
         """
         verifier = self._setup_jwt_auth_verifier(self._public_key_pem)
-        signer = JWTAuthSigner(
+        signer = create_signer(
             'issuer', 'issuerx', self._private_key_pem.decode(),
             algorithm=self.algorithm,
         )

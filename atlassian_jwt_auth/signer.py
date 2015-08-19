@@ -4,20 +4,20 @@ from random import SystemRandom
 import jwt
 
 from . import get_permitted_algorithm_names
-from .key import KeyIdentifier
+from .key import (
+    StaticPrivateKeyRetriever,
+    FilePrivateKeyRetriever
+)
 
 
 class JWTAuthSigner(object):
 
-    def __init__(self, issuer, key_identifier, private_key_pem, **kwargs):
+    def __init__(self, issuer, private_key_retriever, **kwargs):
         self.issuer = issuer
-        self.key_identifier = key_identifier
-        self._private_key_pem = private_key_pem
+        self.private_key_retriever = private_key_retriever
         self.lifetime = kwargs.get('lifetime', datetime.timedelta(hours=1))
         self.algorithm = kwargs.get('algorithm', 'RS256')
 
-        if not isinstance(self.key_identifier, KeyIdentifier):
-            self.key_identifier = KeyIdentifier(key_identifier)
         if self.algorithm not in set(get_permitted_algorithm_names()):
             raise ValueError("Algorithm, '%s', is not permitted." %
                              self.algorithm)
@@ -44,8 +44,25 @@ class JWTAuthSigner(object):
 
     def generate_jwt(self, audience):
         """ returns a new signed jwt for use. """
+        key_identifier, private_key_pem = self.private_key_retriever.load(
+            self.issuer)
         return jwt.encode(
             self._generate_claims(audience),
-            key=self._private_key_pem,
+            key=private_key_pem,
             algorithm=self.algorithm,
-            headers={'kid': self.key_identifier.key_id})
+            headers={'kid': key_identifier.key_id})
+
+
+def create_signer(issuer, key_identifier, private_key_pem, **kwargs):
+    private_key_retriever = StaticPrivateKeyRetriever(
+        key_identifier, private_key_pem)
+    signer = JWTAuthSigner(issuer, private_key_retriever, **kwargs)
+    return signer
+
+
+def create_signer_from_file_private_key_repository(
+        issuer, private_key_repository, **kwargs):
+    private_key_retriever = FilePrivateKeyRetriever(
+        issuer, private_key_repository)
+    signer = JWTAuthSigner(issuer, private_key_retriever, **kwargs)
+    return signer
