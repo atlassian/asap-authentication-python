@@ -8,10 +8,10 @@ This package provides an implementation of the [Service to Service Authenticatio
 ### To create a JWT for authentication
 
 ```python
-    from atlassian_jwt_auth.signer import create_signer
+    import atlassian_jwt_auth
 
 
-    signer = create_signer('issuer', 'issuer/key', private_key_pem)
+    signer = atlassian_jwt_auth.create_signer('issuer', 'issuer/key', private_key_pem)
     a_jwt = signer.generate_jwt('audience')
 ```
 
@@ -21,22 +21,20 @@ This package provides an implementation of the [Service to Service Authenticatio
 Each time you call `generate_jwt` this will find the latest active key file (ends with `.pem`) and use it to generate your JWT.
 
 ```python
-    from atlassian_jwt_auth.signer import create_signer_from_private_key_repository
+    import atlassian_jwt_auth
 
 
-    signer = create_signer_from_private_key_repository('issuer', '/opt/jwtprivatekeys')
+    signer = atlassian_jwt_auth.create_signer_from_file_private_key_repository('issuer', '/opt/jwtprivatekeys')
     a_jwt = signer.generate_jwt('audience')
 ```
 
 
 ### To verify a JWT
 ```python
-    from atlassian_jwt_auth.key import HTTPSPublicKeyRetriever
-    from atlassian_jwt_auth.verifier import JWTAuthVerifier
+    import atlassian_jwt_auth
 
-
-    public_key_retriever = HTTPSPublicKeyRetriever('https://example.com')
-    verifier = JWTAuthVerifier(public_key_retriever)
+    public_key_retriever = atlassian_jwt_auth.HTTPSPublicKeyRetriever('https://example.com')
+    verifier = atlassian_jwt_auth.JWTAuthVerifier(public_key_retriever)
     verified_claims = verifier.verify_jwt(a_jwt, 'audience')
 ```
 

@@ -3,13 +3,8 @@ import unittest
 
 import mock
 
-from ..signer import create_signer
-from ..verifier import JWTAuthVerifier
-from .utils import (
-    get_public_key_pem_for_private_key_pem,
-    RS256KeyTestMixin,
-    ES256KeyTestMixin,
-)
+import atlassian_jwt_auth
+from atlassian_jwt_auth.tests import utils
 
 
 class BaseJWTAuthVerifierTest(object):
@@ -18,12 +13,12 @@ class BaseJWTAuthVerifierTest(object):
 
     def setUp(self):
         self._private_key_pem = self.get_new_private_key_in_pem_format()
-        self._public_key_pem = get_public_key_pem_for_private_key_pem(
+        self._public_key_pem = utils.get_public_key_pem_for_private_key_pem(
             self._private_key_pem)
         self._example_aud = 'aud_x'
         self._example_issuer = 'egissuer'
         self._example_key_id = '%s/a' % self._example_issuer
-        self._jwt_auth_signer = create_signer(
+        self._jwt_auth_signer = atlassian_jwt_auth.create_signer(
             self._example_issuer,
             self._example_key_id,
             self._private_key_pem.decode(),
@@ -37,7 +32,7 @@ class BaseJWTAuthVerifierTest(object):
 
     def _setup_jwt_auth_verifier(self, pub_key_pem):
         m_public_key_ret = self._setup_mock_public_key_retriever(pub_key_pem)
-        return JWTAuthVerifier(m_public_key_ret)
+        return atlassian_jwt_auth.JWTAuthVerifier(m_public_key_ret)
 
     def test_verify_jwt_with_valid_jwt(self):
         """ test that verify_jwt verifies a valid jwt. """
@@ -54,7 +49,7 @@ class BaseJWTAuthVerifierTest(object):
             not start with the claimed issuer.
         """
         verifier = self._setup_jwt_auth_verifier(self._public_key_pem)
-        signer = create_signer(
+        signer = atlassian_jwt_auth.create_signer(
             'issuer', 'issuerx', self._private_key_pem.decode(),
             algorithm=self.algorithm,
         )
@@ -109,13 +104,13 @@ class BaseJWTAuthVerifierTest(object):
 
 class JWTAuthVerifierRS256Test(
         BaseJWTAuthVerifierTest,
-        RS256KeyTestMixin,
+        utils.RS256KeyTestMixin,
         unittest.TestCase):
     pass
 
 
 class JWTAuthVerifierES256Test(
         BaseJWTAuthVerifierTest,
-        ES256KeyTestMixin,
+        utils.ES256KeyTestMixin,
         unittest.TestCase):
     pass

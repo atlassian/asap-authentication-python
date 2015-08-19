@@ -3,12 +3,8 @@ import unittest
 
 import mock
 
-from ..signer import create_signer
-from .utils import (
-    get_example_jwt_auth_signer,
-    RS256KeyTestMixin,
-    ES256KeyTestMixin,
-)
+import atlassian_jwt_auth
+from atlassian_jwt_auth.tests import utils
 
 
 class BaseJWTAuthSignerTest(object):
@@ -24,7 +20,7 @@ class BaseJWTAuthSignerTest(object):
         expected_audience = 'example_aud'
         expected_iss = 'eg'
         expected_key_id = 'eg/ex'
-        jwt_auth_signer = create_signer(
+        jwt_auth_signer = atlassian_jwt_auth.create_signer(
             expected_iss,
             expected_key_id,
             self._private_key_pem)
@@ -46,7 +42,7 @@ class BaseJWTAuthSignerTest(object):
         """ tests that the jti of a claim changes. """
         expected_now = datetime.datetime(year=2001, day=1, month=1)
         aud = 'aud'
-        jwt_auth_signer = get_example_jwt_auth_signer(
+        jwt_auth_signer = utils.get_example_jwt_auth_signer(
             algorithm=self.algorithm, private_key_pem=self._private_key_pem)
         jwt_auth_signer._now = lambda: expected_now
         first = jwt_auth_signer._generate_claims(aud)['jti']
@@ -62,7 +58,7 @@ class BaseJWTAuthSignerTest(object):
         expected_claims = {'eg': 'ex'}
         expected_key_id = 'key_id'
         expected_issuer = 'a_issuer'
-        jwt_auth_signer = create_signer(
+        jwt_auth_signer = atlassian_jwt_auth.create_signer(
             expected_issuer,
             expected_key_id,
             private_key_pem=self._private_key_pem,
@@ -79,13 +75,13 @@ class BaseJWTAuthSignerTest(object):
 
 class JWTAuthSignerRS256Test(
         BaseJWTAuthSignerTest,
-        RS256KeyTestMixin,
+        utils.RS256KeyTestMixin,
         unittest.TestCase):
     pass
 
 
 class JWTAuthSignerES256Test(
         BaseJWTAuthSignerTest,
-        ES256KeyTestMixin,
+        utils.ES256KeyTestMixin,
         unittest.TestCase):
     pass
