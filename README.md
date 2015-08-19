@@ -31,7 +31,7 @@ This package provides an implementation of the [Service to Service Authenticatio
 ## Installation
 To install simply run
 ```
-$ pip install git+ssh://git@bitbucket.org/db_atlass/jwt-authentication-python.git@master
+$ pip install atlassian-jwt-auth
 ```
 
 ### CI builds
