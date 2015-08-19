@@ -35,4 +35,5 @@ $ pip install atlassian-jwt-auth
 ```
 
 ### CI builds
-CI builds are found at [https://identity-bamboo.internal.atlassian.com/browse/SEC-SECENG](https://identity-bamboo.internal.atlassian.com/browse/SEC-SECENG) .
+This project uses travis ci for builds.
+[![Build Status](https://travis-ci.org/atlassian/asap-authentication-python.svg)](https://travis-ci.org/atlassian/asap-authentication-python)
