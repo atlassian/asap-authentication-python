@@ -3,7 +3,7 @@ from cryptography.hazmat.primitives.asymmetric import rsa
 from cryptography.hazmat.primitives.asymmetric import ec
 from cryptography.hazmat.primitives import serialization
 
-from ..signer import create_signer
+import atlassian_jwt_auth
 
 
 def get_new_rsa_private_key_in_pem_format():
@@ -37,7 +37,8 @@ def get_example_jwt_auth_signer(**kwargs):
     key = kwargs.get(
         'private_key_pem', get_new_rsa_private_key_in_pem_format())
     algorithm = kwargs.get('algorithm', 'RS256')
-    return create_signer(issuer, key_id, key, algorithm=algorithm)
+    return atlassian_jwt_auth.create_signer(
+        issuer, key_id, key, algorithm=algorithm)
 
 
 class BaseJWTAlgorithmTestMixin(object):

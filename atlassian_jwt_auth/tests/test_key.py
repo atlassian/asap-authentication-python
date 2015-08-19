@@ -1,6 +1,6 @@
 import unittest
 
-from ..key import KeyIdentifier
+import atlassian_jwt_auth
 
 
 class TestKeyModule(unittest.TestCase):
@@ -15,10 +15,10 @@ class TestKeyModule(unittest.TestCase):
                 ]
         for key in keys:
             with self.assertRaises(ValueError):
-                KeyIdentifier(identifier=key)
+                atlassian_jwt_auth.KeyIdentifier(identifier=key)
 
     def test_key_identifier_with_valid_keys(self):
         """ test that valid keys work as expected. """
         for key in ['oa.oo/a', 'oo.sasdf.asdf/yes', 'oo/o']:
-            key_id = KeyIdentifier(identifier=key)
+            key_id = atlassian_jwt_auth.KeyIdentifier(identifier=key)
             self.assertEqual(key_id.key_id, key)

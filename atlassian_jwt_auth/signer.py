@@ -1,13 +1,10 @@
 import datetime
-from random import SystemRandom
+import random
 
 import jwt
 
-from . import get_permitted_algorithm_names
-from .key import (
-    StaticPrivateKeyRetriever,
-    FilePrivateKeyRetriever
-)
+from atlassian_jwt_auth import algorithms
+from atlassian_jwt_auth import key
 
 
 class JWTAuthSigner(object):
@@ -18,7 +15,8 @@ class JWTAuthSigner(object):
         self.lifetime = kwargs.get('lifetime', datetime.timedelta(hours=1))
         self.algorithm = kwargs.get('algorithm', 'RS256')
 
-        if self.algorithm not in set(get_permitted_algorithm_names()):
+        if self.algorithm not in set(
+                algorithms.get_permitted_algorithm_names()):
             raise ValueError("Algorithm, '%s', is not permitted." %
                              self.algorithm)
         if self.lifetime > datetime.timedelta(hours=1):
@@ -34,7 +32,7 @@ class JWTAuthSigner(object):
             'iat': now,
             'aud': audience,
             'jti': '%s:%s' % (
-                now.strftime('%s'), SystemRandom().getrandbits(32)),
+                now.strftime('%s'), random.SystemRandom().getrandbits(32)),
             'nbf': now,
             'sub': self.issuer,
         }
@@ -54,7 +52,7 @@ class JWTAuthSigner(object):
 
 
 def create_signer(issuer, key_identifier, private_key_pem, **kwargs):
-    private_key_retriever = StaticPrivateKeyRetriever(
+    private_key_retriever = key.StaticPrivateKeyRetriever(
         key_identifier, private_key_pem)
     signer = JWTAuthSigner(issuer, private_key_retriever, **kwargs)
     return signer
@@ -62,7 +60,7 @@ def create_signer(issuer, key_identifier, private_key_pem, **kwargs):
 
 def create_signer_from_file_private_key_repository(
         issuer, private_key_repository, **kwargs):
-    private_key_retriever = FilePrivateKeyRetriever(
+    private_key_retriever = key.FilePrivateKeyRetriever(
         issuer, private_key_repository)
     signer = JWTAuthSigner(issuer, private_key_retriever, **kwargs)
     return signer

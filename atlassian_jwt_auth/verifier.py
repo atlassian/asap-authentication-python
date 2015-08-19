@@ -1,7 +1,7 @@
 import jwt
 
-from . import get_permitted_algorithm_names
-from .key import _get_key_id_from_jwt_header
+from atlassian_jwt_auth import algorithms
+from atlassian_jwt_auth import key
 
 
 class JWTAuthVerifier(object):
@@ -10,7 +10,7 @@ class JWTAuthVerifier(object):
 
     def __init__(self, public_key_retriever, **kwargs):
         self.public_key_retriever = public_key_retriever
-        self.algorithms = get_permitted_algorithm_names()
+        self.algorithms = algorithms.get_permitted_algorithm_names()
         self._seen_jti = set()
 
     def verify_jwt(self, a_jwt, audience, **requests_kwargs):
@@ -18,7 +18,7 @@ class JWTAuthVerifier(object):
             is successful.
         """
         options = {'verify_signature': True}
-        key_identifier = _get_key_id_from_jwt_header(a_jwt)
+        key_identifier = key._get_key_id_from_jwt_header(a_jwt)
         public_key = self.public_key_retriever.retrieve(
             key_identifier, **requests_kwargs)
         claims = jwt.decode(

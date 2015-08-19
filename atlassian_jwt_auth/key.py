@@ -1,7 +1,7 @@
 import os
 import re
 
-from cachecontrol import CacheControlAdapter
+import cachecontrol
 import jwt
 import requests
 
@@ -60,7 +60,7 @@ class HTTPSPublicKeyRetriever(object):
         if self._session is not None:
             return self._session
         session = requests.Session()
-        session.mount('https://', CacheControlAdapter())
+        session.mount('https://', cachecontrol.CacheControlAdapter())
         self._session = session
         return self._session
 
