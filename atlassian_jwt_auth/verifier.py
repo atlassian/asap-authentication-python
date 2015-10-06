@@ -17,7 +17,11 @@ class JWTAuthVerifier(object):
         """ returns the claims of the given jwt iff verification
             is successful.
         """
-        options = {'verify_signature': True}
+        options = {
+            'verify_signature': True,
+            'require_exp': True,
+            'require_iat': True,
+        }
         key_identifier = key._get_key_id_from_jwt_header(a_jwt)
         public_key = self.public_key_retriever.retrieve(
             key_identifier, **requests_kwargs)
