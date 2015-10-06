@@ -1,6 +1,10 @@
 CHANGES
 =======
 
+* Make the private key repository scanning actually work
+* Clean up imports to follow google python style guides
+* Support scanning for key file each time generate_jwt is called
+* Sem-Ver: bugfix - update the build location information to reflect the build status of the master branch
 * Sem-Ver: bugfix - update the build location information
 * Sem-Ver: bugfix - update the installation instructions
 * release 1.0.8
