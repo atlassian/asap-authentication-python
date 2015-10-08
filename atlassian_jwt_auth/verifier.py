@@ -13,7 +13,7 @@ class JWTAuthVerifier(object):
         self.algorithms = algorithms.get_permitted_algorithm_names()
         self._seen_jti = set()
 
-    def verify_jwt(self, a_jwt, audience, **requests_kwargs):
+    def verify_jwt(self, a_jwt, audience, leeway=0, **requests_kwargs):
         """ returns the claims of the given jwt iff verification
             is successful.
         """
@@ -29,7 +29,8 @@ class JWTAuthVerifier(object):
             a_jwt, key=public_key,
             algorithms=self.algorithms,
             options=options,
-            audience=audience)
+            audience=audience,
+            leeway=leeway)
         if not (key_identifier.key_id.startswith('%s/' % claims['iss']) or
                 key_identifier.key_id == claims['iss']):
             raise ValueError('Issuer does not own the supplied public key')
