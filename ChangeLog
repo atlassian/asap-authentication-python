@@ -1,7 +1,10 @@
 CHANGES
 =======
 
-* Pass leeway param through to jwt.decode
+2.1.0
+-----
+
+* Sem-Ver: feature - Pass leeway param through to jwt.decode
 
 2.0.0
 -----
