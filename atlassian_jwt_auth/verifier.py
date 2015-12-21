@@ -12,6 +12,8 @@ class JWTAuthVerifier(object):
         self.public_key_retriever = public_key_retriever
         self.algorithms = algorithms.get_permitted_algorithm_names()
         self._seen_jti = set()
+        self._subject_should_match_issuer = kwargs.get(
+            'subject_should_match_issuer', True)
 
     def verify_jwt(self, a_jwt, audience, leeway=0, **requests_kwargs):
         """ returns the claims of the given jwt iff verification
@@ -34,7 +36,8 @@ class JWTAuthVerifier(object):
         if not (key_identifier.key_id.startswith('%s/' % claims['iss']) or
                 key_identifier.key_id == claims['iss']):
             raise ValueError('Issuer does not own the supplied public key')
-        if claims.get('sub') and claims['iss'] != claims['sub']:
+        if self._subject_should_match_issuer and (
+                claims.get('sub') and claims['iss'] != claims['sub']):
             raise ValueError('Issuer does not match the subject.')
         _aud = claims['aud']
         _exp = int(claims['exp'])
