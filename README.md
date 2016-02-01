@@ -28,6 +28,22 @@ Each time you call `generate_jwt` this will find the latest active key file (end
     a_jwt = signer.generate_jwt('audience')
 ```
 
+### To make an authenticated HTTP request
+
+If you use the `atlassian_jwt_auth.contrib.requests.JWTAuth` provider, you
+can automatically generate JWT tokens when using the `requests` library to
+perform authenticated HTTP requests.
+
+```python
+    import atlassian_jwt_auth
+    from atlassian_jwt_auth.contrib.requests import JWTAuth
+
+    signer = atlassian_jwt_auth.create_signer('issuer', 'issuer/key', private_key_pem)
+    response = requests.get(
+        'https://your-url'
+        auth=JWTAuth(signer, 'audience')
+    )
+```
 
 ### To verify a JWT
 ```python
