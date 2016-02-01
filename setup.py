@@ -3,7 +3,7 @@ from setuptools import setup
 
 
 setup(
-    setup_requires=['pbr==1.0.1'],
+    setup_requires=['pbr==1.8.1'],
     pbr=True,
     tests_require=['mock', 'nose', ],
     test_suite='nose.collector',
