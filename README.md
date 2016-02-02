@@ -1,7 +1,17 @@
 # Atlassian JWT authentication
+
+[![travis-status-image]][travis]
+[![pypi-version-image]][pypi]
+
 This package provides an implementation of the [Service to Service Authentication](https://extranet.atlassian.com/display/I/Service+to+Service+Authentication+-+Specification) specification.
 
 ----
+
+## Installation
+To install simply run
+```
+$ pip install atlassian-jwt-auth
+```
 
 ## Using this library
 
@@ -54,12 +64,8 @@ perform authenticated HTTP requests.
     verified_claims = verifier.verify_jwt(a_jwt, 'audience')
 ```
 
-## Installation
-To install simply run
-```
-$ pip install atlassian-jwt-auth
-```
+[travis-status-image]: https://secure.travis-ci.org/atlassian/asap-authentication-python.svg?branch=master
+[travis]: http://travis-ci.org/atlassian/asap-authentication-python?branch=master
 
-### CI builds
-This project uses travis ci for builds.
-[![Build Status](https://travis-ci.org/atlassian/asap-authentication-python.svg?branch=master)](https://travis-ci.org/atlassian/asap-authentication-python)
+[pypi-version-image]: https://img.shields.io/pypi/v/atlassian-jwt-auth.svg
+[pypi]: https://pypi.python.org/pypi/atlassian-jwt-auth
