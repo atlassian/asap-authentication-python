@@ -1,6 +1,13 @@
 CHANGES
 =======
 
+2.4.0
+-----
+
+* Support providing additional_claims when generating a jwt.
+* Update the location of the asap specification
+* Rearranged the README and added badge for pypi
+
 2.3.0
 -----
 
