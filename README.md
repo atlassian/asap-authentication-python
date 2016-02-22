@@ -3,7 +3,7 @@
 [![travis-status-image]][travis]
 [![pypi-version-image]][pypi]
 
-This package provides an implementation of the [Service to Service Authentication](https://extranet.atlassian.com/display/I/Service+to+Service+Authentication+-+Specification) specification.
+This package provides an implementation of the [Service to Service Authentication](http://s2sauth.bitbucket.org/spec/) specification.
 
 ----
 
