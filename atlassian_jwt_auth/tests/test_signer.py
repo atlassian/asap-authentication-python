@@ -25,18 +25,22 @@ class BaseJWTAuthSignerTest(object):
             expected_key_id,
             self._private_key_pem)
         jwt_auth_signer._now = lambda: expected_now
-        expected_claims = {
-            'iss': expected_iss,
-            'exp': expected_now + datetime.timedelta(hours=1),
-            'iat': expected_now,
-            'aud': expected_audience,
-            'nbf': expected_now,
-            'sub': expected_iss,
-        }
-        claims = jwt_auth_signer._generate_claims(expected_audience)
-        self.assertIsNotNone(claims['jti'])
-        del claims['jti']
-        self.assertEqual(claims, expected_claims)
+        for additional_claims in [{}, {'extra': 'thing'}]:
+            expected_claims = {
+                'iss': expected_iss,
+                'exp': expected_now + datetime.timedelta(hours=1),
+                'iat': expected_now,
+                'aud': expected_audience,
+                'nbf': expected_now,
+                'sub': expected_iss,
+            }
+            expected_claims.update(additional_claims)
+            claims = jwt_auth_signer._generate_claims(
+                expected_audience,
+                additional_claims=additional_claims)
+            self.assertIsNotNone(claims['jti'])
+            del claims['jti']
+            self.assertEqual(claims, expected_claims)
 
     def test_jti_changes(self):
         """ tests that the jti of a claim changes. """

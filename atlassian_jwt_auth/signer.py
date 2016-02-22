@@ -23,10 +23,10 @@ class JWTAuthSigner(object):
             raise ValueError("lifetime, '%s',exceeds the allowed 1 hour max" %
                              (self.lifetime))
 
-    def _generate_claims(self, audience):
+    def _generate_claims(self, audience, **kwargs):
         """ returns a new dictionary of claims. """
         now = self._now()
-        return {
+        claims = {
             'iss': self.issuer,
             'exp': now + self.lifetime,
             'iat': now,
@@ -36,16 +36,18 @@ class JWTAuthSigner(object):
             'nbf': now,
             'sub': self.issuer,
         }
+        claims.update(kwargs.get('additional_claims', {}))
+        return claims
 
     def _now(self):
         return datetime.datetime.utcnow()
 
-    def generate_jwt(self, audience):
+    def generate_jwt(self, audience, **kwargs):
         """ returns a new signed jwt for use. """
         key_identifier, private_key_pem = self.private_key_retriever.load(
             self.issuer)
         return jwt.encode(
-            self._generate_claims(audience),
+            self._generate_claims(audience, **kwargs),
             key=private_key_pem,
             algorithm=self.algorithm,
             headers={'kid': key_identifier.key_id})
