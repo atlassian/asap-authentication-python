@@ -1,9 +1,18 @@
+import base64
 import os
 import re
+import sys
 
 import cachecontrol
+import cryptography.hazmat.backends
+from cryptography.hazmat.primitives import serialization
 import jwt
 import requests
+
+if sys.version_info[0] >= 3:
+    from urllib.parse import unquote_plus
+else:
+    from urllib import unquote_plus
 
 
 class KeyIdentifier(object):
@@ -89,6 +98,33 @@ class BasePrivateKeyRetriever(object):
             for the given issuer.
         """
         raise NotImplementedError('Not implemented.')
+
+
+class DataUriPrivateKeyRetriever(BasePrivateKeyRetriever):
+    """ This class can be used to retrieve the key identifier and
+        private key from the supplied data uri.
+    """
+
+    def __init__(self, data_uri):
+        self._data_uri = data_uri
+
+    def load(self, issuer):
+        if not self._data_uri.startswith('data:application/pkcs8;kid='):
+            raise ValueError('Unrecognised data uri format.')
+        splitted = self._data_uri.split(';')
+        key_identifier = KeyIdentifier(unquote_plus(
+            splitted[1][len('kid='):]))
+        key_data = base64.b64decode(splitted[-1].split(',')[-1])
+        key = serialization.load_der_private_key(
+            key_data,
+            password=None,
+            backend=cryptography.hazmat.backends.default_backend())
+        private_key_pem = key.private_bytes(
+            encoding=serialization.Encoding.PEM,
+            format=serialization.PrivateFormat.TraditionalOpenSSL,
+            encryption_algorithm=serialization.NoEncryption()
+        )
+        return key_identifier, private_key_pem
 
 
 class StaticPrivateKeyRetriever(BasePrivateKeyRetriever):
