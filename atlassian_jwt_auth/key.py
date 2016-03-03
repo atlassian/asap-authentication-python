@@ -81,7 +81,20 @@ class HTTPSPublicKeyRetriever(object):
         return resp.text
 
 
-class StaticPrivateKeyRetriever(object):
+class BasePrivateKeyRetriever(object):
+    """ This is the base private key retriever class. """
+
+    def load(self, issuer):
+        """ returns the key identifier and private key pem found
+            for the given issuer.
+        """
+        raise NotImplementedError('Not implemented.')
+
+
+class StaticPrivateKeyRetriever(BasePrivateKeyRetriever):
+    """ This class simply returns the key_identifier and private_key_pem
+        initially provided to it in calls to load.
+    """
 
     def __init__(self, key_identifier, private_key_pem):
         if not isinstance(key_identifier, KeyIdentifier):
@@ -94,7 +107,11 @@ class StaticPrivateKeyRetriever(object):
         return self.key_identifier, self.private_key_pem
 
 
-class FilePrivateKeyRetriever(object):
+class FilePrivateKeyRetriever(BasePrivateKeyRetriever):
+    """ This class can be used to retrieve the latest key identifier and
+        private key for a given issuer found under its private key
+        repository path.
+    """
 
     def __init__(self, private_key_repository_path):
         self.private_key_repository = FilePrivateKeyRepository(
@@ -116,6 +133,7 @@ class FilePrivateKeyRetriever(object):
 
 
 class FilePrivateKeyRepository(object):
+    """ This class represents a file backed private key repository. """
 
     def __init__(self, path):
         self.path = path
