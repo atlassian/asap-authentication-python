@@ -1,6 +1,14 @@
 CHANGES
 =======
 
+2.5.0
+-----
+
+* Add support for obtaining a key identifier and private key from a data uri.
+* Standardise the PrivateKeyRepository classes and add docstring to the FilePrivateKeyRepository class
+* Sem-Ver: bugfix upgrade CacheControl from version 0.11.5 to 0.11.6
+* Sem-Ver: bugfix upgrade cryptography from version 1.2.2 to use a version >= 1.2.2 and < 1.3.0
+
 2.4.0
 -----
 
@@ -15,7 +23,6 @@ CHANGES
 * Move test requirements out of setup.py and into test-requirements.txt
 * Update pbr from version 1.0.1 to 1.8.1
 * Support python 3.5.
-
 
 2.2.0
 -----
