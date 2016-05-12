@@ -1,4 +1,5 @@
 import base64
+import cgi
 import os
 import re
 import sys
@@ -84,7 +85,8 @@ class HTTPSPublicKeyRetriever(object):
                            headers={'accept': PEM_FILE_TYPE},
                            **requests_kwargs)
         resp.raise_for_status()
-        if resp.headers['content-type'].lower() != PEM_FILE_TYPE.lower():
+        media_type = cgi.parse_header(resp.headers['content-type'])[0]
+        if media_type.lower() != PEM_FILE_TYPE.lower():
             raise ValueError("Invalid content-type, '%s', for url '%s' ." %
                              (resp.headers['content-type'], url))
         return resp.text
