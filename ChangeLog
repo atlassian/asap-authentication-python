@@ -1,6 +1,12 @@
 CHANGES
 =======
 
+2.5.2
+-----
+
+* Sem-Ver: bugfix make the DataUriPrivateKeyRetriever able to be used with a signer to generate jwt
+* Sem-Ver: bugfix support content-type headers that contain parameters in addition to the media-type.
+
 2.5.1
 -----
 
