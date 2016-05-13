@@ -126,7 +126,7 @@ class DataUriPrivateKeyRetriever(BasePrivateKeyRetriever):
             format=serialization.PrivateFormat.TraditionalOpenSSL,
             encryption_algorithm=serialization.NoEncryption()
         )
-        return key_identifier, private_key_pem
+        return key_identifier, private_key_pem.decode('utf-8')
 
 
 class StaticPrivateKeyRetriever(BasePrivateKeyRetriever):
