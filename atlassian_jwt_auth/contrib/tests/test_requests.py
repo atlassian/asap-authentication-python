@@ -38,17 +38,19 @@ class BaseRequestsTest(object):
         req = auth(Request())
         self.assert_authorization_header_is_valid(req)
 
+    def test_create_jwt_auth(self):
+        """Verify a valid Authorization header is added by JWTAuth"""
+        auth = create_jwt_auth('issuer', 'issuer/key',
+                               self._private_key_pem.decode(), 'audience',
+                               algorithm=self.algorithm)
+        req = auth(Request())
+        self.assert_authorization_header_is_valid(req)
+
 
 class RequestsRS256Test(BaseRequestsTest,
                         utils.RS256KeyTestMixin,
                         unittest.TestCase):
-
-    def test_create_jwt_auth(self):
-        """Verify a valid Authorization header is added by JWTAuth"""
-        auth = create_jwt_auth('issuer', 'issuer/key',
-                               self._private_key_pem.decode(), 'audience')
-        req = auth(Request())
-        self.assert_authorization_header_is_valid(req)
+    pass
 
 
 class RequestsES256Test(BaseRequestsTest,

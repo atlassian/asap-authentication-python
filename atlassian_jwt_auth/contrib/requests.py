@@ -5,10 +5,11 @@ import atlassian_jwt_auth
 from requests.auth import AuthBase
 
 
-def create_jwt_auth(issuer, key_identifier, private_key_pem, audience):
+def create_jwt_auth(
+        issuer, key_identifier, private_key_pem, audience, **kwargs):
     """Instantiate a JWTAuth while creating the signer inline"""
     signer = atlassian_jwt_auth.create_signer(issuer, key_identifier,
-                                              private_key_pem)
+                                              private_key_pem, **kwargs)
     return JWTAuth(signer, audience)
 
 
