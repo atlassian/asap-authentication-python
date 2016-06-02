@@ -1,6 +1,12 @@
 CHANGES
 =======
 
+2.6.0
+-----
+
+* Sem-Ver: feature support passing through kwargs for the signer created in create_jwt_auth
+* Generate a universal wheel
+
 2.5.2
 -----
 
