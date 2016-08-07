@@ -5,7 +5,7 @@ from requests import Request
 
 import atlassian_jwt_auth
 from atlassian_jwt_auth.tests import utils
-from atlassian_jwt_auth.contrib.requests_auth import JWTAuth, create_jwt_auth
+from atlassian_jwt_auth.contrib.requests import JWTAuth, create_jwt_auth
 
 
 class BaseRequestsTest(object):
