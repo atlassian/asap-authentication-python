@@ -55,7 +55,7 @@ class FlaskTests(utils.RS256KeyTestMixin, unittest.TestCase):
             'client-app/key01', self._private_key_pem
         )
         response = client.get('/', headers={
-            'Authorization': 'Bearer %s' % token
+            'Authorization': b'Bearer ' + token
         })
 
         self.assertEqual(response.status_code, 200)
@@ -71,7 +71,7 @@ class FlaskTests(utils.RS256KeyTestMixin, unittest.TestCase):
             'client-app/key01', self._private_key_pem
         )
         response = client.get('/', headers={
-            'Authorization': 'Bearer %s' % token
+            'Authorization': b'Bearer ' + token
         })
 
         self.assertEqual(response.status_code, 401)
@@ -83,7 +83,7 @@ class FlaskTests(utils.RS256KeyTestMixin, unittest.TestCase):
 
         get_verifier.side_effect = lambda: self.verifier
         response = client.get('/', headers={
-            'Authorization': 'Bearer %s' % 'not-a-valid-token'
+            'Authorization': b'Bearer notavalidtoken'
         })
 
         self.assertEqual(response.status_code, 401)
@@ -104,7 +104,7 @@ class FlaskTests(utils.RS256KeyTestMixin, unittest.TestCase):
             'another-client/key01', self._private_key_pem
         )
         response = client.get('/', headers={
-            'Authorization': 'Bearer %s' % token
+            'Authorization': b'Bearer ' + token
         })
 
         self.assertEqual(response.status_code, 401)
