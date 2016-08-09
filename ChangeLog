@@ -1,6 +1,12 @@
 CHANGES
 =======
 
+2.7.0
+-----
+
+* Sem-Ver: feature add to contrib flask_app that provides a @requires_asap decorator
+* Sem-Ver: bugfix upgrade PyJWT from version 1.4.0 to 1.4.2
+
 2.6.0
 -----
 
