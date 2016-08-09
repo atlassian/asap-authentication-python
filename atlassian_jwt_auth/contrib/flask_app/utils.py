@@ -6,11 +6,11 @@ def parse_jwt(verifier, encoded_jwt):
     """Decode an encoded JWT using stored config."""
     claims = verifier.verify_jwt(
         encoded_jwt,
-        current_app.config.asap['VALID_AUDIENCE'],
+        current_app.config['ASAP_VALID_AUDIENCE'],
         leeway=60
     )
 
-    valid_issuers = current_app.config.asap.get('VALID_ISSUERS')
+    valid_issuers = current_app.config.get('ASAP_VALID_ISSUERS')
     if valid_issuers and claims.get('iss') not in valid_issuers:
         raise InvalidIssuerError
 

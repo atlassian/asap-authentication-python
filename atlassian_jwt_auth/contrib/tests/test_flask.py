@@ -11,10 +11,10 @@ from atlassian_jwt_auth.contrib.tests.utils import static_verifier
 
 def get_app():
     app = Flask(__name__)
-    app.config.asap = {
-        'VALID_AUDIENCE': 'server-app',
-        'VALID_ISSUERS': ['client-app']
-    }
+    app.config.update({
+        'ASAP_VALID_AUDIENCE': 'server-app',
+        'ASAP_VALID_ISSUERS': ('client-app',)
+    })
 
     @app.route("/")
     @requires_asap
