@@ -7,8 +7,7 @@ def parse_jwt(verifier, encoded_jwt):
     claims = verifier.verify_jwt(
         encoded_jwt,
         current_app.config.asap['VALID_AUDIENCE'],
-        leeway=60,
-        verify=current_app.config.asap.get('VERIFY_TLS_CERT', True)
+        leeway=60
     )
 
     valid_issuers = current_app.config.asap.get('VALID_ISSUERS')
