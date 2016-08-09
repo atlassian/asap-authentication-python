@@ -21,13 +21,13 @@ class BaseHTTPSPublicKeyRetrieverTest(object):
             base urls.
         """
         with self.assertRaises(ValueError):
-            retriever = HTTPSPublicKeyRetriever('http://example.com')
+            HTTPSPublicKeyRetriever('http://example.com')
 
     def test_https_public_key_retriever_supports_https_url(self):
         """ tests that HTTPSPublicKeyRetriever supports https://
             base urls.
         """
-        retriever = HTTPSPublicKeyRetriever(self.base_url)
+        HTTPSPublicKeyRetriever(self.base_url)
 
     @mock.patch.object(requests.Session, 'get')
     def test_retrieve(self, mock_get_method):
