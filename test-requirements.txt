@@ -1,2 +1,3 @@
 nose
 mock
+flask<0.12
