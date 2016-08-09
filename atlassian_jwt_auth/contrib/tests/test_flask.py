@@ -1,19 +1,19 @@
 import unittest
 
 from flask import Flask
-from mock import patch
 
 import atlassian_jwt_auth
 from atlassian_jwt_auth.tests import utils
 from atlassian_jwt_auth.contrib.flask_app import requires_asap
-from atlassian_jwt_auth.contrib.tests.utils import static_verifier
+from atlassian_jwt_auth.contrib.tests.utils import get_static_retriever_class
 
 
 def get_app():
     app = Flask(__name__)
     app.config.update({
         'ASAP_VALID_AUDIENCE': 'server-app',
-        'ASAP_VALID_ISSUERS': ('client-app',)
+        'ASAP_VALID_ISSUERS': ('client-app',),
+        'ASAP_PUBLICKEY_REPOSITORY': None
     })
 
     @app.route("/")
@@ -40,70 +40,56 @@ class FlaskTests(utils.RS256KeyTestMixin, unittest.TestCase):
             self._private_key_pem
         )
 
-        self.verifier = static_verifier(
-            {'client-app/key01': self._public_key_pem}
-        )
+        self.app = get_app()
+        self.client = self.app.test_client()
 
-    @patch('atlassian_jwt_auth.contrib.flask_app.decorators._get_verifier')
-    def test_request_with_valid_token_is_allowed(self, get_verifier):
-        app = get_app()
-        client = app.test_client()
+        retriever = get_static_retriever_class({
+            'client-app/key01': self._public_key_pem
+        })
+        self.app.config['ASAP_KEY_RETRIEVER_CLASS'] = retriever
 
-        get_verifier.side_effect = lambda: self.verifier
+    def test_request_with_valid_token_is_allowed(self):
         token = create_token(
             'client-app', 'server-app',
             'client-app/key01', self._private_key_pem
         )
-        response = client.get('/', headers={
+        response = self.client.get('/', headers={
             'Authorization': b'Bearer ' + token
         })
 
         self.assertEqual(response.status_code, 200)
 
-    @patch('atlassian_jwt_auth.contrib.flask_app.decorators._get_verifier')
-    def test_request_with_invalid_audience_is_rejected(self, get_verifier):
-        app = get_app()
-        client = app.test_client()
-
-        get_verifier.side_effect = lambda: self.verifier
+    def test_request_with_invalid_audience_is_rejected(self):
         token = create_token(
             'client-app', 'invalid-audience',
             'client-app/key01', self._private_key_pem
         )
-        response = client.get('/', headers={
+        response = self.client.get('/', headers={
             'Authorization': b'Bearer ' + token
         })
 
         self.assertEqual(response.status_code, 401)
 
-    @patch('atlassian_jwt_auth.contrib.flask_app.decorators._get_verifier')
-    def test_request_with_invalid_token_is_rejected(self, get_verifier):
-        app = get_app()
-        client = app.test_client()
-
-        get_verifier.side_effect = lambda: self.verifier
-        response = client.get('/', headers={
+    def test_request_with_invalid_token_is_rejected(self):
+        response = self.client.get('/', headers={
             'Authorization': b'Bearer notavalidtoken'
         })
 
         self.assertEqual(response.status_code, 401)
 
-    @patch('atlassian_jwt_auth.contrib.flask_app.decorators._get_verifier')
-    def test_request_with_invalid_issuer_is_rejected(self, get_verifier):
-        app = get_app()
-        client = app.test_client()
-
+    def test_request_with_invalid_issuer_is_rejected(self):
         # Try with a different audience with a valid signature
-        self.verifier = static_verifier(
-            {'another-client/key01': self._public_key_pem}
+        self.app.config['ASAP_KEY_RETRIEVER_CLASS'] = (
+            get_static_retriever_class({
+                'another-client/key01': self._public_key_pem
+            })
         )
 
-        get_verifier.side_effect = lambda: self.verifier
         token = create_token(
             'another-client', 'server-app',
             'another-client/key01', self._private_key_pem
         )
-        response = client.get('/', headers={
+        response = self.client.get('/', headers={
             'Authorization': b'Bearer ' + token
         })
 
