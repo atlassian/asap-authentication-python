@@ -59,7 +59,7 @@ class HTTPSPublicKeyRetriever(object):
     """
 
     def __init__(self, base_url):
-        if not base_url.startswith('https://'):
+        if base_url is None or not base_url.startswith('https://'):
             raise ValueError('The base url must start with https://')
         if not base_url.endswith('/'):
             base_url += '/'

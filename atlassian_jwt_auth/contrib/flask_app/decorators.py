@@ -48,7 +48,7 @@ def _get_verifier():
     )
 
     retriever = retriever_cls(
-        base_url=current_app.config['ASAP_PUBLICKEY_REPOSITORY']
+        base_url=current_app.config.get('ASAP_PUBLICKEY_REPOSITORY')
     )
 
     return atlassian_jwt_auth.JWTAuthVerifier(retriever)
