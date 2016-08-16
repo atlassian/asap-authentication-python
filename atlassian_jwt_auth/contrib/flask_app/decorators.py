@@ -42,9 +42,11 @@ def requires_asap(f):
 
 
 def _get_verifier():
-    """Returns a verifier based on config['ASAP_PUBLICKEY_REPOSITORY']"""
-    return atlassian_jwt_auth.JWTAuthVerifier(
-        atlassian_jwt_auth.HTTPSPublicKeyRetriever(
-            current_app.config['ASAP_PUBLICKEY_REPOSITORY']
-        )
+    """Returns a verifier for ASAP JWT tokens basd on application settings"""
+    retriever_cls = current_app.config.get(
+        'ASAP_KEY_RETRIEVER_CLASS', atlassian_jwt_auth.HTTPSPublicKeyRetriever
     )
+    retriever = retriever_cls(
+        base_url=current_app.config.get('ASAP_PUBLICKEY_REPOSITORY')
+    )
+    return atlassian_jwt_auth.JWTAuthVerifier(retriever)
