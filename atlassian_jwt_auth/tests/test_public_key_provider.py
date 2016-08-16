@@ -23,6 +23,13 @@ class BaseHTTPSPublicKeyRetrieverTest(object):
         with self.assertRaises(ValueError):
             retriever = HTTPSPublicKeyRetriever('http://example.com')
 
+    def test_https_public_key_retriever_does_not_support_none_url(self):
+        """ tests that HTTPSPublicKeyRetriever does not support None
+            base urls.
+        """
+        with self.assertRaises(ValueError):
+            retriever = HTTPSPublicKeyRetriever(None)
+
     def test_https_public_key_retriever_supports_https_url(self):
         """ tests that HTTPSPublicKeyRetriever supports https://
             base urls.
