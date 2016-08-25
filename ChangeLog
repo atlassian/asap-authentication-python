@@ -1,6 +1,13 @@
 CHANGES
 =======
 
+2.8.0
+-----
+
+* Sem-Ver: feature Added ASAP_KEY_RETRIEVER_CLASS to simplify Flask testing
+* Sem-Ver: bugfix HTTPSPublicKeyRetriever should raise a ValueError if the base_url is None.
+* Sem-Ver: bugfix Fix an issue where Flask config values were not referenced properly
+
 2.7.0
 -----
 
