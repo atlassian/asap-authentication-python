@@ -40,8 +40,15 @@ def requires_asap(f):
 
     return decorated
 
+_verifier = None
+
 
 def _get_verifier():
+    global _verifier
+
+    if _verifier is not None:
+        return _verifier
+
     """Returns a verifier for ASAP JWT tokens basd on application settings"""
     retriever_cls = current_app.config.get(
         'ASAP_KEY_RETRIEVER_CLASS', atlassian_jwt_auth.HTTPSPublicKeyRetriever
@@ -49,4 +56,5 @@ def _get_verifier():
     retriever = retriever_cls(
         base_url=current_app.config.get('ASAP_PUBLICKEY_REPOSITORY')
     )
-    return atlassian_jwt_auth.JWTAuthVerifier(retriever)
+    _verifier = atlassian_jwt_auth.JWTAuthVerifier(retriever)
+    return _verifier
