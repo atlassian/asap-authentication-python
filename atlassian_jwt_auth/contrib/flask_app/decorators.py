@@ -23,7 +23,8 @@ def requires_asap(f):
 
         try:
             g.asap_claims = parse_jwt(verifier, auth[1])
-            return f(*args, **kwargs)
+        except ValueError as ex:
+            return Response('Unauthorized: {}'.format(str(ex)), 401)
         except requests.exceptions.HTTPError:
             # Couldn't find key in key server
             return Response('Unauthorized: Invalid key', 401)
@@ -37,6 +38,8 @@ def requires_asap(f):
         except jwt.exceptions.InvalidTokenError:
             # Something went wrong with decoding the JWT
             return Response('Unauthorized: Invalid token', 401)
+
+        return f(*args, **kwargs)
 
     return decorated
 
