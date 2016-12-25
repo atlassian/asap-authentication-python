@@ -12,7 +12,7 @@ from atlassian_jwt_auth.contrib.django.utils import parse_jwt, verify_issuers
 def requires_asap(issuers):
     """Decorator for Django endpoints to require ASAP
 
-    :param list issuers: (required) The 'iss' claims that this endpoint is from.
+    :param list issuers: (required) The 'iss' claims that this endpoint is from
     """
     def requires_asap_decorator(func):
         @wraps(func)
@@ -34,13 +34,15 @@ def requires_asap(issuers):
             except ConnectionError:
                 # Also couldn't find key in key-server
                 return HttpResponse(
-                    'Unauthorized: Backend server connection error', status=401)
+                    'Unauthorized: Backend server connection error',
+                    status=401)
             except InvalidIssuerError:
                 return HttpResponse('Unauthorized: Invalid token issuer',
                                     status=401)
             except InvalidTokenError as e:
                 # Something went wrong with decoding the JWT
-                return HttpResponse('Unauthorized: Invalid token', status=401)
+                return HttpResponse('Unauthorized: Invalid token',
+                                    status=401)
 
         return requires_asap_wrapper
     return requires_asap_decorator
