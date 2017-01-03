@@ -14,7 +14,7 @@ def parse_jwt(verifier, encoded_jwt):
 
 
 def verify_issuers(asap_claims, issuers):
-    """Verify that the issuer in the claims is valid and is expected"""
+    """Verify that the issuer in the claims is valid and is expected."""
     if asap_claims.get('iss') not in issuers:
         # Raise early if the specific issuer isn't expected
         raise InvalidIssuerError()
@@ -22,5 +22,3 @@ def verify_issuers(asap_claims, issuers):
     valid_issuers = settings.ASAP_VALID_ISSUERS
     if valid_issuers and asap_claims.get('iss') not in valid_issuers:
         raise InvalidIssuerError()
-
-    return

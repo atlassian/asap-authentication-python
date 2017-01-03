@@ -12,7 +12,7 @@ from atlassian_jwt_auth.contrib.django.utils import parse_jwt, verify_issuers
 def requires_asap(issuers):
     """Decorator for Django endpoints to require ASAP
 
-    :param list issuers: (required) The 'iss' claims that this endpoint is from
+    :param list issuers: *required The 'iss' claims that this endpoint is from.
     """
     def requires_asap_decorator(func):
         @wraps(func)
