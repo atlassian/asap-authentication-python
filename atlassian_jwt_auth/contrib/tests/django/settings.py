@@ -124,5 +124,5 @@ USE_TZ = True
 STATIC_URL = '/static/'
 
 ASAP_VALID_AUDIENCE = 'server-app'
-ASAP_VALID_ISSUERS = ('client-app',)
+ASAP_VALID_ISSUERS = ('client-app', 'whitelist')
 ASAP_PUBLICKEY_REPOSITORY = None
