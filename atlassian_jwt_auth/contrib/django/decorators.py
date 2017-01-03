@@ -18,7 +18,7 @@ def requires_asap(issuers):
         @wraps(func)
         def requires_asap_wrapper(request, *args, **kwargs):
             verifier = _get_verifier()
-            auth = request.META.get('AUTHORIZATION', '').split(' ')
+            auth = request.META.get('AUTHORIZATION', '').split(b' ')
             print(request.META, auth)
             if not auth or len(auth) != 2:
                 return HttpResponse('Unauthorized', status=401)
