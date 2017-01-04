@@ -21,7 +21,7 @@ def requires_asap(issuers):
             auth = request.META.get('AUTHORIZATION', '').split(b' ')
             if not auth or len(auth) != 2:
                 return HttpResponse('Unauthorized', status=401)
-
+            error_message = None
             try:
                 asap_claims = parse_jwt(verifier, auth[1])
                 verify_issuers(asap_claims, issuers)
@@ -29,20 +29,17 @@ def requires_asap(issuers):
                 return func(request, *args, **kwargs)
             except HTTPError:
                 # Couldn't find key in key server
-                return HttpResponse('Unauthorized: Invalid key', status=401)
+                error_message = 'Unauthorized: Invalid key'
             except ConnectionError:
                 # Also couldn't find key in key-server
-                return HttpResponse(
-                    'Unauthorized: Backend server connection error',
-                    status=401)
+                error_message = 'Unauthorized: Backend server connection error'
             except InvalidIssuerError:
-                return HttpResponse('Unauthorized: Invalid token issuer',
-                                    status=401)
+                error_message = 'Unauthorized: Invalid token issuer'
             except InvalidTokenError:
                 # Something went wrong with decoding the JWT
-                return HttpResponse('Unauthorized: Invalid token',
-                                    status=401)
-
+                error_message = 'Unauthorized: Invalid token'
+            if error_message is not None:
+                return HttpResponse(error_message, status=401)
         return requires_asap_wrapper
     return requires_asap_decorator
 
