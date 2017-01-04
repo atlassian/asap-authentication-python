@@ -6,7 +6,7 @@ from django.http.response import HttpResponse
 from requests.exceptions import (HTTPError, ConnectionError)
 from jwt.exceptions import (InvalidIssuerError, InvalidTokenError)
 
-from atlassian_jwt_auth.contrib.django.utils import parse_jwt, verify_issuers
+from .utils import parse_jwt, verify_issuers
 
 
 def requires_asap(issuers):
