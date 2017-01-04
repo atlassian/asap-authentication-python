@@ -3,6 +3,10 @@ import os
 import django
 from django.test.testcases import SimpleTestCase
 from django.test.utils import override_settings
+try:
+    from django.urls import reverse
+except ImportError:
+    from django.core.urlresolvers import reverse
 
 from atlassian_jwt_auth import create_signer
 from atlassian_jwt_auth.contrib.tests.utils import get_static_retriever_class
@@ -17,6 +21,7 @@ def create_token(issuer, audience, key_id, private_key):
 
 
 class TestAsapDecorator(RS256KeyTestMixin, SimpleTestCase):
+
     @classmethod
     def setUpClass(cls):
         os.environ.setdefault(
@@ -52,7 +57,7 @@ class TestAsapDecorator(RS256KeyTestMixin, SimpleTestCase):
         )
 
         with override_settings(**self.test_settings):
-            response = self.client.get('/asap/test1',
+            response = self.client.get(reverse('test1'),
                                        AUTHORIZATION=b'Bearer ' + token)
 
         self.assertContains(response, 'Greatest Success!', status_code=200)
@@ -64,7 +69,7 @@ class TestAsapDecorator(RS256KeyTestMixin, SimpleTestCase):
         )
 
         with override_settings(**self.test_settings):
-            response = self.client.get('/asap/test1',
+            response = self.client.get(reverse('test1'),
                                        AUTHORIZATION=b'Bearer ' + token)
 
         self.assertContains(response, 'Unauthorized: Invalid token',
@@ -72,7 +77,7 @@ class TestAsapDecorator(RS256KeyTestMixin, SimpleTestCase):
 
     def test_request_with_invalid_token_is_rejected(self):
         with override_settings(**self.test_settings):
-            response = self.client.get('/asap/test1',
+            response = self.client.get(reverse('test1'),
                                        AUTHORIZATION=b'Bearer notavalidtoken')
 
         self.assertContains(response, 'Unauthorized: Invalid token',
@@ -89,7 +94,7 @@ class TestAsapDecorator(RS256KeyTestMixin, SimpleTestCase):
         )
 
         with override_settings(ASAP_KEY_RETRIEVER_CLASS=retriever):
-            response = self.client.get('/asap/test1',
+            response = self.client.get(reverse('test1'),
                                        AUTHORIZATION=b'Bearer ' + token)
 
             self.assertContains(response, 'Unauthorized: Invalid token issuer',
@@ -106,7 +111,7 @@ class TestAsapDecorator(RS256KeyTestMixin, SimpleTestCase):
         )
 
         with override_settings(ASAP_KEY_RETRIEVER_CLASS=retriever):
-            response = self.client.get('/asap/unexpected',
+            response = self.client.get(reverse('unexpected'),
                                        AUTHORIZATION=b'Bearer ' + token)
 
             self.assertContains(response, 'Unauthorized: Invalid token issuer',
@@ -119,7 +124,7 @@ class TestAsapDecorator(RS256KeyTestMixin, SimpleTestCase):
         )
 
         with override_settings(**self.test_settings):
-            response = self.client.get('/asap/whitelist',
+            response = self.client.get(reverse('whitelist'),
                                        AUTHORIZATION=b'Bearer ' + token)
 
         self.assertContains(response, 'Unauthorized: Invalid token issuer',
@@ -136,7 +141,7 @@ class TestAsapDecorator(RS256KeyTestMixin, SimpleTestCase):
         )
 
         with override_settings(ASAP_KEY_RETRIEVER_CLASS=retriever):
-            response = self.client.get('/asap/whitelist',
+            response = self.client.get(reverse('whitelist'),
                                        AUTHORIZATION=b'Bearer ' + token)
 
             self.assertContains(response, 'Only the right issuer is allowed.')
