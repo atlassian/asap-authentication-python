@@ -4,7 +4,8 @@ from atlassian_jwt_auth.contrib.tests.django import views
 
 
 urlpatterns = [
-    url(r'^asap/test1', views.my_view),
-    url(r'^asap/unexpected', views.unexpected_view),
-    url(r'^asap/whitelist', views.whitelist_view)
+    url(r'^asap/expected', views.expected_view, name='expected'),
+    url(r'^asap/unexpected$', views.unexpected_view, name='unexpected'),
+    url(r'^asap/decorated$', views.decorated_view, name='decorated'),
+    url(r'asap/settings$', views.settings_view, name='settings')
 ]

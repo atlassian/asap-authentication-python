@@ -1,4 +1,4 @@
 nose
 mock
 flask<0.12
-django>=1.8
+django>=1.8,<1.11
