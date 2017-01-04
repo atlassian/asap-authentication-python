@@ -1,6 +1,6 @@
 from django.conf.urls import url
 
-from atlassian_jwt_auth.contrib.tests.django import views
+from . import views
 
 
 urlpatterns = [
