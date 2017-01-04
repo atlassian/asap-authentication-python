@@ -38,7 +38,7 @@ def requires_asap(issuers):
             except InvalidIssuerError:
                 return HttpResponse('Unauthorized: Invalid token issuer',
                                     status=401)
-            except InvalidTokenError as e:
+            except InvalidTokenError:
                 # Something went wrong with decoding the JWT
                 return HttpResponse('Unauthorized: Invalid token',
                                     status=401)
