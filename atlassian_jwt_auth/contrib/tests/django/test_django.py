@@ -81,7 +81,6 @@ class TestAsapDecorator(RS256KeyTestMixin, SimpleTestCase):
         retriever = get_static_retriever_class({
             'something-invalid/key01': self._public_key_pem
         })
-
         token = create_token(
             issuer='something-invalid', audience='server-app',
             key_id='something-invalid/key01', private_key=self._private_key_pem
@@ -95,7 +94,6 @@ class TestAsapDecorator(RS256KeyTestMixin, SimpleTestCase):
         retriever = get_static_retriever_class({
             'unexpected/key01': self._public_key_pem
         })
-
         token = create_token(
             issuer='unexpected', audience='server-app',
             key_id='unexpected/key01', private_key=self._private_key_pem
@@ -118,7 +116,6 @@ class TestAsapDecorator(RS256KeyTestMixin, SimpleTestCase):
         retriever = get_static_retriever_class({
             'whitelist/key01': self._public_key_pem
         })
-
         token = create_token(
             issuer='whitelist', audience='server-app',
             key_id='whitelist/key01', private_key=self._private_key_pem
