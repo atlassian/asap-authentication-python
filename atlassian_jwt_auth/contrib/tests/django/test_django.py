@@ -101,7 +101,6 @@ class TestAsapDecorator(RS256KeyTestMixin, SimpleTestCase):
         self.assertContains(response, 'Unauthorized: Invalid token issuer',
                             status_code=401)
 
-
     def test_request_non_whitelisted_decorated_issuer_is_rejected(self):
         retriever = get_static_retriever_class({
             'unexpected/key01': self._public_key_pem
@@ -117,7 +116,6 @@ class TestAsapDecorator(RS256KeyTestMixin, SimpleTestCase):
 
         self.assertContains(response, 'Unauthorized: Invalid token issuer',
                             status_code=401)
-
 
     def test_request_non_decorated_issuer_is_rejected(self):
         token = create_token(
