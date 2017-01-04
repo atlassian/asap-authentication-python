@@ -6,6 +6,7 @@ def get_static_retriever_class(keys):
     class StaticPublicKeyRetriever(object):
         """ Retrieves a key from a static list of public keys
         (for use in tests only) """
+
         def __init__(self, *args, **kwargs):
             self.keys = keys
 
