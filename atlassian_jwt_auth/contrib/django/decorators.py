@@ -1,11 +1,11 @@
 from functools import wraps
 
-import atlassian_jwt_auth
 from django.conf import settings
 from django.http.response import HttpResponse
 from requests.exceptions import (HTTPError, ConnectionError)
 from jwt.exceptions import (InvalidIssuerError, InvalidTokenError)
 
+import atlassian_jwt_auth
 from .utils import parse_jwt, verify_issuers
 
 
