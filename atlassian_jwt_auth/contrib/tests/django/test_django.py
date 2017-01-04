@@ -16,7 +16,6 @@ from atlassian_jwt_auth.tests.utils import RS256KeyTestMixin
 
 def create_token(issuer, audience, key_id, private_key):
     signer = create_signer(issuer, key_id, private_key)
-
     return signer.generate_jwt(audience)
 
 
