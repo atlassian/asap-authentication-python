@@ -17,13 +17,15 @@ class JWTAuth(AuthBase):
     """Adds a JWT bearer token to the request per the ASAP specification"""
 
     def __init__(self, signer, audience, *args, **kwargs):
-        super(JWTAuth, self).__init__(*args, **kwargs)
+        super(JWTAuth, self).__init__()
 
         self._audience = audience
         self._signer = signer
+        self._additional_claims = kwargs.get('additional_claims', {})
 
     def __call__(self, r):
         r.headers['Authorization'] = (
-            b'Bearer ' + self._signer.generate_jwt(self._audience)
+            b'Bearer ' + self._signer.generate_jwt(
+                self._audience, additional_claims=self._additional_claims)
         )
         return r
