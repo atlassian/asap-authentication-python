@@ -25,7 +25,8 @@ class BaseRequestsTest(object):
         bearer = auth_header.split(b' ')[1]
         # Decode the JWT (verifying the signature and aud match)
         # an exception is thrown if this fails
-        jwt.decode(bearer, self._public_key_pem.decode(), audience='audience')
+        return jwt.decode(bearer, self._public_key_pem.decode(),
+                          audience='audience')
 
     def test_JWTAuth_make_authenticated_request(self):
         """Verify a valid Authorization header is added by JWTAuth"""
@@ -45,6 +46,21 @@ class BaseRequestsTest(object):
                                algorithm=self.algorithm)
         req = auth(Request())
         self.assert_authorization_header_is_valid(req)
+
+    def test_create_jwt_auth_with_additional_claims(self):
+        """ Verify a Valid Authorization header is added by JWTAuth and
+            contains the additional claims when provided.
+        """
+        jwt_auth_signer = atlassian_jwt_auth.create_signer(
+            'issuer',
+            'issuer/key',
+            self._private_key_pem.decode(),
+            algorithm=self.algorithm)
+        auth = JWTAuth(jwt_auth_signer, 'audience',
+                       additional_claims={'example': 'claim'})
+        req = auth(Request())
+        token = self.assert_authorization_header_is_valid(req)
+        self.assertEqual(token.get('example'), 'claim')
 
 
 class RequestsRS256Test(BaseRequestsTest,
