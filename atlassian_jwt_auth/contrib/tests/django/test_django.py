@@ -53,7 +53,7 @@ class TestAsapDecorator(RS256KeyTestMixin, SimpleTestCase):
         if settings is None:
             settings = self.test_settings
         with override_settings(**settings):
-            return self.client.get(url, AUTHORIZATION=b'Bearer ' + token)
+            return self.client.get(url, HTTP_AUTHORIZATION=b'Bearer ' + token)
 
     def test_request_with_valid_token_is_allowed(self):
         token = create_token(
@@ -62,7 +62,7 @@ class TestAsapDecorator(RS256KeyTestMixin, SimpleTestCase):
         )
         with override_settings(**self.test_settings):
             response = self.client.get(reverse('expected'),
-                                       AUTHORIZATION=b'Bearer ' + token)
+                                       HTTP_AUTHORIZATION=b'Bearer ' + token)
 
         self.assertContains(response, 'Greatest Success!', status_code=200)
 
@@ -73,15 +73,16 @@ class TestAsapDecorator(RS256KeyTestMixin, SimpleTestCase):
         )
         with override_settings(**self.test_settings):
             response = self.client.get(reverse('expected'),
-                                       AUTHORIZATION=b'Bearer ' + token)
+                                       HTTP_AUTHORIZATION=b'Bearer ' + token)
 
         self.assertContains(response, 'Unauthorized: Invalid token',
                             status_code=401)
 
     def test_request_with_invalid_token_is_rejected(self):
         with override_settings(**self.test_settings):
-            response = self.client.get(reverse('expected'),
-                                       AUTHORIZATION=b'Bearer notavalidtoken')
+            response = self.client.get(
+                reverse('expected'),
+                HTTP_AUTHORIZATION=b'Bearer notavalidtoken')
 
         self.assertContains(response, 'Unauthorized: Invalid token',
                             status_code=401)
@@ -96,7 +97,7 @@ class TestAsapDecorator(RS256KeyTestMixin, SimpleTestCase):
         )
         with override_settings(ASAP_KEY_RETRIEVER_CLASS=retriever):
             response = self.client.get(reverse('expected'),
-                                       AUTHORIZATION=b'Bearer ' + token)
+                                       HTTP_AUTHORIZATION=b'Bearer ' + token)
 
         self.assertContains(response, 'Unauthorized: Invalid token issuer',
                             status_code=401)
@@ -112,7 +113,7 @@ class TestAsapDecorator(RS256KeyTestMixin, SimpleTestCase):
 
         with override_settings(ASAP_KEY_RETRIEVER_CLASS=retriever):
             response = self.client.get(reverse('unexpected'),
-                                       AUTHORIZATION=b'Bearer ' + token)
+                                       HTTP_AUTHORIZATION=b'Bearer ' + token)
 
         self.assertContains(response, 'Unauthorized: Invalid token issuer',
                             status_code=401)
@@ -124,7 +125,7 @@ class TestAsapDecorator(RS256KeyTestMixin, SimpleTestCase):
         )
         with override_settings(**self.test_settings):
             response = self.client.get(reverse('decorated'),
-                                       AUTHORIZATION=b'Bearer ' + token)
+                                       HTTP_AUTHORIZATION=b'Bearer ' + token)
 
         self.assertContains(response, 'Unauthorized: Invalid token issuer',
                             status_code=401)
@@ -139,7 +140,7 @@ class TestAsapDecorator(RS256KeyTestMixin, SimpleTestCase):
         )
         with override_settings(ASAP_KEY_RETRIEVER_CLASS=retriever):
             response = self.client.get(reverse('decorated'),
-                                       AUTHORIZATION=b'Bearer ' + token)
+                                       HTTP_AUTHORIZATION=b'Bearer ' + token)
 
         self.assertContains(response, 'Only the right issuer is allowed.')
 
@@ -150,6 +151,6 @@ class TestAsapDecorator(RS256KeyTestMixin, SimpleTestCase):
         )
         with override_settings(**self.test_settings):
             response = self.client.get(reverse('settings'),
-                                       AUTHORIZATION=b'Bearer ' + token)
+                                       HTTP_AUTHORIZATION=b'Bearer ' + token)
 
         self.assertContains(response, 'Any settings issuer is allowed.')
