@@ -1,3 +1,5 @@
+import sys
+
 from atlassian_jwt_auth.algorithms import get_permitted_algorithm_names
 
 from atlassian_jwt_auth.signer import (
@@ -13,3 +15,7 @@ from atlassian_jwt_auth.key import (
 from atlassian_jwt_auth.verifier import (
     JWTAuthVerifier,
 )
+
+if sys.version_info >= (3, 5):
+    from . import aio
+del sys

@@ -15,6 +15,8 @@ if sys.version_info[0] >= 3:
 else:
     from urllib import unquote_plus
 
+PEM_FILE_TYPE = 'application/x-pem-file'
+
 
 class KeyIdentifier(object):
 
@@ -64,32 +66,34 @@ class HTTPSPublicKeyRetriever(object):
         if not base_url.endswith('/'):
             base_url += '/'
         self.base_url = base_url
-        self._session = None
+        self._session = self._get_session()
 
     def _get_session(self):
-        if self._session is not None:
-            return self._session
         session = requests.Session()
         session.mount('https://', cachecontrol.CacheControlAdapter())
-        self._session = session
-        return self._session
+        return session
 
     def retrieve(self, key_identifier, **requests_kwargs):
         """ returns the public key for given key_identifier. """
         if not isinstance(key_identifier, KeyIdentifier):
             key_identifier = KeyIdentifier(key_identifier)
-        PEM_FILE_TYPE = 'application/x-pem-file'
+
         url = self.base_url + key_identifier.key_id
-        session = self._get_session()
-        resp = session.get(url,
-                           headers={'accept': PEM_FILE_TYPE},
-                           **requests_kwargs)
+        return self._retrieve(url, requests_kwargs)
+
+    def _retrieve(self, url, requests_kwargs):
+        resp = self._session.get(url, headers={'accept': PEM_FILE_TYPE},
+                                 **requests_kwargs)
         resp.raise_for_status()
-        media_type = cgi.parse_header(resp.headers['content-type'])[0]
+        self._check_content_type(url, resp.headers['content-type'])
+        return resp.text
+
+    def _check_content_type(self, url, content_type):
+        media_type = cgi.parse_header(content_type)[0]
+
         if media_type.lower() != PEM_FILE_TYPE.lower():
             raise ValueError("Invalid content-type, '%s', for url '%s' ." %
-                             (resp.headers['content-type'], url))
-        return resp.text
+                             (content_type, url))
 
 
 class BasePrivateKeyRetriever(object):

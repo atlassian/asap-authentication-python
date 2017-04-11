@@ -50,10 +50,23 @@ perform authenticated HTTP requests.
 
     signer = atlassian_jwt_auth.create_signer('issuer', 'issuer/key', private_key_pem)
     response = requests.get(
-        'https://your-url'
+        'https://your-url',
         auth=JWTAuth(signer, 'audience')
     )
 ```
+One can also use `JWTAuth` to autenticate `aiohttp` requests:
+
+```python
+    import atlassian_jwt_auth
+    from atlassian_jwt_auth.contrib.requests import JWTAuth
+
+    signer = atlassian_jwt_auth.create_signer('issuer', 'issuer/key', private_key_pem)
+    response = await aiohttp_client_session.get(
+        'https://your-url',
+        auth=JWTAuth(signer, 'audience')
+    )
+```
+
 
 ### To verify a JWT
 ```python
@@ -62,6 +75,18 @@ perform authenticated HTTP requests.
     public_key_retriever = atlassian_jwt_auth.HTTPSPublicKeyRetriever('https://example.com')
     verifier = atlassian_jwt_auth.JWTAuthVerifier(public_key_retriever)
     verified_claims = verifier.verify_jwt(a_jwt, 'audience')
+```
+
+For Python versions starting from `Python 3.5` `atlassian_jwt_auth.aio`
+provides drop-in replacements for the components that
+perform HTTP requests, so that they use `aiohttp` instead of `requests`: 
+
+```python
+    import atlassian_jwt_auth.aio
+
+    public_key_retriever = atlassian_jwt_auth.aio.HTTPSPublicKeyRetriever('https://example.com')
+    verifier = atlassian_jwt_auth.aio.JWTAuthVerifier(public_key_retriever)
+    verified_claims = await verifier.verify_jwt(a_jwt, 'audience')
 ```
 
 [travis-status-image]: https://secure.travis-ci.org/atlassian/asap-authentication-python.svg?branch=master

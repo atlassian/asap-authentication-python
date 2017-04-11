@@ -4,7 +4,9 @@ python:
   - "2.7"
   - "3.4"
   - "3.5"
+  - "3.6"
 install:
+  - if [[ $TRAVIS_PYTHON_VERSION == 3.5 || $TRAVIS_PYTHON_VERSION == 3.6 ]]; then pip install aiohttp==2.0.6 asynctest==0.10.0; fi
   - pip install -q pep8==1.6.2
 script:
   - pep8 .
