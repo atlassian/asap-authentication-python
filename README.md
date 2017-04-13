@@ -54,13 +54,14 @@ perform authenticated HTTP requests.
         auth=JWTAuth(signer, 'audience')
     )
 ```
-One can also use `JWTAuth` to autenticate `aiohttp` requests:
+One can also use `atlassian_jwt_auth.contrib.aiohttp.JWTAuth`
+to autenticate `aiohttp` requests:
 
 ```python
     import aiohttp
     
     import atlassian_jwt_auth
-    from atlassian_jwt_auth.contrib.requests import JWTAuth
+    from atlassian_jwt_auth.contrib.aiohttp import JWTAuth
 
     signer = atlassian_jwt_auth.create_signer('issuer', 'issuer/key', private_key_pem)
 
