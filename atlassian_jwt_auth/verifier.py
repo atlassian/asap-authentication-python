@@ -18,26 +18,32 @@ class JWTAuthVerifier(object):
     def verify_jwt(self, a_jwt, audience, leeway=0, **requests_kwargs):
         """Verify if the token is correct
 
-        Returns
+        Returns:
              dict: the claims of the given jwt if verification is successful.
+
+        Raises:
+            ValueError: if verification failed.
         """
+        key_identifier = key._get_key_id_from_jwt_header(a_jwt)
+        public_key = self._retrieve_pub_key(key_identifier, requests_kwargs)
+
+        return self._decode_jwt(
+            a_jwt, key_identifier.key_id, public_key,
+            audience=audience, leeway=leeway)
+
+    def _retrieve_pub_key(self, key_identifier, requests_kwargs):
+        return self.public_key_retriever.retrieve(
+            key_identifier, **requests_kwargs)
+
+    def _decode_jwt(self, a_jwt, key_id, jwt_key,
+                    audience=None, leeway=0):
+        """Decode JWT and check if it's valid"""
         options = {
             'verify_signature': True,
             'require_exp': True,
             'require_iat': True,
         }
-        key_identifier = key._get_key_id_from_jwt_header(a_jwt)
-        public_key = self.public_key_retriever.retrieve(
-            key_identifier, **requests_kwargs)
 
-        # We extract the method to let subclasses convert it to a coroutine
-        return self._decode_jwt(
-            a_jwt, key_identifier.key_id, public_key,
-            audience=audience, options=options, leeway=leeway)
-
-    def _decode_jwt(self, a_jwt, key_id, jwt_key,
-                    audience=None, options=None, leeway=0):
-        """Decode JWT and check if it's valid"""
         claims = jwt.decode(
             a_jwt,
             key=jwt_key,
@@ -46,8 +52,8 @@ class JWTAuthVerifier(object):
             audience=audience,
             leeway=leeway)
 
-        if not key_id.startswith('%s/' % claims['iss']) and \
-                key_id != claims['iss']:
+        if (not key_id.startswith('%s/' % claims['iss']) and
+                key_id != claims['iss']):
             raise ValueError('Issuer does not own the supplied public key')
 
         if self._subject_should_match_issuer and (

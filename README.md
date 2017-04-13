@@ -57,14 +57,17 @@ perform authenticated HTTP requests.
 One can also use `JWTAuth` to autenticate `aiohttp` requests:
 
 ```python
+    import aiohttp
+    
     import atlassian_jwt_auth
     from atlassian_jwt_auth.contrib.requests import JWTAuth
 
     signer = atlassian_jwt_auth.create_signer('issuer', 'issuer/key', private_key_pem)
-    response = await aiohttp_client_session.get(
-        'https://your-url',
-        auth=JWTAuth(signer, 'audience')
-    )
+
+    async with aiohttp.ClientSession() as session:
+        async with session.get('https://your-url',
+                               auth=JWTAuth(signer, 'audience')) as resp:
+            ...
 ```
 
 
@@ -77,15 +80,15 @@ One can also use `JWTAuth` to autenticate `aiohttp` requests:
     verified_claims = verifier.verify_jwt(a_jwt, 'audience')
 ```
 
-For Python versions starting from `Python 3.5` `atlassian_jwt_auth.aio`
+For Python versions starting from `Python 3.5` `atlassian_jwt_auth.contrib.aiohttp`
 provides drop-in replacements for the components that
 perform HTTP requests, so that they use `aiohttp` instead of `requests`: 
 
 ```python
-    import atlassian_jwt_auth.aio
+    import atlassian_jwt_auth.contrib.aiohttp
 
-    public_key_retriever = atlassian_jwt_auth.aio.HTTPSPublicKeyRetriever('https://example.com')
-    verifier = atlassian_jwt_auth.aio.JWTAuthVerifier(public_key_retriever)
+    public_key_retriever = atlassian_jwt_auth.contrib.aiohttp.HTTPSPublicKeyRetriever('https://example.com')
+    verifier = atlassian_jwt_auth.contrib.aiohttp.JWTAuthVerifier(public_key_retriever)
     verified_claims = await verifier.verify_jwt(a_jwt, 'audience')
 ```
 

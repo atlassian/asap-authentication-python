@@ -1,13 +1,13 @@
 import aiohttp
-from asynctest import TestCase, CoroutineMock
+from asynctest import TestCase, Mock, CoroutineMock
 from multidict import CIMultiDict
 
-from atlassian_jwt_auth import aio
+from atlassian_jwt_auth.contrib.aiohttp import HTTPSPublicKeyRetriever
 from atlassian_jwt_auth.key import PEM_FILE_TYPE
 from atlassian_jwt_auth.tests import utils
 
 
-class DummyHTTPSPublicKeyRetriever(aio.HTTPSPublicKeyRetriever):
+class DummyHTTPSPublicKeyRetriever(HTTPSPublicKeyRetriever):
     def set_headers(self, headers):
         self._session.get.return_value.headers.update(headers)
 
@@ -15,15 +15,17 @@ class DummyHTTPSPublicKeyRetriever(aio.HTTPSPublicKeyRetriever):
         self._session.get.return_value.text.return_value = text
 
     def _get_session(self):
-        session = CoroutineMock(spec=aiohttp.ClientSession).return_value
+        session = Mock(spec=aiohttp.ClientSession)
+        session.attach_mock(CoroutineMock(), 'get')
+
         resp = session.get.return_value
         resp.headers = CIMultiDict({"content-type": PEM_FILE_TYPE})
-        resp.text = CoroutineMock(return_value='i-am-a-public-key')
+        resp.text.return_value = 'i-am-a-public-key'
         return session
 
 
-class RS256HTTPSPublicKeyRetrieverTest(utils.RS256KeyTestMixin, TestCase):
-    """Tests for aio.HTTPSPublicKeyRetriever class for RS256 algorithm"""
+class BaseHTTPSPublicKeyRetrieverTestMixin(object):
+    """Tests for aiohttp.HTTPSPublicKeyRetriever class for RS256 algorithm"""
 
     def setUp(self):
         self._private_key_pem = self.get_new_private_key_in_pem_format()
@@ -63,6 +65,13 @@ class RS256HTTPSPublicKeyRetrieverTest(utils.RS256KeyTestMixin, TestCase):
             await retriever.retrieve('example/eg')
 
 
-class ES256HTTPSPublicKeyRetrieverTest(utils.ES256KeyTestMixin,
-                                       RS256HTTPSPublicKeyRetrieverTest):
-    """Tests for aio.HTTPSPublicKeyRetriever class for ES256 algorithm"""
+class RS256HTTPSPublicKeyRetrieverTest(utils.RS256KeyTestMixin,
+                                       BaseHTTPSPublicKeyRetrieverTestMixin,
+                                       TestCase):
+    """Tests for aiohttp.HTTPSPublicKeyRetriever class for RS256 algorithm"""
+
+
+class ES256HTTPSPublicKeyRetrieverTest(utils.RS256KeyTestMixin,
+                                       BaseHTTPSPublicKeyRetrieverTestMixin,
+                                       TestCase):
+    """Tests for aiohttp.HTTPSPublicKeyRetriever class for ES256 algorithm"""

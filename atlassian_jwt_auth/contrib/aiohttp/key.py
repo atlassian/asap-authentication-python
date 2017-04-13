@@ -2,8 +2,10 @@ import asyncio
 
 import aiohttp
 
-from atlassian_jwt_auth.key import PEM_FILE_TYPE, \
+from atlassian_jwt_auth.key import (
+    PEM_FILE_TYPE,
     HTTPSPublicKeyRetriever as _HTTPSPublicKeyRetriever
+)
 
 
 class HTTPSPublicKeyRetriever(_HTTPSPublicKeyRetriever):

@@ -2,11 +2,12 @@ import asyncio
 
 from asynctest import TestCase, CoroutineMock
 
-from atlassian_jwt_auth import aio
+from atlassian_jwt_auth.contrib.aiohttp import (
+    JWTAuthVerifier, HTTPSPublicKeyRetriever)
 from atlassian_jwt_auth.tests import utils, test_verifier
 
 
-class SyncJWTAuthVerifier(aio.JWTAuthVerifier):
+class SyncJWTAuthVerifier(JWTAuthVerifier):
     def __init__(self, *args, loop=None, **kwargs):
         if loop is None:
             loop = asyncio.get_event_loop()
@@ -23,7 +24,7 @@ class JWTAuthVerifierTestMixin(test_verifier.BaseJWTAuthVerifierTest):
     loop = None
 
     def _setup_mock_public_key_retriever(self, pub_key_pem):
-        m_public_key_ret = CoroutineMock(spec=aio.HTTPSPublicKeyRetriever)
+        m_public_key_ret = CoroutineMock(spec=HTTPSPublicKeyRetriever)
         m_public_key_ret.retrieve.return_value = pub_key_pem.decode()
         return m_public_key_ret
 
@@ -34,9 +35,9 @@ class JWTAuthVerifierTestMixin(test_verifier.BaseJWTAuthVerifierTest):
 
 class JWTAuthVerifierRS256Test(
         utils.RS256KeyTestMixin, JWTAuthVerifierTestMixin, TestCase):
-    """Tests for aio.JWTAuthVerifier class for RS256 algorithm"""
+    """Tests for aiohttp.JWTAuthVerifier class for RS256 algorithm"""
 
 
 class JWTAuthVerifierES256Test(
         utils.ES256KeyTestMixin, JWTAuthVerifierTestMixin, TestCase):
-    """Tests for aio.JWTAuthVerifier class for ES256 algorithm"""
+    """Tests for aiohttp.JWTAuthVerifier class for ES256 algorithm"""

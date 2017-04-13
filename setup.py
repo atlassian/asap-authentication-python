@@ -8,7 +8,4 @@ setup(
     test_suite='nose.collector',
     platforms=['any'],
     zip_safe=False,
-    extras_require={
-        'asyncio': ['aiohttp']
-    },
 )
