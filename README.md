@@ -55,7 +55,7 @@ perform authenticated HTTP requests.
     )
 ```
 One can also use `atlassian_jwt_auth.contrib.aiohttp.JWTAuth`
-to autenticate `aiohttp` requests:
+to authenticate `aiohttp` requests:
 
 ```python
     import aiohttp
