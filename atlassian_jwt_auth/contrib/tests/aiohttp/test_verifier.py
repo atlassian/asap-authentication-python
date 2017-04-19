@@ -8,6 +8,7 @@ from atlassian_jwt_auth.tests import utils, test_verifier
 
 
 class SyncJWTAuthVerifier(JWTAuthVerifier):
+
     def __init__(self, *args, loop=None, **kwargs):
         if loop is None:
             loop = asyncio.get_event_loop()

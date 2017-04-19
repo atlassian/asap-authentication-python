@@ -21,5 +21,5 @@ class JWTAuthVerifier(_JWTAuthVerifier):
             public_key = await public_key
 
         return self._decode_jwt(
-            a_jwt, key_identifier.key_id, public_key,
+            a_jwt, key_identifier, public_key,
             audience=audience, leeway=leeway)
