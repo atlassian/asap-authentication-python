@@ -28,14 +28,14 @@ class JWTAuthVerifier(object):
         public_key = self._retrieve_pub_key(key_identifier, requests_kwargs)
 
         return self._decode_jwt(
-            a_jwt, key_identifier.key_id, public_key,
+            a_jwt, key_identifier, public_key,
             audience=audience, leeway=leeway)
 
     def _retrieve_pub_key(self, key_identifier, requests_kwargs):
         return self.public_key_retriever.retrieve(
             key_identifier, **requests_kwargs)
 
-    def _decode_jwt(self, a_jwt, key_id, jwt_key,
+    def _decode_jwt(self, a_jwt, key_identifier, jwt_key,
                     audience=None, leeway=0):
         """Decode JWT and check if it's valid"""
         options = {
@@ -52,8 +52,8 @@ class JWTAuthVerifier(object):
             audience=audience,
             leeway=leeway)
 
-        if (not key_id.startswith('%s/' % claims['iss']) and
-                key_id != claims['iss']):
+        if (not key_identifier.key_id.startswith('%s/' % claims['iss']) and
+                key_identifier.key_id != claims['iss']):
             raise ValueError('Issuer does not own the supplied public key')
 
         if self._subject_should_match_issuer and (
