@@ -8,6 +8,7 @@ from atlassian_jwt_auth.tests import utils
 
 
 class DummyHTTPSPublicKeyRetriever(HTTPSPublicKeyRetriever):
+
     def set_headers(self, headers):
         self._session.get.return_value.headers.update(headers)
 
