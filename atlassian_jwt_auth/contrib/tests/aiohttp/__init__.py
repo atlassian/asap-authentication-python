@@ -9,7 +9,6 @@ else:
     try:
         import asynctest
     except ImportError:
-        import nose
         raise nose.SkipTest(
             'Skipping tests because asynctest is not installed')
 
