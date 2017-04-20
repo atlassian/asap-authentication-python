@@ -16,29 +16,50 @@ class JWTAuthVerifier(object):
             'subject_should_match_issuer', True)
 
     def verify_jwt(self, a_jwt, audience, leeway=0, **requests_kwargs):
-        """ returns the claims of the given jwt iff verification
-            is successful.
+        """Verify if the token is correct
+
+        Returns:
+             dict: the claims of the given jwt if verification is successful.
+
+        Raises:
+            ValueError: if verification failed.
         """
+        key_identifier = key._get_key_id_from_jwt_header(a_jwt)
+        public_key = self._retrieve_pub_key(key_identifier, requests_kwargs)
+
+        return self._decode_jwt(
+            a_jwt, key_identifier, public_key,
+            audience=audience, leeway=leeway)
+
+    def _retrieve_pub_key(self, key_identifier, requests_kwargs):
+        return self.public_key_retriever.retrieve(
+            key_identifier, **requests_kwargs)
+
+    def _decode_jwt(self, a_jwt, key_identifier, jwt_key,
+                    audience=None, leeway=0):
+        """Decode JWT and check if it's valid"""
         options = {
             'verify_signature': True,
             'require_exp': True,
             'require_iat': True,
         }
-        key_identifier = key._get_key_id_from_jwt_header(a_jwt)
-        public_key = self.public_key_retriever.retrieve(
-            key_identifier, **requests_kwargs)
+
         claims = jwt.decode(
-            a_jwt, key=public_key,
+            a_jwt,
+            key=jwt_key,
             algorithms=self.algorithms,
             options=options,
             audience=audience,
             leeway=leeway)
-        if not (key_identifier.key_id.startswith('%s/' % claims['iss']) or
-                key_identifier.key_id == claims['iss']):
+
+        if (not key_identifier.key_id.startswith('%s/' % claims['iss']) and
+                key_identifier.key_id != claims['iss']):
             raise ValueError('Issuer does not own the supplied public key')
+
         if self._subject_should_match_issuer and (
                 claims.get('sub') and claims['iss'] != claims['sub']):
             raise ValueError('Issuer does not match the subject.')
+
         _aud = claims['aud']
         _exp = int(claims['exp'])
         _iat = int(claims['iat'])
@@ -46,6 +67,7 @@ class JWTAuthVerifier(object):
             _msg = ("Claims validity, '%s', exceeds the maximum 1 hour." %
                     (_exp - _iat))
             raise ValueError(_msg)
+
         _jti = claims['jti']
         if _jti in self._seen_jti:
             raise ValueError("The jti, '%s', has already been used." % _jti)
