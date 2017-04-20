@@ -1,6 +1,11 @@
 CHANGES
 =======
 
+2.11.0
+------
+
+* Sem-Ver: feature Provide aiohttp support
+
 2.10.2
 ------
 
