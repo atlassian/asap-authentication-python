@@ -9,11 +9,15 @@ from atlassian_jwt_auth import key
 
 class JWTAuthSigner(object):
 
-    def __init__(self, issuer, private_key_retriever, **kwargs):
+    def __init__(self, issuer, private_key_retriever,
+                 lifetime=None, algorithm='RS256'):
         self.issuer = issuer
         self.private_key_retriever = private_key_retriever
-        self.lifetime = kwargs.get('lifetime', datetime.timedelta(hours=1))
-        self.algorithm = kwargs.get('algorithm', 'RS256')
+        if lifetime is None:
+            self.lifetime = datetime.timedelta(hours=1)
+        else:
+            self.lifetime = lifetime
+        self.algorithm = algorithm
 
         if self.algorithm not in set(
                 algorithms.get_permitted_algorithm_names()):
@@ -23,7 +27,7 @@ class JWTAuthSigner(object):
             raise ValueError("lifetime, '%s',exceeds the allowed 1 hour max" %
                              (self.lifetime))
 
-    def _generate_claims(self, audience, **kwargs):
+    def _generate_claims(self, audience, additional_claims=None):
         """ returns a new dictionary of claims. """
         now = self._now()
         claims = {
@@ -36,18 +40,22 @@ class JWTAuthSigner(object):
             'nbf': now,
             'sub': self.issuer,
         }
-        claims.update(kwargs.get('additional_claims', {}))
+        if additional_claims is not None:
+            claims.update(additional_claims)
         return claims
 
     def _now(self):
         return datetime.datetime.utcnow()
 
-    def generate_jwt(self, audience, **kwargs):
+    def generate_jwt(self, audience, additional_claims=None):
         """ returns a new signed jwt for use. """
         key_identifier, private_key_pem = self.private_key_retriever.load(
             self.issuer)
         return jwt.encode(
-            self._generate_claims(audience, **kwargs),
+            self._generate_claims(
+                audience,
+                additional_claims=additional_claims
+            ),
             key=private_key_pem,
             algorithm=self.algorithm,
             headers={'kid': key_identifier.key_id})

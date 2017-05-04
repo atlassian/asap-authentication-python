@@ -68,7 +68,8 @@ class BaseJWTAuthSignerTest(object):
             private_key_pem=self._private_key_pem,
             algorithm=self.algorithm,
         )
-        jwt_auth_signer._generate_claims = lambda aud: expected_claims
+        jwt_auth_signer._generate_claims = mock.Mock()
+        jwt_auth_signer._generate_claims.return_value = expected_claims
         jwt_auth_signer.generate_jwt(expected_aud)
         m_jwt_encode.assert_called_with(
             expected_claims,
