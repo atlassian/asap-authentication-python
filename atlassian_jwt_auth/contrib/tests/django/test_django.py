@@ -87,6 +87,13 @@ class TestAsapDecorator(RS256KeyTestMixin, SimpleTestCase):
         self.assertContains(response, 'Unauthorized: Invalid token',
                             status_code=401)
 
+    def test_request_without_token_is_rejected(self):
+        with override_settings(**self.test_settings):
+            response = self.client.get(reverse('expected'))
+
+        self.assertContains(response, 'Unauthorized',
+                            status_code=401)
+
     def test_request_with_invalid_issuer_is_rejected(self):
         retriever = get_static_retriever_class({
             'something-invalid/key01': self._public_key_pem
