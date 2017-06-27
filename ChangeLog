@@ -1,6 +1,12 @@
 CHANGES
 =======
 
+2.11.1
+------
+
+* Sem-Ver: bugfix Fix the default value for the auth header used in the Django requires_asap decorator to work in Python 3
+* Sem-Ver: bugfix Warn when an import error occurs when importing aiohttp so that the tests do not fail in python >= 3.5 when aiohttp is not installed
+
 2.11.0
 ------
 
