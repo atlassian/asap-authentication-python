@@ -66,6 +66,19 @@ class TestAsapDecorator(RS256KeyTestMixin, SimpleTestCase):
 
         self.assertContains(response, 'Greatest Success!', status_code=200)
 
+    def test_request_with_string_headers_is_allowed(self):
+        token = create_token(
+            issuer='client-app', audience='server-app',
+            key_id='client-app/key01', private_key=self._private_key_pem
+        )
+        str_token = token.decode(encoding='iso-8859-1')
+        with override_settings(**self.test_settings):
+            response = self.client.get(reverse('expected'),
+                                       HTTP_AUTHORIZATION='Bearer ' +
+                                                          str_token)
+
+        self.assertContains(response, 'Greatest Success!', status_code=200)
+
     def test_request_with_invalid_audience_is_rejected(self):
         token = create_token(
             issuer='client-app', audience='something-invalid',
