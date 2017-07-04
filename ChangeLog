@@ -1,6 +1,11 @@
 CHANGES
 =======
 
+2.11.2
+------
+
+* Sem-Ver: bugfix Fix the requires_asap decorator for python 3 by forcing the HTTP_AUTHORIZATION header into bytes before parsing it
+
 2.11.1
 ------
 
