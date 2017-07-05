@@ -7,7 +7,7 @@ def parse_jwt(verifier, encoded_jwt):
     claims = verifier.verify_jwt(
         encoded_jwt,
         current_app.config['ASAP_VALID_AUDIENCE'],
-        leeway=60
+        leeway=current_app.config.get('ASAP_VALID_LEEWAY', 0)
     )
 
     valid_issuers = current_app.config.get('ASAP_VALID_ISSUERS')
