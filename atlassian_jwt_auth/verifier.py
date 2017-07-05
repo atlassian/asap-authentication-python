@@ -1,3 +1,5 @@
+from collections import deque
+
 import jwt
 
 from atlassian_jwt_auth import algorithms
@@ -11,7 +13,7 @@ class JWTAuthVerifier(object):
     def __init__(self, public_key_retriever, **kwargs):
         self.public_key_retriever = public_key_retriever
         self.algorithms = algorithms.get_permitted_algorithm_names()
-        self._seen_jti = set()
+        self._seen_jti = deque(maxlen=1000)
         self._subject_should_match_issuer = kwargs.get(
             'subject_should_match_issuer', True)
 
@@ -72,7 +74,5 @@ class JWTAuthVerifier(object):
         if _jti in self._seen_jti:
             raise ValueError("The jti, '%s', has already been used." % _jti)
         else:
-            if len(self._seen_jti) > 100:
-                self._seen_jti = set()
-            self._seen_jti.add(_jti)
+            self._seen_jti.append(_jti)
         return claims
