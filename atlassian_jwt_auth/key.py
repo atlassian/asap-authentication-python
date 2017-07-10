@@ -56,16 +56,31 @@ def _get_key_id_from_jwt_header(a_jwt):
 
 class HTTPSPublicKeyRetriever(object):
 
-    """ This class retrieves public key from a https location based upon the
+    """ This class retrieves public key from a (set of) https location(s) based upon the
          given key id.
     """
 
-    def __init__(self, base_url):
-        if base_url is None or not base_url.startswith('https://'):
-            raise ValueError('The base url must start with https://')
-        if not base_url.endswith('/'):
-            base_url += '/'
-        self.base_url = base_url
+    def __init__(self, base_urls):
+        if isinstance(base_urls, basestring):
+            base_urls = [base_urls]
+
+        if base_urls is None:
+            raise ValueError('Base URL list cannot be None')
+
+        if len(base_urls) < 1:
+            raise ValueError('At least one base URL must be provided')
+
+        self.base_urls = []
+        for urlpart in base_urls:
+            if urlpart is None or not isinstance(urlpart, basestring):
+                raise ValueError('Base URLs must be strings')
+            for url in urlpart.split('|'):
+                url = url.strip()
+                if not url.startswith('https://'):
+                    raise ValueError('All base urls must start with https://')
+                if not url.endswith('/'):
+                    url += '/'
+                self.base_urls.append(url)
         self._session = self._get_session()
 
     def _get_session(self):
@@ -78,8 +93,14 @@ class HTTPSPublicKeyRetriever(object):
         if not isinstance(key_identifier, KeyIdentifier):
             key_identifier = KeyIdentifier(key_identifier)
 
-        url = self.base_url + key_identifier.key_id
-        return self._retrieve(url, requests_kwargs)
+        exceptions = []
+        for base_url in self.base_urls:
+            url = base_url + key_identifier.key_id
+            try:
+                return self._retrieve(url, requests_kwargs)
+            except Exception, e:
+                exceptions.append(e)
+        raise ValueError('Encountered failures: %s', ','.join([str(x) for x in exceptions]))
 
     def _retrieve(self, url, requests_kwargs):
         resp = self._session.get(url, headers={'accept': PEM_FILE_TYPE},

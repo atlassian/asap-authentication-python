@@ -11,11 +11,11 @@ from atlassian_jwt_auth.key import (
 class HTTPSPublicKeyRetriever(_HTTPSPublicKeyRetriever):
     """A class for retrieving JWT public keys with aiohttp"""
 
-    def __init__(self, base_url, *, loop=None):
+    def __init__(self, base_urls, *, loop=None):
         if loop is None:
             loop = asyncio.get_event_loop()
         self.loop = loop
-        super().__init__(base_url)
+        super().__init__(base_urls)
 
     def _get_session(self):
         return aiohttp.ClientSession(loop=self.loop)

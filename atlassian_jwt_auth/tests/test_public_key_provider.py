@@ -15,6 +15,7 @@ class BaseHTTPSPublicKeyRetrieverTest(object):
         self._public_key_pem = utils.get_public_key_pem_for_private_key_pem(
             self._private_key_pem)
         self.base_url = 'https://example.com'
+        self.second_base_url = 'https://2.example.com'
 
     def test_https_public_key_retriever_does_not_support_http_url(self):
         """ tests that HTTPSPublicKeyRetriever does not support http://
@@ -35,6 +36,19 @@ class BaseHTTPSPublicKeyRetrieverTest(object):
             base urls.
         """
         retriever = HTTPSPublicKeyRetriever(self.base_url)
+
+    def test_https_public_key_retriever_supports_multiple_https_urls(self):
+        """ tests that HTTPSPublicKeyRetriever supports multiple https://
+            base urls.
+        """
+        retriever = HTTPSPublicKeyRetriever([self.base_url, self.second_base_url])
+
+    def test_https_public_key_retriever_supports_pipe_notation_https_urls(self):
+        """ tests that HTTPSPublicKeyRetriever supports URLs containing pipes
+            denoting multiple base urls.
+        """
+        retriever = HTTPSPublicKeyRetriever([self.base_url + '|' + self.second_base_url])
+        self.assertEqual(2, len(retriever.base_urls))
 
     @mock.patch.object(requests.Session, 'get')
     def test_retrieve(self, mock_get_method):
