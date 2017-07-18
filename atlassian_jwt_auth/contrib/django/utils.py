@@ -7,7 +7,7 @@ def parse_jwt(verifier, encoded_jwt):
     claims = verifier.verify_jwt(
         encoded_jwt,
         settings.ASAP_VALID_AUDIENCE,
-        leeway=60
+        leeway=getattr(settings, 'ASAP_VALID_LEEWAY', 0)
     )
     return claims
 
