@@ -88,7 +88,7 @@ class TestAsapDecorator(RS256KeyTestMixin, SimpleTestCase):
             response = self.client.get(reverse('expected'),
                                        HTTP_AUTHORIZATION=b'Bearer ' + token)
 
-        self.assertContains(response, 'Unauthorized: Invalid token',
+        self.assertContains(response, 'Unauthorized: Invalid audience',
                             status_code=401)
 
     def test_request_with_invalid_token_is_rejected(self):
@@ -97,7 +97,7 @@ class TestAsapDecorator(RS256KeyTestMixin, SimpleTestCase):
                 reverse('expected'),
                 HTTP_AUTHORIZATION=b'Bearer notavalidtoken')
 
-        self.assertContains(response, 'Unauthorized: Invalid token',
+        self.assertContains(response, 'Unauthorized: Not enough segments',
                             status_code=401)
 
     def test_request_without_token_is_rejected(self):
@@ -119,7 +119,9 @@ class TestAsapDecorator(RS256KeyTestMixin, SimpleTestCase):
             response = self.client.get(reverse('expected'),
                                        HTTP_AUTHORIZATION=b'Bearer ' + token)
 
-        self.assertContains(response, 'Unauthorized: Invalid token issuer',
+        self.assertContains(response,
+                            'Unauthorized: Issuer `something-invalid` not in'
+                            ' valid issuers for this endpoint',
                             status_code=401)
 
     def test_request_non_whitelisted_decorated_issuer_is_rejected(self):
@@ -135,7 +137,9 @@ class TestAsapDecorator(RS256KeyTestMixin, SimpleTestCase):
             response = self.client.get(reverse('unexpected'),
                                        HTTP_AUTHORIZATION=b'Bearer ' + token)
 
-        self.assertContains(response, 'Unauthorized: Invalid token issuer',
+        self.assertContains(response,
+                            'Unauthorized: Issuer `unexpected` not in'
+                            ' valid issuers for this application',
                             status_code=401)
 
     def test_request_non_decorated_issuer_is_rejected(self):
@@ -147,7 +151,9 @@ class TestAsapDecorator(RS256KeyTestMixin, SimpleTestCase):
             response = self.client.get(reverse('decorated'),
                                        HTTP_AUTHORIZATION=b'Bearer ' + token)
 
-        self.assertContains(response, 'Unauthorized: Invalid token issuer',
+        self.assertContains(response,
+                            'Unauthorized: Issuer `client-app` not in valid'
+                            ' issuers for this endpoint',
                             status_code=401)
 
     def test_request_decorated_issuer_is_allowed(self):

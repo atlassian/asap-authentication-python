@@ -1,13 +1,16 @@
+import logging
 from functools import wraps
 
 from django.conf import settings
 from django.http.response import HttpResponse
 from django.utils import six
-from jwt.exceptions import (InvalidIssuerError, InvalidTokenError)
-from requests.exceptions import ConnectionError, HTTPError
+from jwt.exceptions import InvalidIssuerError, InvalidTokenError
 
 import atlassian_jwt_auth
+from atlassian_jwt_auth.exceptions import PublicKeyRetrieverException
 from .utils import parse_jwt, verify_issuers
+
+logger = logging.getLogger(__name__)
 
 
 def requires_asap(issuers=None):
@@ -36,19 +39,22 @@ def requires_asap(issuers=None):
                 verify_issuers(asap_claims, issuers)
                 request.asap_claims = asap_claims
                 return func(request, *args, **kwargs)
-            except HTTPError:
-                # Couldn't find key in key server
-                error_message = 'Unauthorized: Invalid key'
-            except ConnectionError:
-                # Also couldn't find key in key-server
-                error_message = 'Unauthorized: Backend server connection error'
-            except InvalidIssuerError:
-                error_message = 'Unauthorized: Invalid token issuer'
-            except InvalidTokenError:
+            except PublicKeyRetrieverException as e:
+                # Couldn't find key in key server, log the error, but do
+                # not show to clients.
+                error_message = 'Unauthorized: Could not load public key'
+                logger.exception(error_message)
+            except InvalidIssuerError as e:
+                error_message = 'Unauthorized: %s' % e
+                logger.exception(error_message)
+            except InvalidTokenError as e:
                 # Something went wrong with decoding the JWT
-                error_message = 'Unauthorized: Invalid token'
+                error_message = 'Unauthorized: %s' % e
+                logger.exception(error_message)
+
             if error_message is not None:
                 return HttpResponse(error_message, status=401)
+
         return requires_asap_wrapper
     return requires_asap_decorator
 

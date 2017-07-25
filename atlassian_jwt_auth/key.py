@@ -6,9 +6,14 @@ import sys
 
 import cachecontrol
 import cryptography.hazmat.backends
-from cryptography.hazmat.primitives import serialization
 import jwt
 import requests
+from cryptography.hazmat.primitives import serialization
+from requests.exceptions import RequestException
+
+from atlassian_jwt_auth.exceptions import (PublicKeyRetrieverException,
+                                           PrivateKeyRetrieverException,
+                                           KeyIdentifierException)
 
 if sys.version_info[0] >= 3:
     from urllib.parse import unquote_plus
@@ -35,16 +40,16 @@ def validate_key_identifier(identifier):
     regex = re.compile('^[\w.\-\+/]*$')
     _error_msg = 'Invalid key identifier %s' % identifier
     if not identifier:
-        raise ValueError(_error_msg)
+        raise KeyIdentifierException(_error_msg)
     if not regex.match(identifier):
-        raise ValueError(_error_msg)
+        raise KeyIdentifierException(_error_msg)
     normalised = os.path.normpath(identifier)
     if normalised != identifier:
-        raise ValueError(_error_msg)
+        raise KeyIdentifierException(_error_msg)
     if normalised.startswith('/'):
-        raise ValueError(_error_msg)
+        raise KeyIdentifierException(_error_msg)
     if '..' in normalised:
-        raise ValueError(_error_msg)
+        raise KeyIdentifierException(_error_msg)
     return identifier
 
 
@@ -55,17 +60,36 @@ def _get_key_id_from_jwt_header(a_jwt):
 
 
 class HTTPSPublicKeyRetriever(object):
+    """Retrieves public key from https location(s) based on the given key id.
 
-    """ This class retrieves public key from a https location based upon the
-         given key id.
+    :param str base_urls: A string containing a single url OR a list of url(s)
     """
 
-    def __init__(self, base_url):
-        if base_url is None or not base_url.startswith('https://'):
-            raise ValueError('The base url must start with https://')
-        if not base_url.endswith('/'):
-            base_url += '/'
-        self.base_url = base_url
+    def __init__(self, base_urls):
+        if isinstance(base_urls, str):
+            base_urls = [base_urls]
+
+        if base_urls is None:
+            raise PublicKeyRetrieverException('Base URL list cannot be None')
+
+        if len(base_urls) < 1:
+            raise PublicKeyRetrieverException(
+                'At least one base URL must be provided')
+
+        self.base_urls = []
+        for urlpart in base_urls:
+            if urlpart is None or not isinstance(urlpart, str):
+                raise PublicKeyRetrieverException('Base URLs must be strings')
+
+            for url in urlpart.split('|'):
+                url = url.strip()
+                if not url.startswith('https://'):
+                    raise PublicKeyRetrieverException(
+                        'All base urls must start with https://')
+                if not url.endswith('/'):
+                    url += '/'
+                self.base_urls.append(url)
+
         self._session = self._get_session()
 
     def _get_session(self):
@@ -78,8 +102,14 @@ class HTTPSPublicKeyRetriever(object):
         if not isinstance(key_identifier, KeyIdentifier):
             key_identifier = KeyIdentifier(key_identifier)
 
-        url = self.base_url + key_identifier.key_id
-        return self._retrieve(url, requests_kwargs)
+        exceptions = []
+        for base_url in self.base_urls:
+            url = base_url + key_identifier.key_id
+            try:
+                return self._retrieve(url, requests_kwargs)
+            except RequestException as e:
+                exceptions.append(e)
+        raise PublicKeyRetrieverException(exceptions)
 
     def _retrieve(self, url, requests_kwargs):
         resp = self._session.get(url, headers={'accept': PEM_FILE_TYPE},
@@ -92,8 +122,9 @@ class HTTPSPublicKeyRetriever(object):
         media_type = cgi.parse_header(content_type)[0]
 
         if media_type.lower() != PEM_FILE_TYPE.lower():
-            raise ValueError("Invalid content-type, '%s', for url '%s' ." %
-                             (content_type, url))
+            raise PublicKeyRetrieverException(
+                "Invalid content-type, '%s', for url '%s' ." %
+                (content_type, url))
 
 
 class BasePrivateKeyRetriever(object):
@@ -116,7 +147,7 @@ class DataUriPrivateKeyRetriever(BasePrivateKeyRetriever):
 
     def load(self, issuer):
         if not self._data_uri.startswith('data:application/pkcs8;kid='):
-            raise ValueError('Unrecognised data uri format.')
+            raise PrivateKeyRetrieverException('Unrecognised data uri format.')
         splitted = self._data_uri.split(';')
         key_identifier = KeyIdentifier(unquote_plus(
             splitted[1][len('kid='):]))

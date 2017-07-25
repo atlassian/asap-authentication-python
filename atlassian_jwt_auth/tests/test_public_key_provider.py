@@ -3,6 +3,7 @@ import unittest
 import mock
 import requests
 
+from atlassian_jwt_auth.exceptions import PublicKeyRetrieverException
 from atlassian_jwt_auth.key import HTTPSPublicKeyRetriever
 from atlassian_jwt_auth.tests import utils
 
@@ -15,19 +16,20 @@ class BaseHTTPSPublicKeyRetrieverTest(object):
         self._public_key_pem = utils.get_public_key_pem_for_private_key_pem(
             self._private_key_pem)
         self.base_url = 'https://example.com'
+        self.second_base_url = 'https://2.example.com'
 
     def test_https_public_key_retriever_does_not_support_http_url(self):
         """ tests that HTTPSPublicKeyRetriever does not support http://
             base urls.
         """
-        with self.assertRaises(ValueError):
+        with self.assertRaises(PublicKeyRetrieverException):
             retriever = HTTPSPublicKeyRetriever('http://example.com')
 
     def test_https_public_key_retriever_does_not_support_none_url(self):
         """ tests that HTTPSPublicKeyRetriever does not support None
             base urls.
         """
-        with self.assertRaises(ValueError):
+        with self.assertRaises(PublicKeyRetrieverException):
             retriever = HTTPSPublicKeyRetriever(None)
 
     def test_https_public_key_retriever_supports_https_url(self):
@@ -35,6 +37,21 @@ class BaseHTTPSPublicKeyRetrieverTest(object):
             base urls.
         """
         retriever = HTTPSPublicKeyRetriever(self.base_url)
+
+    def test_https_public_key_retriever_supports_multiple_https_urls(self):
+        """ tests that HTTPSPublicKeyRetriever supports multiple https://
+            base urls.
+        """
+        retriever = HTTPSPublicKeyRetriever(
+            [self.base_url, self.second_base_url])
+
+    def test_https_public_key_retriever_supports_pipe_notation_urls(self):
+        """ tests that HTTPSPublicKeyRetriever supports URLs containing pipes
+            denoting multiple base urls.
+        """
+        retriever = HTTPSPublicKeyRetriever(
+            [self.base_url + '|' + self.second_base_url])
+        self.assertEqual(2, len(retriever.base_urls))
 
     @mock.patch.object(requests.Session, 'get')
     def test_retrieve(self, mock_get_method):
@@ -68,7 +85,7 @@ class BaseHTTPSPublicKeyRetrieverTest(object):
         _setup_mock_response_for_retriever(
             mock_get_method, self._public_key_pem, headers)
         retriever = HTTPSPublicKeyRetriever(self.base_url)
-        with self.assertRaises(ValueError):
+        with self.assertRaises(PublicKeyRetrieverException):
             retriever.retrieve('example/eg')
 
 
