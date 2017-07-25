@@ -1,6 +1,7 @@
 import unittest
 
 import atlassian_jwt_auth
+from atlassian_jwt_auth.exceptions import KeyIdentifierException
 
 
 class TestKeyModule(unittest.TestCase):
@@ -14,7 +15,7 @@ class TestKeyModule(unittest.TestCase):
                 u'dir/some\0thing', 'a/#a', 'a/a?x', 'a/a;',
                 ]
         for key in keys:
-            with self.assertRaises(ValueError):
+            with self.assertRaises(KeyIdentifierException):
                 atlassian_jwt_auth.KeyIdentifier(identifier=key)
 
     def test_key_identifier_with_valid_keys(self):

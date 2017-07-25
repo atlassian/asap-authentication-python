@@ -3,6 +3,7 @@ import unittest
 import mock
 import requests
 
+from atlassian_jwt_auth.exceptions import PublicKeyRetrieverException
 from atlassian_jwt_auth.key import HTTPSPublicKeyRetriever
 from atlassian_jwt_auth.tests import utils
 
@@ -21,14 +22,14 @@ class BaseHTTPSPublicKeyRetrieverTest(object):
         """ tests that HTTPSPublicKeyRetriever does not support http://
             base urls.
         """
-        with self.assertRaises(ValueError):
+        with self.assertRaises(PublicKeyRetrieverException):
             retriever = HTTPSPublicKeyRetriever('http://example.com')
 
     def test_https_public_key_retriever_does_not_support_none_url(self):
         """ tests that HTTPSPublicKeyRetriever does not support None
             base urls.
         """
-        with self.assertRaises(ValueError):
+        with self.assertRaises(PublicKeyRetrieverException):
             retriever = HTTPSPublicKeyRetriever(None)
 
     def test_https_public_key_retriever_supports_https_url(self):
@@ -82,7 +83,7 @@ class BaseHTTPSPublicKeyRetrieverTest(object):
         _setup_mock_response_for_retriever(
             mock_get_method, self._public_key_pem, headers)
         retriever = HTTPSPublicKeyRetriever(self.base_url)
-        with self.assertRaises(ValueError):
+        with self.assertRaises(PublicKeyRetrieverException):
             retriever.retrieve('example/eg')
 
 
