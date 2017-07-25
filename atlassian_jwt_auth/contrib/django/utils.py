@@ -23,4 +23,5 @@ def verify_issuers(asap_claims, issuers=None):
     valid_issuers = settings.ASAP_VALID_ISSUERS
     if valid_issuers and claim_iss not in valid_issuers:
         raise InvalidIssuerError(
-            'Issuer `%s` not in valid issuers for this application' % claim_iss)
+            'Issuer `%s` not in valid issuers for this application'
+            % claim_iss)

@@ -42,13 +42,15 @@ class BaseHTTPSPublicKeyRetrieverTest(object):
         """ tests that HTTPSPublicKeyRetriever supports multiple https://
             base urls.
         """
-        retriever = HTTPSPublicKeyRetriever([self.base_url, self.second_base_url])
+        retriever = HTTPSPublicKeyRetriever(
+            [self.base_url, self.second_base_url])
 
-    def test_https_public_key_retriever_supports_pipe_notation_https_urls(self):
+    def test_https_public_key_retriever_supports_pipe_notation_urls(self):
         """ tests that HTTPSPublicKeyRetriever supports URLs containing pipes
             denoting multiple base urls.
         """
-        retriever = HTTPSPublicKeyRetriever([self.base_url + '|' + self.second_base_url])
+        retriever = HTTPSPublicKeyRetriever(
+            [self.base_url + '|' + self.second_base_url])
         self.assertEqual(2, len(retriever.base_urls))
 
     @mock.patch.object(requests.Session, 'get')
