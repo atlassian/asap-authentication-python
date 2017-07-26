@@ -12,8 +12,6 @@ from atlassian_jwt_auth.exceptions import (PrivateKeyRetrieverException,
                                            PublicKeyRetrieverException)
 from .utils import parse_jwt, verify_issuers
 
-logger = logging.getLogger(__name__)
-
 
 def requires_asap(issuers=None):
     """Decorator for Django endpoints to require ASAP
@@ -57,6 +55,7 @@ def requires_asap(issuers=None):
                 # Something went wrong with decoding the JWT
                 exception = ('Unauthorized: Invalid token', e)
             if exception is not None:
+                logger = logging.getLogger(__name__)
                 logger.error(exception[0],
                              extra={'original_message': str(exception[1])})
 
