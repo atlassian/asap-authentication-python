@@ -18,7 +18,6 @@ else:
     from urllib import unquote_plus
 
 PEM_FILE_TYPE = 'application/x-pem-file'
-logger = logging.getLogger(__name__)
 
 
 class KeyIdentifier(object):
@@ -136,6 +135,7 @@ class HTTPSMultiPublicKeyRetriever(HTTPSPublicKeyRetriever):
             try:
                 return self._retrieve(key_url, requests_kwargs)
             except RequestException as e:
+                logger = logging.getLogger(__name__)
                 logger.warn('Unable to retrieve public key from store',
                             extra={'underlying_error': str(e),
                                    'keystore_url': key_url})
