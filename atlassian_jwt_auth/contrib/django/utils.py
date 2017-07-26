@@ -34,4 +34,3 @@ def verify_issuers(asap_claims, issuers=None):
         logger.error(message, extra={'iss': claim_iss})
 
         raise InvalidIssuerError(message)
-
