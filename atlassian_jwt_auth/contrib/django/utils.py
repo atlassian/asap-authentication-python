@@ -1,5 +1,10 @@
+import logging
+
 from django.conf import settings
 from jwt.exceptions import InvalidIssuerError
+
+
+logger = logging.getLogger(__name__)
 
 
 def parse_jwt(verifier, encoded_jwt):
@@ -14,9 +19,19 @@ def parse_jwt(verifier, encoded_jwt):
 
 def verify_issuers(asap_claims, issuers=None):
     """Verify that the issuer in the claims is valid and is expected."""
-    if issuers and (asap_claims.get('iss') not in issuers):
+    claim_iss = asap_claims.get('iss')
+
+    if issuers and (claim_iss not in issuers):
         # Raise early if the specific issuer isn't expected
-        raise InvalidIssuerError()
+        message = 'Issuer not in valid issuers for this endpoint'
+        logger.error(message, extra={'iss': claim_iss})
+
+        raise InvalidIssuerError(message)
+
     valid_issuers = settings.ASAP_VALID_ISSUERS
-    if valid_issuers and asap_claims.get('iss') not in valid_issuers:
-        raise InvalidIssuerError()
+    if valid_issuers and claim_iss not in valid_issuers:
+        message = 'Issuer not in valid issuers for this application'
+        logger.error(message, extra={'iss': claim_iss})
+
+        raise InvalidIssuerError(message)
+
