@@ -1,12 +1,15 @@
+import logging
 from functools import wraps
 
 from django.conf import settings
 from django.http.response import HttpResponse
 from django.utils import six
 from jwt.exceptions import (InvalidIssuerError, InvalidTokenError)
-from requests.exceptions import ConnectionError, HTTPError
+from requests.exceptions import RequestException
 
 import atlassian_jwt_auth
+from atlassian_jwt_auth.exceptions import (PrivateKeyRetrieverException,
+                                           PublicKeyRetrieverException)
 from .utils import parse_jwt, verify_issuers
 
 
@@ -30,25 +33,40 @@ def requires_asap(issuers=None):
             auth = auth_header.split(b' ')
             if not auth or len(auth) != 2:
                 return HttpResponse('Unauthorized', status=401)
-            error_message = None
+
+            message = None
+            exception = None
             try:
                 asap_claims = parse_jwt(verifier, auth[1])
                 verify_issuers(asap_claims, issuers)
                 request.asap_claims = asap_claims
                 return func(request, *args, **kwargs)
-            except HTTPError:
-                # Couldn't find key in key server
-                error_message = 'Unauthorized: Invalid key'
-            except ConnectionError:
-                # Also couldn't find key in key-server
-                error_message = 'Unauthorized: Backend server connection error'
-            except InvalidIssuerError:
-                error_message = 'Unauthorized: Invalid token issuer'
-            except InvalidTokenError:
+            except RequestException as e:
+                # Error communicating to get key
+                message = 'Unauthorized: Communications error retrieving key'
+                exception = e
+            except PrivateKeyRetrieverException as e:
+                # Error parsing or getting private key
+                message = 'Unauthorized: Unable to retrieve private key'
+                exception = e
+            except PublicKeyRetrieverException as e:
+                # Error parsing or getting public key
+                message = 'Unauthorized: Unable to retrieve public key'
+                exception = e
+            except InvalidIssuerError as e:
+                message = 'Unauthorized: Invalid token issuer'
+                exception = e
+            except InvalidTokenError as e:
                 # Something went wrong with decoding the JWT
-                error_message = 'Unauthorized: Invalid token'
-            if error_message is not None:
-                return HttpResponse(error_message, status=401)
+                message = 'Unauthorized: Invalid token'
+                exception = e
+            if message is not None:
+                logger = logging.getLogger(__name__)
+                logger.error(message,
+                             extra={'original_message': str(exception)})
+
+                return HttpResponse(message, status=401)
+
         return requires_asap_wrapper
     return requires_asap_decorator
 
