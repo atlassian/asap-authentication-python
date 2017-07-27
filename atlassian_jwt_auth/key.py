@@ -111,6 +111,7 @@ class HTTPSPublicKeyRetriever(BasePublicKeyRetriever):
 
 
 class HTTPSMultiPublicKeyRetriever(HTTPSPublicKeyRetriever):
+    """Return a public key from the first of a list of URLs"""
     def __init__(self, keystore_urls):
         self.keystore_urls = self._validate_keystore_urls(keystore_urls)
         self._session = self._get_session()

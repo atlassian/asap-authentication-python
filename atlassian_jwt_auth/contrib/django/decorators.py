@@ -53,11 +53,17 @@ def requires_asap(issuers=None):
     return requires_asap_decorator
 
 
+def default_config():
+    return {
+        'base_url': getattr(settings, 'ASAP_PUBLICKEY_REPOSITORY')
+    }
+
+
 def _get_verifier():
     """Return a verifier for ASAP JWT tokens based on settings"""
     retriever_cls = getattr(settings, 'ASAP_KEY_RETRIEVER_CLASS',
                             atlassian_jwt_auth.HTTPSPublicKeyRetriever)
-    retriever = retriever_cls(
-        base_url=getattr(settings, 'ASAP_PUBLICKEY_REPOSITORY')
-    )
+    retriever = retriever_cls(**getattr(settings, 'ASAP_KEY_RETRIEVER_CONFIG',
+                                        default_config()))
+
     return atlassian_jwt_auth.JWTAuthVerifier(retriever)
