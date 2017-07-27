@@ -1,5 +1,7 @@
 import logging
+from collections import namedtuple
 from functools import wraps
+from typing import NamedTuple
 
 from django.conf import settings
 from django.http.response import HttpResponse
@@ -33,6 +35,8 @@ def requires_asap(issuers=None):
             auth = auth_header.split(b' ')
             if not auth or len(auth) != 2:
                 return HttpResponse('Unauthorized', status=401)
+
+            message = None
             exception = None
             try:
                 asap_claims = parse_jwt(verifier, auth[1])
@@ -41,25 +45,29 @@ def requires_asap(issuers=None):
                 return func(request, *args, **kwargs)
             except RequestException as e:
                 # Error communicating to get key
-                exception = (
-                    'Unauthorized: Communications error retrieving key', e)
+                message = 'Unauthorized: Communications error retrieving key'
+                exception = e
             except PrivateKeyRetrieverException as e:
                 # Error parsing or getting private key
-                exception = ('Unauthorized: Unable to retrieve private key', e)
+                message = 'Unauthorized: Unable to retrieve private key'
+                exception = e
             except PublicKeyRetrieverException as e:
                 # Error parsing or getting public key
-                exception = ('Unauthorized: Unable to retrieve public key', e)
+                message = 'Unauthorized: Unable to retrieve public key'
+                exception = e
             except InvalidIssuerError as e:
-                exception = ('Unauthorized: Invalid token issuer', e)
+                message = 'Unauthorized: Invalid token issuer'
+                exception = e
             except InvalidTokenError as e:
                 # Something went wrong with decoding the JWT
-                exception = ('Unauthorized: Invalid token', e)
-            if exception is not None:
+                message = 'Unauthorized: Invalid token'
+                exception = e
+            if message is not None:
                 logger = logging.getLogger(__name__)
-                logger.error(exception[0],
-                             extra={'original_message': str(exception[1])})
+                logger.error(message,
+                             extra={'original_message': str(exception)})
 
-                return HttpResponse(exception[0], status=401)
+                return HttpResponse(message, status=401)
 
         return requires_asap_wrapper
     return requires_asap_decorator
