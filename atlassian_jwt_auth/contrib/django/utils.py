@@ -4,9 +4,6 @@ from django.conf import settings
 from jwt.exceptions import InvalidIssuerError
 
 
-logger = logging.getLogger(__name__)
-
-
 def parse_jwt(verifier, encoded_jwt):
     """Decode an encoded JWT using stored config."""
     claims = verifier.verify_jwt(
@@ -20,6 +17,7 @@ def parse_jwt(verifier, encoded_jwt):
 def verify_issuers(asap_claims, issuers=None):
     """Verify that the issuer in the claims is valid and is expected."""
     claim_iss = asap_claims.get('iss')
+    logger = logging.getLogger(__name__)
 
     if issuers and (claim_iss not in issuers):
         # Raise early if the specific issuer isn't expected
