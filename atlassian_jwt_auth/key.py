@@ -1,14 +1,16 @@
 import base64
 import cgi
+import logging
 import os
 import re
 import sys
 
 import cachecontrol
 import cryptography.hazmat.backends
-from cryptography.hazmat.primitives import serialization
 import jwt
 import requests
+from cryptography.hazmat.primitives import serialization
+from requests.exceptions import RequestException
 
 from atlassian_jwt_auth.exceptions import (KeyIdentifierException,
                                            PublicKeyRetrieverException,
@@ -58,24 +60,36 @@ def _get_key_id_from_jwt_header(a_jwt):
     return KeyIdentifier(header['kid'])
 
 
-class HTTPSPublicKeyRetriever(object):
+class BasePublicKeyRetriever(object):
+    """Base class for getting a public key"""
+
+    def retrieve(self, key_identifier, **kwargs):
+        raise NotImplementedError()
+
+
+class HTTPSPublicKeyRetriever(BasePublicKeyRetriever):
 
     """ This class retrieves public key from a https location based upon the
          given key id.
     """
 
     def __init__(self, base_url):
+        self.base_url = self._validate_baseurl(base_url)
+        self._session = self._get_session()
+
+    def _validate_baseurl(self, base_url):
         if base_url is None or not base_url.startswith('https://'):
             raise PublicKeyRetrieverException(
                 'The base url must start with https://')
         if not base_url.endswith('/'):
             base_url += '/'
-        self.base_url = base_url
-        self._session = self._get_session()
+
+        return base_url
 
     def _get_session(self):
         session = requests.Session()
         session.mount('https://', cachecontrol.CacheControlAdapter())
+
         return session
 
     def retrieve(self, key_identifier, **requests_kwargs):
@@ -100,6 +114,40 @@ class HTTPSPublicKeyRetriever(object):
             raise PublicKeyRetrieverException(
                 "Invalid content-type, '%s', for url '%s' ." %
                 (content_type, url))
+
+
+class HTTPSMultiPublicKeyRetriever(HTTPSPublicKeyRetriever):
+    """Return a public key from the first of a list of URLs"""
+    def __init__(self, keystore_urls):
+        self.keystore_urls = self._validate_keystore_urls(keystore_urls)
+        self._session = self._get_session()
+
+    def _validate_keystore_urls(self, keystore_urls):
+        if not isinstance(keystore_urls, list):
+            raise ValueError('keystore_urls should be a list of urls')
+
+        _keystore_urls = []
+        for url in keystore_urls:
+            _keystore_urls.append(self._validate_baseurl(url))
+
+        return _keystore_urls
+
+    def retrieve(self, key_identifier, **requests_kwargs):
+        for url in self.keystore_urls:
+            if not isinstance(key_identifier, KeyIdentifier):
+                key_identifier = KeyIdentifier(key_identifier)
+
+            key_url = url + key_identifier.key_id
+
+            try:
+                return self._retrieve(key_url, requests_kwargs)
+            except RequestException as e:
+                logger = logging.getLogger(__name__)
+                logger.warn('Unable to retrieve public key from store',
+                            extra={'underlying_error': str(e),
+                                   'keystore_url': key_url})
+        else:
+            raise KeyError('Cannot load key from keystore(s)')
 
 
 class BasePrivateKeyRetriever(object):
