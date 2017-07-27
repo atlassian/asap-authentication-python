@@ -1,7 +1,5 @@
 import logging
-from collections import namedtuple
 from functools import wraps
-from typing import NamedTuple
 
 from django.conf import settings
 from django.http.response import HttpResponse
