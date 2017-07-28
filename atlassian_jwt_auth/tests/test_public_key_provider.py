@@ -3,12 +3,19 @@ import unittest
 import mock
 import requests
 
-from atlassian_jwt_auth.key import HTTPSPublicKeyRetriever
+from atlassian_jwt_auth.key import (
+    HTTPSPublicKeyRetriever,
+    HTTPSMultiRepositoryPublicKeyRetriever,
+)
 from atlassian_jwt_auth.tests import utils
 
 
 class BaseHTTPSPublicKeyRetrieverTest(object):
     """ tests for the HTTPSPublicKeyRetriever class. """
+
+    def create_retriever(self, url):
+        """ returns a public key retriever created using the given url. """
+        return HTTPSPublicKeyRetriever(url)
 
     def setUp(self):
         self._private_key_pem = self.get_new_private_key_in_pem_format()
@@ -21,27 +28,27 @@ class BaseHTTPSPublicKeyRetrieverTest(object):
             base urls.
         """
         with self.assertRaises(ValueError):
-            retriever = HTTPSPublicKeyRetriever('http://example.com')
+            retriever = self.create_retriever('http://example.com')
 
     def test_https_public_key_retriever_does_not_support_none_url(self):
         """ tests that HTTPSPublicKeyRetriever does not support None
             base urls.
         """
         with self.assertRaises(ValueError):
-            retriever = HTTPSPublicKeyRetriever(None)
+            retriever = self.create_retriever(None)
 
     def test_https_public_key_retriever_supports_https_url(self):
         """ tests that HTTPSPublicKeyRetriever supports https://
             base urls.
         """
-        retriever = HTTPSPublicKeyRetriever(self.base_url)
+        retriever = self.create_retriever(self.base_url)
 
     @mock.patch.object(requests.Session, 'get')
     def test_retrieve(self, mock_get_method):
         """ tests that the retrieve method works expected. """
         _setup_mock_response_for_retriever(
             mock_get_method, self._public_key_pem)
-        retriever = HTTPSPublicKeyRetriever(self.base_url)
+        retriever = self.create_retriever(self.base_url)
         self.assertEqual(
             retriever.retrieve('example/eg'),
             self._public_key_pem)
@@ -54,7 +61,7 @@ class BaseHTTPSPublicKeyRetrieverTest(object):
         headers = {'content-type': 'application/x-pem-file;charset=UTF-8'}
         _setup_mock_response_for_retriever(
             mock_get_method, self._public_key_pem, headers)
-        retriever = HTTPSPublicKeyRetriever(self.base_url)
+        retriever = self.create_retriever(self.base_url)
         self.assertEqual(
             retriever.retrieve('example/eg'),
             self._public_key_pem)
@@ -67,9 +74,42 @@ class BaseHTTPSPublicKeyRetrieverTest(object):
         headers = {'content-type': 'different/not-supported'}
         _setup_mock_response_for_retriever(
             mock_get_method, self._public_key_pem, headers)
-        retriever = HTTPSPublicKeyRetriever(self.base_url)
+        retriever = self.create_retriever(self.base_url)
         with self.assertRaises(ValueError):
             retriever.retrieve('example/eg')
+
+
+class BaseHTTPSMultiRepositoryPublicKeyRetrieverTest(
+        BaseHTTPSPublicKeyRetrieverTest):
+    """ tests for the HTTPSMultiRepositoryPublicKeyRetriever class. """
+
+    def create_retriever(self, url):
+        """ returns a public key retriever created using the given url. """
+        return HTTPSMultiRepositoryPublicKeyRetriever([url])
+
+    def setUp(self):
+        self._private_key_pem = self.get_new_private_key_in_pem_format()
+        self._public_key_pem = utils.get_public_key_pem_for_private_key_pem(
+            self._private_key_pem)
+        self.keystore_urls = ['https://example.com', 'https://example.ly']
+        self.base_url = self.keystore_urls[0]
+
+    def test_https_multi_public_key_retriever_does_not_support_strings(self):
+        """ tests that HTTPSMultiRepositoryPublicKeyRetriever does not
+            support a string key repository url.
+        """
+        with self.assertRaises(TypeError):
+            HTTPSMultiRepositoryPublicKeyRetriever('https://example.com')
+
+    @mock.patch.object(requests.Session, 'get')
+    def test_retrieve(self, mock_get_method):
+        """ tests that the retrieve method works expected. """
+        _setup_mock_response_for_retriever(
+            mock_get_method, self._public_key_pem)
+        retriever = HTTPSMultiRepositoryPublicKeyRetriever(self.keystore_urls)
+        self.assertEqual(
+            retriever.retrieve('example/eg'),
+            self._public_key_pem)
 
 
 def _setup_mock_response_for_retriever(
@@ -95,4 +135,18 @@ class HTTPSPublicKeyRetrieverRS256Test(BaseHTTPSPublicKeyRetrieverTest,
 class HTTPSPublicKeyRetrieverES256Test(BaseHTTPSPublicKeyRetrieverTest,
                                        utils.ES256KeyTestMixin,
                                        unittest.TestCase):
+    pass
+
+
+class HTTPSMultiRepositoryPublicKeyRetrieverRS256Test(
+        BaseHTTPSMultiRepositoryPublicKeyRetrieverTest,
+        utils.RS256KeyTestMixin,
+        unittest.TestCase):
+    pass
+
+
+class HTTPSMultiRepositoryPublicKeyRetrieverES256Test(
+        BaseHTTPSMultiRepositoryPublicKeyRetrieverTest,
+        utils.ES256KeyTestMixin,
+        unittest.TestCase):
     pass
