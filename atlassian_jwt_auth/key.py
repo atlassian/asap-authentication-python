@@ -1,14 +1,16 @@
 import base64
 import cgi
+import logging
 import os
 import re
 import sys
 
 import cachecontrol
 import cryptography.hazmat.backends
-from cryptography.hazmat.primitives import serialization
 import jwt
 import requests
+from cryptography.hazmat.primitives import serialization
+from requests.exceptions import RequestException
 
 from atlassian_jwt_auth.exceptions import (KeyIdentifierException,
                                            PublicKeyRetrieverException,
@@ -58,7 +60,14 @@ def _get_key_id_from_jwt_header(a_jwt):
     return KeyIdentifier(header['kid'])
 
 
-class HTTPSPublicKeyRetriever(object):
+class BasePublicKeyRetriever(object):
+    """ Base class for retrieving a public key. """
+
+    def retrieve(self, key_identifier, **kwargs):
+        raise NotImplementedError()
+
+
+class HTTPSPublicKeyRetriever(BasePublicKeyRetriever):
 
     """ This class retrieves public key from a https location based upon the
          given key id.
@@ -100,6 +109,32 @@ class HTTPSPublicKeyRetriever(object):
             raise PublicKeyRetrieverException(
                 "Invalid content-type, '%s', for url '%s' ." %
                 (content_type, url))
+
+
+class HTTPSMultiRepositoryPublicKeyRetriever(BasePublicKeyRetriever):
+    """ This class retrieves public key from the supplied https key
+        repository locations based upon key ids.
+    """
+
+    def __init__(self, key_repository_urls):
+        if not isinstance(key_repository_urls, list):
+            raise TypeError('keystore_urls must be a list of urls.')
+        self._retrievers = self._create_retrievers(key_repository_urls)
+
+    def _create_retrievers(self, key_repository_urls):
+        return [HTTPSPublicKeyRetriever(url) for url
+                in key_repository_urls]
+
+    def retrieve(self, key_identifier, **requests_kwargs):
+        for retriever in self._retrievers:
+            try:
+                return retriever.retrieve(key_identifier, **requests_kwargs)
+            except RequestException as e:
+                logger = logging.getLogger(__name__)
+                logger.warn('Unable to retrieve public key from store',
+                            extra={'underlying_error': str(e),
+                                   'key repository': retriever.base_url})
+        raise KeyError('Cannot load key from key repositories')
 
 
 class BasePrivateKeyRetriever(object):
