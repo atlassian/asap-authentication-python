@@ -1,6 +1,13 @@
 CHANGES
 =======
 
+3.0.0
+-----
+
+* Sem-Ver: feature Add a new HTTPSMultiRepositoryPublicKeyRetriever class which allows using multiple public key repositories.
+* Sem-Ver: feature Add and use library specific exceptions instead of using ValueError
+* Sem-Ver: api-break Add support for customising the value of the leeway used in the django and flask contrib code through the ASAP_VALID_LEEWAY setting & switch to a default leeway of 0 seconds
+
 2.11.2
 ------
 
