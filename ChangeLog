@@ -1,6 +1,11 @@
 CHANGES
 =======
 
+3.0.1
+-----
+
+* Sem-Ver: bugfix upgrade PyJWT from version 1.4.2 to use a version >= 1.5.2 but less than 2.0.0
+
 3.0.0
 -----
 
