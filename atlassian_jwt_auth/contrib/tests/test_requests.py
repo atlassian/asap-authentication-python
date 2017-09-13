@@ -26,8 +26,9 @@ class BaseRequestsTest(object):
         bearer = auth_header.split(b' ')[1]
         # Decode the JWT (verifying the signature and aud match)
         # an exception is thrown if this fails
+        algorithms = atlassian_jwt_auth.get_permitted_algorithm_names()
         return jwt.decode(bearer, self._public_key_pem.decode(),
-                          audience='audience')
+                          audience='audience', algorithms=algorithms)
 
     def _get_auth_header(self, auth):
         request = auth(Request())
