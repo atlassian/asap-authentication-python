@@ -3,7 +3,7 @@
 [![travis-status-image]][travis]
 [![pypi-version-image]][pypi]
 
-This package provides an implementation of the [Service to Service Authentication](http://s2sauth.bitbucket.org/spec/) specification.
+This package provides an implementation of the [Service to Service Authentication](http://s2sauth.bitbucket.io/spec/) specification.
 
 ----
 
