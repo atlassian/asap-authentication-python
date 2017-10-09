@@ -1,14 +1,20 @@
 import base64
 import cgi
+import logging
 import os
 import re
 import sys
 
 import cachecontrol
 import cryptography.hazmat.backends
-from cryptography.hazmat.primitives import serialization
 import jwt
 import requests
+from cryptography.hazmat.primitives import serialization
+from requests.exceptions import RequestException
+
+from atlassian_jwt_auth.exceptions import (KeyIdentifierException,
+                                           PublicKeyRetrieverException,
+                                           PrivateKeyRetrieverException)
 
 if sys.version_info[0] >= 3:
     from urllib.parse import unquote_plus
@@ -35,16 +41,16 @@ def validate_key_identifier(identifier):
     regex = re.compile('^[\w.\-\+/]*$')
     _error_msg = 'Invalid key identifier %s' % identifier
     if not identifier:
-        raise ValueError(_error_msg)
+        raise KeyIdentifierException(_error_msg)
     if not regex.match(identifier):
-        raise ValueError(_error_msg)
+        raise KeyIdentifierException(_error_msg)
     normalised = os.path.normpath(identifier)
     if normalised != identifier:
-        raise ValueError(_error_msg)
+        raise KeyIdentifierException(_error_msg)
     if normalised.startswith('/'):
-        raise ValueError(_error_msg)
+        raise KeyIdentifierException(_error_msg)
     if '..' in normalised:
-        raise ValueError(_error_msg)
+        raise KeyIdentifierException(_error_msg)
     return identifier
 
 
@@ -54,7 +60,14 @@ def _get_key_id_from_jwt_header(a_jwt):
     return KeyIdentifier(header['kid'])
 
 
-class HTTPSPublicKeyRetriever(object):
+class BasePublicKeyRetriever(object):
+    """ Base class for retrieving a public key. """
+
+    def retrieve(self, key_identifier, **kwargs):
+        raise NotImplementedError()
+
+
+class HTTPSPublicKeyRetriever(BasePublicKeyRetriever):
 
     """ This class retrieves public key from a https location based upon the
          given key id.
@@ -62,7 +75,8 @@ class HTTPSPublicKeyRetriever(object):
 
     def __init__(self, base_url):
         if base_url is None or not base_url.startswith('https://'):
-            raise ValueError('The base url must start with https://')
+            raise PublicKeyRetrieverException(
+                'The base url must start with https://')
         if not base_url.endswith('/'):
             base_url += '/'
         self.base_url = base_url
@@ -92,8 +106,35 @@ class HTTPSPublicKeyRetriever(object):
         media_type = cgi.parse_header(content_type)[0]
 
         if media_type.lower() != PEM_FILE_TYPE.lower():
-            raise ValueError("Invalid content-type, '%s', for url '%s' ." %
-                             (content_type, url))
+            raise PublicKeyRetrieverException(
+                "Invalid content-type, '%s', for url '%s' ." %
+                (content_type, url))
+
+
+class HTTPSMultiRepositoryPublicKeyRetriever(BasePublicKeyRetriever):
+    """ This class retrieves public key from the supplied https key
+        repository locations based upon key ids.
+    """
+
+    def __init__(self, key_repository_urls):
+        if not isinstance(key_repository_urls, list):
+            raise TypeError('keystore_urls must be a list of urls.')
+        self._retrievers = self._create_retrievers(key_repository_urls)
+
+    def _create_retrievers(self, key_repository_urls):
+        return [HTTPSPublicKeyRetriever(url) for url
+                in key_repository_urls]
+
+    def retrieve(self, key_identifier, **requests_kwargs):
+        for retriever in self._retrievers:
+            try:
+                return retriever.retrieve(key_identifier, **requests_kwargs)
+            except RequestException as e:
+                logger = logging.getLogger(__name__)
+                logger.warn('Unable to retrieve public key from store',
+                            extra={'underlying_error': str(e),
+                                   'key repository': retriever.base_url})
+        raise KeyError('Cannot load key from key repositories')
 
 
 class BasePrivateKeyRetriever(object):
@@ -116,7 +157,7 @@ class DataUriPrivateKeyRetriever(BasePrivateKeyRetriever):
 
     def load(self, issuer):
         if not self._data_uri.startswith('data:application/pkcs8;kid='):
-            raise ValueError('Unrecognised data uri format.')
+            raise PrivateKeyRetrieverException('Unrecognised data uri format.')
         splitted = self._data_uri.split(';')
         key_identifier = KeyIdentifier(unquote_plus(
             splitted[1][len('kid='):]))
