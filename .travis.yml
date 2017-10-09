@@ -5,6 +5,8 @@ python:
 - 3.4
 - 3.5
 - &main_python_version 3.6
+before_install:
+- pip install -U pip setuptools
 script:
 - python setup.py test
 
@@ -21,6 +23,7 @@ jobs:
 
   - stage: &deploy_stage_name deploy to PYPI (triggered only for tagged commits)
     python: *main_python_version
+    before_install: []
     script: skip
     deploy:
       provider: pypi
