@@ -4,7 +4,8 @@ CHANGES
 3.1.0
 -----
 
-* Add Django middleware to auth forwarded clients
+* Sem-Ver: feature Add Django middleware to auth forwarded clients
+* Sem-Ver: bugfix upgrade cryptography from using a version >= 1.8.1 < 1.9.0 to use a version >= 2.0.3 and < 2.1.0
 
 3.0.1
 -----
