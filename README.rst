@@ -7,7 +7,7 @@ Atlassian JWT authentication
 .. image:: https://img.shields.io/pypi/v/atlassian-jwt-auth.svg
    :target: https://pypi.org/project/atlassian-jwt-auth
 
-This package provides an implementation of the `Service to Service Authentication <http://s2sauth.bitbucket.io/spec/>`_ specification.
+This package provides an implementation of the `Service to Service Authentication <https://s2sauth.bitbucket.io/spec/>`_ specification.
 
 ----
 
