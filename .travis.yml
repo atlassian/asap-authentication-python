@@ -19,7 +19,24 @@ jobs:
     script:
     - pep8 .
 
+  - stage: &deploy_stage_name deploy to PYPI (triggered only for tagged commits)
+    python: *main_python_version
+    script: skip
+    deploy:
+      provider: pypi
+      distribution: sdist bdist_wheel
+      user: dblack
+      password:
+        secure: YOUR_ENCRYPTED_PASSWORD_HERE_https://docs.travis-ci.com/user/encryption-keys/
+      # Since commit https://github.com/travis-ci/dpl/commit/90b5e39
+      # it is default that Travis PYPI provider has `skip_upload_docs: true`
+      # set by default.
+      on:
+        tags: true
+        all_branches: true
+
 stages:
 - *lint_stage_name
 - test
-- deploy
+- name: *deploy_stage_name
+  if: tag IS present
