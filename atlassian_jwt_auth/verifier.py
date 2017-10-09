@@ -1,4 +1,4 @@
-from collections import deque, OrderedDict
+from collections import OrderedDict
 
 import jwt
 
