@@ -21,7 +21,7 @@ jobs:
   - stage: &lint_stage_name lint
     python: *main_python_version
     install:
-    - pip install -q pep8==1.6.2
+    - pip install pep8==1.6.2
     script:
     - pep8 .
 
