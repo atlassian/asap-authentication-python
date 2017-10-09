@@ -1,0 +1,2 @@
+aiohttp>=2.0,<2.3; python_version>="3.4"
+asynctest==0.10.0; python_version>="3.4"

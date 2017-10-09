@@ -9,6 +9,8 @@ python:
 - &main_python_version 3.6
 before_install:
 - pip install -U pip setuptools
+install:
+- pip install -r test-requirements-py3.txt
 script:
 - python setup.py test
 
