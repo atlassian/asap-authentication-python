@@ -1,5 +1,9 @@
 from django.conf import settings
 
+import atlassian_jwt_auth
+from ..server.helpers import _requires_asap
+from .utils import parse_jwt, verify_issuers, _build_response
+
 
 class ASAPForwardedMiddleware(object):
     """Enable client auth for ASAP-enabled services that are forwarding
@@ -55,3 +59,43 @@ class ASAPForwardedMiddleware(object):
             request.META['HTTP_AUTHORIZATION'] = asap_auth
         if orig_auth is not None:
             request.META[self.xauth] = orig_auth
+
+
+class ASAPMiddleware(ASAPForwardedMiddleware):
+    """Enable ASAP for Django applications.
+
+    To use proxied credentials, this must come before any authentication
+    middleware.
+    """
+
+    def __init__(self, get_response=None):
+        super(ASAPMiddleware, self).__init__(get_response=get_response)
+
+        self.required = getattr(settings, 'ASAP_REQUIRED', True)
+        self.client_auth = getattr(settings, 'ASAP_CLIENT_AUTH', False)
+
+        # Configure verifier based on settings
+        retriever_kwargs = {}
+        retriever_cls = getattr(settings, 'ASAP_KEY_RETRIEVER_CLASS',
+                                atlassian_jwt_auth.HTTPSPublicKeyRetriever)
+        public_key_url = getattr(settings, 'ASAP_PUBLICKEY_REPOSITORY', None)
+        if public_key_url:
+            retriever_kwargs['base_url'] = public_key_url
+        retriever = retriever_cls(**retriever_kwargs)
+        self.verifier = atlassian_jwt_auth.JWTAuthVerifier(retriever)
+
+    def process_request(self, request):
+        auth_header = request.META.get('HTTP_AUTHORIZATION', b'')
+        asap_err = _requires_asap(
+            verifier=self.verifier,
+            auth=auth_header,
+            parse_jwt_func=parse_jwt,
+            build_response_func=_build_response,
+            asap_claim_holder=request,
+            verify_issuers_func=verify_issuers,
+        )
+
+        if asap_err and self.required:
+            return asap_err
+        elif self.client_auth:
+            super(ASAPMiddleware, self).process_request(request)
