@@ -1,5 +1,6 @@
 import logging
 from functools import wraps
+import warnings
 
 from django.conf import settings
 from django.http.response import HttpResponse
@@ -58,8 +59,13 @@ def requires_asap(issuers=None):
     """Decorator for Django endpoints to require ASAP
 
     :param list issuers: *required The 'iss' claims that this endpoint is from.
+
+    DEPRECATED: use ASAPMiddleware and validate_asap instead.
     """
     def requires_asap_decorator(func):
+        warnings.warn("requires_asap is deprecated; use ASAPMiddleware and "
+                      "validate_asap instead.", DeprecationWarning)
+
         @wraps(func)
         def requires_asap_wrapper(request, *args, **kwargs):
             verifier = _get_verifier()
