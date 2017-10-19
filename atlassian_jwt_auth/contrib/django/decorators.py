@@ -45,8 +45,8 @@ def validate_asap(issuers=None, subjects=None, required=True):
                 sub_allowed = True
 
             if not sub_allowed:
-                message = 'Unauthorized: Invalid token subject'
-                return HttpResponse(message, status=401)
+                message = 'Forbidden: Invalid token subject'
+                return HttpResponse(message, status=403)
 
             return func(request, *args, **kwargs)
 
