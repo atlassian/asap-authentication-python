@@ -1,10 +1,55 @@
 from functools import wraps
 
 from django.conf import settings
+from django.http.response import HttpResponse
 
 import atlassian_jwt_auth
 from .utils import parse_jwt, verify_issuers, _build_response
 from ..server.helpers import _requires_asap
+
+
+def validate_asap(issuers=None, subjects=None, required=True):
+    """Decorator to allow endpoint-specific ASAP authorization, assuming ASAP
+    authentication has already occurred.
+
+    :param list issuers: A list of issuers that are allowed to use the
+        endpoint.
+    :param subject: A list of subjects or a function to determine allowed
+        subjects for the endpoint.
+    :param boolean required: Whether or not to require ASAP on this endpoint.
+        Note that requirements will be still be verified if claims are present.
+    """
+    def validate_asap_decorator(func):
+        @wraps(func)
+        def validate_asap_wrapper(request, *args, **kwargs):
+            asap_claims = getattr(request, 'asap_claims', {})
+            if required and not asap_claims:
+                message = 'Unauthorized: Invalid or missing token'
+                response = HttpResponse(message, status=401)
+                response['WWW-Authenticate'] = 'Bearer'
+                return response
+
+            iss = asap_claims.get('iss')
+            if issuers and iss not in issuers:
+                message = 'Forbidden: Invalid token issuer'
+                return HttpResponse(message, status=403)
+
+            sub = asap_claims.get('sub')
+            if callable(subjects):
+                sub_allowed = subjects(sub)
+            elif hasattr(subjects, '__contains__'):
+                sub_allowed = sub in subjects
+            else:
+                sub_allowed = True
+
+            if not sub_allowed:
+                message = 'Forbidden: Invalid token subject'
+                return HttpResponse(message, status=403)
+
+            return func(request, *args, **kwargs)
+
+        return validate_asap_wrapper
+    return validate_asap_decorator
 
 
 def requires_asap(issuers=None):
