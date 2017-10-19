@@ -1,4 +1,5 @@
 import logging
+import warnings
 
 from jwt import InvalidAudienceError
 
@@ -16,9 +17,14 @@ class ASAPForwardedMiddleware(object):
     non-ASAP client requests.
 
     This must come before any authentication middleware.
+
+    DEPRECATED: use ASAPMiddleware instead.
     """
 
     def __init__(self, get_response=None):
+        warnings.warn("ASAPForwardedMiddleware is deprecated; use "
+                      "ASAPMiddleware instead", DeprecationWarning)
+
         self.get_response = get_response
 
         # Rely on this header to tell us if a request has been forwarded
@@ -73,7 +79,8 @@ class ASAPMiddleware(ASAPForwardedMiddleware):
     """
 
     def __init__(self, get_response=None):
-        super(ASAPMiddleware, self).__init__(get_response=get_response)
+        with warnings.catch_warnings():
+            super(ASAPMiddleware, self).__init__(get_response=get_response)
 
         self.logger = logging.getLogger(__name__)
 
