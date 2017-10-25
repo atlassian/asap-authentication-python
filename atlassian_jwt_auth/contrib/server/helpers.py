@@ -2,11 +2,6 @@ import logging
 
 from jwt.compat import text_type
 import jwt.exceptions
-import requests.exceptions
-
-from atlassian_jwt_auth.exceptions import (
-    PublicKeyRetrieverException,
-)
 
 
 def _requires_asap(verifier, auth, parse_jwt_func, response_class,
@@ -35,14 +30,6 @@ def _requires_asap(verifier, auth, parse_jwt_func, response_class,
         if verify_issuers_func is not None:
             verify_issuers_func(asap_claims, issuers)
         asap_claim_holder.asap_claims = asap_claims
-    except requests.exceptions.HTTPError as e:
-        # Couldn't find key in key server
-        message = 'Unauthorized: Invalid key'
-        exception = e
-    except (requests.exceptions.ConnectionError,
-            PublicKeyRetrieverException) as e:
-        message = 'Unauthorized: Backend server connection error'
-        exception = e
     except jwt.exceptions.InvalidIssuerError as e:
         message = 'Unauthorized: Invalid token issuer'
         exception = e
