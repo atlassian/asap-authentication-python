@@ -17,16 +17,16 @@ def requires_asap(f):
     def decorated(*args, **kwargs):
         verifier = _get_verifier()
         auth = request.headers.get('AUTHORIZATION', '').split(' ')
-        result = _requires_asap(
+        err_response = _requires_asap(
             verifier=verifier,
             auth=auth,
             parse_jwt_func=parse_jwt,
             response_class=Response,
             asap_claim_holder=g,
         )
-        if result is None:
+        if err_response is None:
             return f(*args, **kwargs)
-        return result
+        return err_response
 
     return decorated
 

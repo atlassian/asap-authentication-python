@@ -27,7 +27,7 @@ def requires_asap(issuers=None):
             if isinstance(auth_header, six.string_types):
                 auth_header = auth_header.encode(encoding='iso-8859-1')
             auth = auth_header.split(b' ')
-            result = _requires_asap(
+            err_response = _requires_asap(
                 verifier=verifier,
                 auth=auth,
                 parse_jwt_func=parse_jwt,
@@ -36,9 +36,9 @@ def requires_asap(issuers=None):
                 verify_issuers_func=verify_issuers,
                 issuers=issuers,
             )
-            if result is None:
+            if err_response is None:
                 return func(request, *args, **kwargs)
-            return result
+            return err_response
 
         return requires_asap_wrapper
     return requires_asap_decorator
