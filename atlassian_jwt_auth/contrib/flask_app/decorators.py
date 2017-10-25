@@ -1,11 +1,10 @@
 from functools import wraps
 
 from flask import Response, current_app, g, request
-import jwt.exceptions
-import requests.exceptions
 
 import atlassian_jwt_auth
 from .utils import parse_jwt
+from ..server import _requires_asap
 
 
 def requires_asap(f):
@@ -17,26 +16,17 @@ def requires_asap(f):
     @wraps(f)
     def decorated(*args, **kwargs):
         verifier = _get_verifier()
-        auth = request.headers.get('Authorization', '').split(' ')
-        if not auth or len(auth) != 2:
-            return Response('Unauthorized', 401)
-
-        try:
-            g.asap_claims = parse_jwt(verifier, auth[1])
+        auth = request.headers.get('AUTHORIZATION', '').split(' ')
+        result = _requires_asap(
+            verifier=verifier,
+            auth=auth,
+            parse_jwt_func=parse_jwt,
+            response_class=Response,
+            asap_claim_holder=g,
+        )
+        if result is None:
             return f(*args, **kwargs)
-        except requests.exceptions.HTTPError:
-            # Couldn't find key in key server
-            return Response('Unauthorized: Invalid key', 401)
-        except requests.exceptions.ConnectionError:
-            # Also couldn't find key in key-server
-            return Response(
-                'Unauthorized: Backend server connection error', 401
-            )
-        except jwt.exceptions.InvalidIssuer:
-            return Response('Unauthorized: Invalid token issuer', 401)
-        except jwt.exceptions.InvalidTokenError:
-            # Something went wrong with decoding the JWT
-            return Response('Unauthorized: Invalid token', 401)
+        return result
 
     return decorated
 
