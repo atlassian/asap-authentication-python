@@ -6,7 +6,7 @@ from django.utils import six
 
 import atlassian_jwt_auth
 from .utils import parse_jwt, verify_issuers
-from ..server import _requires_asap
+from ..server.helpers import _requires_asap
 
 
 def requires_asap(issuers=None):

@@ -4,7 +4,7 @@ from flask import Response, current_app, g, request
 
 import atlassian_jwt_auth
 from .utils import parse_jwt
-from ..server import _requires_asap
+from ..server.helpers import _requires_asap
 
 
 def requires_asap(f):
