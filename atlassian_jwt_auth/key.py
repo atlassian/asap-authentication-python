@@ -134,7 +134,8 @@ class HTTPSMultiRepositoryPublicKeyRetriever(BasePublicKeyRetriever):
                 logger.warn('Unable to retrieve public key from store',
                             extra={'underlying_error': str(e),
                                    'key repository': retriever.base_url})
-        raise KeyError('Cannot load key from key repositories')
+        raise PublicKeyRetrieverException(
+            'Cannot load key from key repositories')
 
 
 class BasePrivateKeyRetriever(object):
