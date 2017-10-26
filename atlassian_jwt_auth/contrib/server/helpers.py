@@ -20,7 +20,6 @@ def _requires_asap(verifier, auth, parse_jwt_func, build_response,
     except ValueError:
         scheme = b''
 
-    message = None
     if scheme.lower() != b'bearer':
         return build_response('Unauthorized', status=401, headers={
                               'WWW-Authenticate': 'Bearer'})
@@ -30,11 +29,11 @@ def _requires_asap(verifier, auth, parse_jwt_func, build_response,
             verify_issuers_func(asap_claims, issuers)
         asap_claim_holder.asap_claims = asap_claims
     except jwt.exceptions.InvalidIssuerError as e:
-        message = 'Unauthorized: Invalid token issuer'
+        message = 'Forbidden: Invalid token issuer'
+        return build_response(message, status=403)
     except jwt.exceptions.InvalidTokenError as e:
         # Something went wrong with decoding the JWT
         message = 'Unauthorized: Invalid token'
-    if message is not None:
         return build_response(message, status=401, headers={
                               'WWW-Authenticate': 'Bearer'})
     return None

@@ -93,4 +93,4 @@ class FlaskTests(utils.RS256KeyTestMixin, unittest.TestCase):
             'Authorization': b'Bearer ' + token
         })
 
-        self.assertEqual(response.status_code, 401)
+        self.assertEqual(response.status_code, 403)
