@@ -1,5 +1,6 @@
 import logging
 
+import jwt.compat
 import jwt.exceptions
 import requests.exceptions
 
@@ -14,6 +15,14 @@ def _requires_asap(verifier, auth, parse_jwt_func, response_class,
                    issuers=None,
                    ):
     """ Internal code used in various requires_asap decorators. """
+    if isinstance(auth, jwt.compat.text_type):
+        # Per PEP-3333, healways send str so we need to convert if
+        # that is the case to aders must be in ISO-8859-1 or use an RFC-2047
+        # MIME encoding. We don't really care about MIME encoded
+        # headers, but some libraries allow sending bytes (Django tests)
+        # and some (requests) properly support Python 3.
+        auth = auth.encode(encoding='iso-8859-1')
+    auth = auth.split(b' ')
     message, exception = None, None
     if not auth or len(auth) != 2:
         return response_class('Unauthorized', status=401)

@@ -16,7 +16,7 @@ def requires_asap(f):
     @wraps(f)
     def decorated(*args, **kwargs):
         verifier = _get_verifier()
-        auth = request.headers.get('AUTHORIZATION', '').split(' ')
+        auth = request.headers.get('AUTHORIZATION', '')
         err_response = _requires_asap(
             verifier=verifier,
             auth=auth,
