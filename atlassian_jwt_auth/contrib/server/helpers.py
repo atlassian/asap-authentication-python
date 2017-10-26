@@ -22,6 +22,7 @@ def _requires_asap(verifier, auth, parse_jwt_func, build_response,
         # and some (requests) always send str so we need to convert if
         # that is the case to properly support Python 3.
         auth = auth.encode(encoding='iso-8859-1')
+    auth = auth.split(b' ')
     message, exception = None, None
     if not auth or len(auth) != 2 or auth[0].lower() != b'bearer':
         return build_response('Unauthorized', status=401, headers={
