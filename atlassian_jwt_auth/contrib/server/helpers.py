@@ -1,5 +1,6 @@
 import logging
 
+from jwt.compat import text_type
 import jwt.exceptions
 import requests.exceptions
 
@@ -8,15 +9,24 @@ from atlassian_jwt_auth.exceptions import (
 )
 
 
-def _requires_asap(verifier, auth, parse_jwt_func, response_class,
+def _requires_asap(verifier, auth, parse_jwt_func, build_response_func,
                    asap_claim_holder,
                    verify_issuers_func=None,
                    issuers=None,
                    ):
     """ Internal code used in various requires_asap decorators. """
+    if isinstance(auth, text_type):
+        # Per PEP-3333, headers must be in ISO-8859-1 or use an RFC-2047
+        # MIME encoding. We don't really care about MIME encoded
+        # headers, but some libraries allow sending bytes (Django tests)
+        # and some (requests) always send str so we need to convert if
+        # that is the case to properly support Python 3.
+        auth = auth.encode(encoding='iso-8859-1')
+    auth = auth.split(b' ')
     message, exception = None, None
-    if not auth or len(auth) != 2:
-        return response_class('Unauthorized', status=401)
+    if not auth or len(auth) != 2 or auth[0].lower() != b'bearer':
+        return build_response_func('Unauthorized', status=401, headers={
+                              'WWW-Authenticate': 'Bearer'})
     try:
         asap_claims = parse_jwt_func(verifier, auth[1])
         if verify_issuers_func is not None:
@@ -41,5 +51,6 @@ def _requires_asap(verifier, auth, parse_jwt_func, response_class,
         logger = logging.getLogger(__name__)
         logger.error(message,
                      extra={'original_message': str(exception)})
-        return response_class(message, status=401)
+        return build_response_func(message, status=401, headers={
+                              'WWW-Authenticate': 'Bearer'})
     return None

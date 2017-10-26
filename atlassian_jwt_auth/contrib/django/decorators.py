@@ -2,7 +2,6 @@ from functools import wraps
 
 from django.conf import settings
 from django.http.response import HttpResponse
-from django.utils import six
 
 import atlassian_jwt_auth
 from .utils import parse_jwt, verify_issuers
@@ -19,19 +18,11 @@ def requires_asap(issuers=None):
         def requires_asap_wrapper(request, *args, **kwargs):
             verifier = _get_verifier()
             auth_header = request.META.get('HTTP_AUTHORIZATION', b'')
-            # Per PEP-3333, headers must be in ISO-8859-1 or use an RFC-2047
-            # MIME encoding. We don't really care about MIME encoded
-            # headers, but some libraries allow sending bytes (Django tests)
-            # and some (requests) always send str so we need to convert if
-            # that is the case to properly support Python 3.
-            if isinstance(auth_header, six.string_types):
-                auth_header = auth_header.encode(encoding='iso-8859-1')
-            auth = auth_header.split(b' ')
             err_response = _requires_asap(
                 verifier=verifier,
-                auth=auth,
+                auth=auth_header,
                 parse_jwt_func=parse_jwt,
-                response_class=HttpResponse,
+                build_response_func=_build_response,
                 asap_claim_holder=request,
                 verify_issuers_func=verify_issuers,
                 issuers=issuers,
@@ -52,3 +43,14 @@ def _get_verifier():
         base_url=getattr(settings, 'ASAP_PUBLICKEY_REPOSITORY')
     )
     return atlassian_jwt_auth.JWTAuthVerifier(retriever)
+
+
+def _build_response(message, status, headers=None):
+        if headers is None:
+            headers = {}
+
+        response = HttpResponse(message, status=status)
+        for header, value in headers.items():
+            response[header] = value
+
+        return response
