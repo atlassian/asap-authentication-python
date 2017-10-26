@@ -29,7 +29,8 @@ def _requires_asap(verifier, auth, parse_jwt_func, build_response,
 
     message, exception = None, None
     if scheme.lower() != b'bearer':
-        return build_response('Unauthorized', status=401)
+        return build_response('Unauthorized', status=401, headers={
+                              'WWW-Authenticate': 'Bearer'})
     try:
         asap_claims = parse_jwt_func(verifier, auth)
         if verify_issuers_func is not None:
@@ -54,5 +55,6 @@ def _requires_asap(verifier, auth, parse_jwt_func, build_response,
         logger = logging.getLogger(__name__)
         logger.error(message,
                      extra={'original_message': str(exception)})
-        return build_response(message, status=401)
+        return build_response(message, status=401, headers={
+                              'WWW-Authenticate': 'Bearer'})
     return None
