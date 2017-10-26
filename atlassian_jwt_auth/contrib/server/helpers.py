@@ -9,7 +9,7 @@ from atlassian_jwt_auth.exceptions import (
 )
 
 
-def _requires_asap(verifier, auth, parse_jwt_func, build_response,
+def _requires_asap(verifier, auth, parse_jwt_func, build_response_func,
                    asap_claim_holder,
                    verify_issuers_func=None,
                    issuers=None,
@@ -25,7 +25,7 @@ def _requires_asap(verifier, auth, parse_jwt_func, build_response,
     auth = auth.split(b' ')
     message, exception = None, None
     if not auth or len(auth) != 2 or auth[0].lower() != b'bearer':
-        return build_response('Unauthorized', status=401, headers={
+        return build_response_func('Unauthorized', status=401, headers={
                               'WWW-Authenticate': 'Bearer'})
     try:
         asap_claims = parse_jwt_func(verifier, auth[1])
@@ -51,6 +51,6 @@ def _requires_asap(verifier, auth, parse_jwt_func, build_response,
         logger = logging.getLogger(__name__)
         logger.error(message,
                      extra={'original_message': str(exception)})
-        return build_response(message, status=401, headers={
+        return build_response_func(message, status=401, headers={
                               'WWW-Authenticate': 'Bearer'})
     return None

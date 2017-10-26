@@ -21,7 +21,7 @@ def requires_asap(f):
             verifier=verifier,
             auth=auth,
             parse_jwt_func=parse_jwt,
-            build_response=_build_response,
+            build_response_func=_build_response,
             asap_claim_holder=g,
         )
         if err_response is None:
