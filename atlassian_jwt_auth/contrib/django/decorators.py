@@ -16,10 +16,9 @@ def requires_asap(issuers=None):
     def requires_asap_decorator(func):
         @wraps(func)
         def requires_asap_wrapper(request, *args, **kwargs):
-            verifier = _get_verifier()
             auth_header = request.META.get('HTTP_AUTHORIZATION', b'')
             err_response = _requires_asap(
-                verifier=verifier,
+                get_verifier=_get_verifier,
                 auth=auth_header,
                 parse_jwt_func=parse_jwt,
                 build_response=_build_response,

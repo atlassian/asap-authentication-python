@@ -2,7 +2,7 @@ from jwt.compat import text_type
 import jwt.exceptions
 
 
-def _requires_asap(verifier, auth, parse_jwt_func, build_response,
+def _requires_asap(get_verifier, auth, parse_jwt_func, build_response,
                    asap_claim_holder,
                    verify_issuers_func=None,
                    issuers=None,
@@ -23,6 +23,7 @@ def _requires_asap(verifier, auth, parse_jwt_func, build_response,
     if scheme.lower() != b'bearer':
         return build_response('Unauthorized', status=401, headers={
                               'WWW-Authenticate': 'Bearer'})
+    verifier = get_verifier()
     try:
         asap_claims = parse_jwt_func(verifier, auth)
         if verify_issuers_func is not None:
