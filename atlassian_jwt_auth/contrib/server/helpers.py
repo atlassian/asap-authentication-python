@@ -24,7 +24,7 @@ def _requires_asap(verifier, auth, parse_jwt_func, response_class,
         auth = auth.encode(encoding='iso-8859-1')
     auth = auth.split(b' ')
     message, exception = None, None
-    if not auth or len(auth) != 2:
+    if not auth or len(auth) != 2 or auth[0].lower() != b'bearer':
         return response_class('Unauthorized', status=401)
     try:
         asap_claims = parse_jwt_func(verifier, auth[1])
