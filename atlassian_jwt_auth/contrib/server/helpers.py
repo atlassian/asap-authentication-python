@@ -27,7 +27,7 @@ def _requires_asap(verifier, auth, parse_jwt_func, build_response,
         return build_response('Unauthorized', status=401, headers={
                               'WWW-Authenticate': 'Bearer'})
     try:
-        asap_claims = parse_jwt_func(verifier, auth)
+        asap_claims = parse_jwt_func(verifier, auth[1])
         if verify_issuers_func is not None:
             verify_issuers_func(asap_claims, issuers)
         asap_claim_holder.asap_claims = asap_claims
