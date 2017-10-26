@@ -4,7 +4,7 @@ from jwt.compat import text_type
 import jwt.exceptions
 
 
-def _requires_asap(verifier, auth, parse_jwt_func, response_class,
+def _requires_asap(verifier, auth, parse_jwt_func, build_response,
                    asap_claim_holder,
                    verify_issuers_func=None,
                    issuers=None,
@@ -24,7 +24,7 @@ def _requires_asap(verifier, auth, parse_jwt_func, response_class,
 
     message, exception = None, None
     if scheme.lower() != b'bearer':
-        return response_class('Unauthorized', status=401)
+        return build_response('Unauthorized', status=401)
     try:
         asap_claims = parse_jwt_func(verifier, auth)
         if verify_issuers_func is not None:
@@ -41,5 +41,5 @@ def _requires_asap(verifier, auth, parse_jwt_func, response_class,
         logger = logging.getLogger(__name__)
         logger.error(message,
                      extra={'original_message': str(exception)})
-        return response_class(message, status=401)
+        return build_response(message, status=401)
     return None

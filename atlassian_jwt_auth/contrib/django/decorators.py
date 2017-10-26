@@ -22,7 +22,7 @@ def requires_asap(issuers=None):
                 verifier=verifier,
                 auth=auth_header,
                 parse_jwt_func=parse_jwt,
-                response_class=HttpResponse,
+                build_response=_build_response,
                 asap_claim_holder=request,
                 verify_issuers_func=verify_issuers,
                 issuers=issuers,
@@ -43,3 +43,14 @@ def _get_verifier():
         base_url=getattr(settings, 'ASAP_PUBLICKEY_REPOSITORY')
     )
     return atlassian_jwt_auth.JWTAuthVerifier(retriever)
+
+
+def _build_response(message, status, headers=None):
+        if headers is None:
+            headers = {}
+
+        response = HttpResponse(message, status=status)
+        for header, value in headers.items():
+            response[header] = value
+
+        return response
