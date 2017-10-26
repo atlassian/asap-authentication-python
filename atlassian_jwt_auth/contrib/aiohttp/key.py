@@ -1,6 +1,7 @@
 import asyncio
 
 import aiohttp
+import requests
 
 from atlassian_jwt_auth.key import (
     PEM_FILE_TYPE,
@@ -21,8 +22,18 @@ class HTTPSPublicKeyRetriever(_HTTPSPublicKeyRetriever):
         return aiohttp.ClientSession(loop=self.loop)
 
     async def _retrieve(self, url, requests_kwargs):
-        resp = await self._session.get(url, headers={'accept': PEM_FILE_TYPE},
-                                       **requests_kwargs)
-        resp.raise_for_status()
-        self._check_content_type(url, resp.headers['content-type'])
-        return await resp.text()
+        try:
+            resp = await self._session.get(url, headers={'accept':
+                                                         PEM_FILE_TYPE},
+                                           **requests_kwargs)
+        except aiohttp.ClientError as e:
+            raise requests.RequestException(e)
+
+        try:
+            resp.raise_for_status()
+            self._check_content_type(url, resp.headers['content-type'])
+            return await resp.text()
+        except aiohttp.http.HttpProcessingError as e:
+            wrapped_exception = requests.HTTPError(str(e))
+            wrapped_exception.original_exception = e
+            raise wrapped_exception

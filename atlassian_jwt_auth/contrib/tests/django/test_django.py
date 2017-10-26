@@ -119,8 +119,8 @@ class TestAsapDecorator(RS256KeyTestMixin, SimpleTestCase):
             response = self.client.get(reverse('expected'),
                                        HTTP_AUTHORIZATION=b'Bearer ' + token)
 
-        self.assertContains(response, 'Unauthorized: Invalid token issuer',
-                            status_code=401)
+        self.assertContains(response, 'Forbidden: Invalid token issuer',
+                            status_code=403)
 
     def test_request_non_whitelisted_decorated_issuer_is_rejected(self):
         retriever = get_static_retriever_class({
@@ -135,8 +135,8 @@ class TestAsapDecorator(RS256KeyTestMixin, SimpleTestCase):
             response = self.client.get(reverse('unexpected'),
                                        HTTP_AUTHORIZATION=b'Bearer ' + token)
 
-        self.assertContains(response, 'Unauthorized: Invalid token issuer',
-                            status_code=401)
+        self.assertContains(response, 'Forbidden: Invalid token issuer',
+                            status_code=403)
 
     def test_request_non_decorated_issuer_is_rejected(self):
         token = create_token(
@@ -147,8 +147,8 @@ class TestAsapDecorator(RS256KeyTestMixin, SimpleTestCase):
             response = self.client.get(reverse('decorated'),
                                        HTTP_AUTHORIZATION=b'Bearer ' + token)
 
-        self.assertContains(response, 'Unauthorized: Invalid token issuer',
-                            status_code=401)
+        self.assertContains(response, 'Forbidden: Invalid token issuer',
+                            status_code=403)
 
     def test_request_decorated_issuer_is_allowed(self):
         retriever = get_static_retriever_class({

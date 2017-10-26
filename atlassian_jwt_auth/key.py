@@ -93,7 +93,12 @@ class HTTPSPublicKeyRetriever(BasePublicKeyRetriever):
             key_identifier = KeyIdentifier(key_identifier)
 
         url = self.base_url + key_identifier.key_id
-        return self._retrieve(url, requests_kwargs)
+        try:
+            return self._retrieve(url, requests_kwargs)
+        except requests.RequestException as e:
+            wrapped_exception = PublicKeyRetrieverException(str(e))
+            wrapped_exception.original_exception = e
+            raise wrapped_exception
 
     def _retrieve(self, url, requests_kwargs):
         resp = self._session.get(url, headers={'accept': PEM_FILE_TYPE},

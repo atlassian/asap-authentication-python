@@ -15,13 +15,12 @@ def requires_asap(f):
 
     @wraps(f)
     def decorated(*args, **kwargs):
-        verifier = _get_verifier()
-        auth = request.headers.get('AUTHORIZATION', '').split(' ')
+        auth = request.headers.get('AUTHORIZATION', '')
         err_response = _requires_asap(
-            verifier=verifier,
+            get_verifier=_get_verifier,
             auth=auth,
             parse_jwt_func=parse_jwt,
-            response_class=Response,
+            build_response=_build_response,
             asap_claim_holder=g,
         )
         if err_response is None:
@@ -40,3 +39,7 @@ def _get_verifier():
         base_url=current_app.config.get('ASAP_PUBLICKEY_REPOSITORY')
     )
     return atlassian_jwt_auth.JWTAuthVerifier(retriever)
+
+
+def _build_response(message, status, headers=None):
+        return Response(message, status=status, headers=headers)
