@@ -48,7 +48,7 @@ def _requires_asap(verifier, auth, parse_jwt_func, build_response_func,
         exception = e
     if message is not None:
         logger = logging.getLogger(__name__)
-        logger.error(message,
+        logger.debug(message,
                      extra={'original_message': str(exception)})
         if message.startswith('Unauthorized:'):
             kwargs = {
