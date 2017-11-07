@@ -40,7 +40,7 @@ def _requires_asap(verifier, auth, parse_jwt_func, build_response_func,
         message = 'Unauthorized: Invalid key'
         exception = e
     except jwt.exceptions.InvalidIssuerError as e:
-        message = 'Unauthorized: Invalid token issuer'
+        message = 'Forbidden: Invalid token issuer'
         exception = e
     except jwt.exceptions.InvalidTokenError as e:
         # Something went wrong with decoding the JWT
@@ -50,6 +50,12 @@ def _requires_asap(verifier, auth, parse_jwt_func, build_response_func,
         logger = logging.getLogger(__name__)
         logger.error(message,
                      extra={'original_message': str(exception)})
-        return build_response_func(message, status=401, headers={
-                              'WWW-Authenticate': 'Bearer'})
+        if message.startswith('Unauthorized:'):
+            kwargs = {
+                'status': 401,
+                'headers': {'WWW-Authenticate': 'Bearer'},
+            }
+        elif message.startswith('Forbidden:'):
+            kwargs = {'status': 403}
+        return build_response_func(message, **kwargs)
     return None
