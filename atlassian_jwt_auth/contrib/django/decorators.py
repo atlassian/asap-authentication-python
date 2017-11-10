@@ -1,10 +1,9 @@
 from functools import wraps
 
 from django.conf import settings
-from django.http.response import HttpResponse
 
 import atlassian_jwt_auth
-from .utils import parse_jwt, verify_issuers
+from .utils import parse_jwt, verify_issuers, _build_response
 from ..server.helpers import _requires_asap
 
 
@@ -43,14 +42,3 @@ def _get_verifier():
         base_url=getattr(settings, 'ASAP_PUBLICKEY_REPOSITORY')
     )
     return atlassian_jwt_auth.JWTAuthVerifier(retriever)
-
-
-def _build_response(message, status, headers=None):
-        if headers is None:
-            headers = {}
-
-        response = HttpResponse(message, status=status)
-        for header, value in headers.items():
-            response[header] = value
-
-        return response
