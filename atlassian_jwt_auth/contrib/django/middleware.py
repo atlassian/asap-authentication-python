@@ -21,7 +21,9 @@ class ASAPForwardedMiddleware(object):
                              'HTTP_X_ASAP_AUTHORIZATION')
 
     def __call__(self, request):
-        self.process_request(request)
+        early_response = self.process_request(request)
+        if early_response:
+            return early_response
         return self.get_response(request)
 
     def process_request(self, request):
