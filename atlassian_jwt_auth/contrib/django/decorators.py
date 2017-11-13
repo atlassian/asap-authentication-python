@@ -14,8 +14,8 @@ def validate_asap(issuers=None, subjects=None, required=True):
 
     :param list issuers: A list of issuers that are allowed to use the
         endpoint.
-    :param subject: A list of subjects or a function to determine allowed
-        subjects for the endpoint.
+    :param list subjects: A list of subjects that are allowed to use the
+        endpoint.
     :param boolean required: Whether or not to require ASAP on this endpoint.
         Note that requirements will be still be verified if claims are present.
     """
@@ -36,14 +36,7 @@ def validate_asap(issuers=None, subjects=None, required=True):
                     return HttpResponse(message, status=403)
 
                 sub = asap_claims.get('sub')
-                if callable(subjects):
-                    sub_allowed = subjects(sub)
-                elif hasattr(subjects, '__contains__'):
-                    sub_allowed = sub in subjects
-                else:
-                    sub_allowed = True
-
-                if not sub_allowed:
+                if subjects and sub not in subjects:
                     message = 'Forbidden: Invalid token subject'
                     return HttpResponse(message, status=403)
 
