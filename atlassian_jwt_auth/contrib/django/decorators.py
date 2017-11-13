@@ -22,29 +22,30 @@ def validate_asap(issuers=None, subjects=None, required=True):
     def validate_asap_decorator(func):
         @wraps(func)
         def validate_asap_wrapper(request, *args, **kwargs):
-            asap_claims = getattr(request, 'asap_claims', {})
+            asap_claims = getattr(request, 'asap_claims', None)
             if required and not asap_claims:
                 message = 'Unauthorized: Invalid or missing token'
                 response = HttpResponse(message, status=401)
                 response['WWW-Authenticate'] = 'Bearer'
                 return response
 
-            iss = asap_claims.get('iss')
-            if issuers and iss not in issuers:
-                message = 'Forbidden: Invalid token issuer'
-                return HttpResponse(message, status=403)
+            if asap_claims:
+                iss = asap_claims['iss']
+                if issuers and iss not in issuers:
+                    message = 'Forbidden: Invalid token issuer'
+                    return HttpResponse(message, status=403)
 
-            sub = asap_claims.get('sub')
-            if callable(subjects):
-                sub_allowed = subjects(sub)
-            elif hasattr(subjects, '__contains__'):
-                sub_allowed = sub in subjects
-            else:
-                sub_allowed = True
+                sub = asap_claims.get('sub')
+                if callable(subjects):
+                    sub_allowed = subjects(sub)
+                elif hasattr(subjects, '__contains__'):
+                    sub_allowed = sub in subjects
+                else:
+                    sub_allowed = True
 
-            if not sub_allowed:
-                message = 'Forbidden: Invalid token subject'
-                return HttpResponse(message, status=403)
+                if not sub_allowed:
+                    message = 'Forbidden: Invalid token subject'
+                    return HttpResponse(message, status=403)
 
             return func(request, *args, **kwargs)
 
