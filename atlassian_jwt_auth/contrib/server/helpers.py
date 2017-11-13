@@ -32,9 +32,12 @@ def _requires_asap(verifier, auth, parse_jwt_func, build_response_func,
             verify_issuers_func(asap_claims, issuers)
         asap_claim_holder.asap_claims = asap_claims
     except PublicKeyRetrieverException as e:
-        if e.status_code != 404:
+        if e.status_code not in (403, 404):
             # Any error other than "not found" is a problem and should be dealt
-            # with elsewhere
+            # with elsewhere.
+            # Note that we treat 403 like 404 to account for the fact that
+            # a server configured to secure directory listings will return 403
+            # for a missing file to avoid leaking information.
             raise
         # Couldn't find key in key server
         message = 'Unauthorized: Invalid key'
