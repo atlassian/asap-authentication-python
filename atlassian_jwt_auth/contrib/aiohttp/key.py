@@ -2,6 +2,7 @@ import asyncio
 
 import aiohttp
 
+from atlassian_jwt_auth.exceptions import PublicKeyRetrieverException
 from atlassian_jwt_auth.key import (
     PEM_FILE_TYPE,
     HTTPSPublicKeyRetriever as _HTTPSPublicKeyRetriever
@@ -21,8 +22,13 @@ class HTTPSPublicKeyRetriever(_HTTPSPublicKeyRetriever):
         return aiohttp.ClientSession(loop=self.loop)
 
     async def _retrieve(self, url, requests_kwargs):
-        resp = await self._session.get(url, headers={'accept': PEM_FILE_TYPE},
-                                       **requests_kwargs)
-        resp.raise_for_status()
-        self._check_content_type(url, resp.headers['content-type'])
-        return await resp.text()
+        try:
+            resp = await self._session.get(url, headers={'accept':
+                                                         PEM_FILE_TYPE},
+                                           **requests_kwargs)
+            resp.raise_for_status()
+            self._check_content_type(url, resp.headers['content-type'])
+            return await resp.text()
+        except aiohttp.ClientError as e:
+            status_code = getattr(e, 'code', None)
+            raise PublicKeyRetrieverException(e, status_code=status_code)
