@@ -1,5 +1,3 @@
-import warnings
-
 from django.conf import settings
 
 import atlassian_jwt_auth
@@ -17,9 +15,6 @@ class ASAPForwardedMiddleware(object):
     """
 
     def __init__(self, get_response=None):
-        warnings.warn("ASAPForwardedMiddleware is deprecated; use "
-                      "ASAPMiddleware instead", DeprecationWarning)
-
         self.get_response = get_response
 
         # Rely on this header to tell us if a request has been forwarded
@@ -76,9 +71,7 @@ class ASAPMiddleware(ASAPForwardedMiddleware):
     """
 
     def __init__(self, get_response=None):
-        with warnings.catch_warnings():
-            super(ASAPMiddleware, self).__init__(get_response=get_response)
-
+        super(ASAPMiddleware, self).__init__(get_response=get_response)
         self.required = getattr(settings, 'ASAP_REQUIRED', True)
         self.client_auth = getattr(settings, 'ASAP_CLIENT_AUTH', False)
 
