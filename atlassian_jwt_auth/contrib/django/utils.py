@@ -36,11 +36,11 @@ def verify_issuers(asap_claims, issuers=None):
 
 
 def _build_response(message, status, headers=None):
-        if headers is None:
-            headers = {}
+    if headers is None:
+        headers = {}
 
-        response = HttpResponse(message, status=status)
-        for header, value in headers.items():
-            response[header] = value
+    response = HttpResponse(message, status=status)
+    for header, value in headers.items():
+        response[header] = value
 
-        return response
+    return response

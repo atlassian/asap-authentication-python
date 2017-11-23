@@ -6,6 +6,7 @@ class _WrappedException(object):
     they're mutually incompatible. This is a simple, portable approach that
     should be sufficient for most use cases.
     """
+
     def __init__(self, *args, **kwargs):
         if args:
             orig = args[0]
@@ -22,6 +23,7 @@ class _WithStatus(object):
     This should allow inspecting HTTP-related errors without having to know
     details about the HTTP client library.
     """
+
     def __init__(self, *args, **kwargs):
         status_code = kwargs.pop('status_code', None)
         super(_WithStatus, self).__init__(*args, **kwargs)
