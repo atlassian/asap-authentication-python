@@ -1,6 +1,16 @@
 CHANGES
 =======
 
+3.2.0
+-----
+
+* Sem-Ver: feature Cleanup responses from requires_asap
+* Sem-Ver: bugfix Check authorization scheme in requires_asap and also send a WWW-Authenticate header where appropriate
+* Sem-Ver: bugfix Clean up the django and flask requires_asap decorators by sharing their code
+* Sem-Ver: bugfix HTTPSMultiRepositoryPublicKeyRetriever should raise PublicKeyRetrieverException and not KeyError when a key is not found
+* Sem-Ver: bugfix Improvements to the readme file
+* Sem-Ver: bugfix Make _seen_jti a ringbuffer and increase its capacity to 1000
+
 3.1.0
 -----
 
