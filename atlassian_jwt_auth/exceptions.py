@@ -7,13 +7,16 @@ class _WrappedException(object):
     should be sufficient for most use cases.
     """
     def __init__(self, *args, **kwargs):
+        wrapped_args = [arg for arg in args]
+
         if args:
             orig = args[0]
             if isinstance(orig, Exception):
-                args[0] = str(orig)
+
+                wrapped_args[0] = str(orig)
                 self.original_exception = getattr(orig, 'original_exception',
                                                   orig)
-        super(_WrappedException, self).__init__(*args, **kwargs)
+        super(_WrappedException, self).__init__(*wrapped_args, **kwargs)
 
 
 class _WithStatus(object):
