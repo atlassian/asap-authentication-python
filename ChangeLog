@@ -1,6 +1,11 @@
 CHANGES
 =======
 
+3.2.2
+-----
+
+* Sem-Ver: bugfix Fix tuple assignment in wrapped exception mechanism.
+
 3.2.1
 -----
 
