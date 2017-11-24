@@ -78,6 +78,19 @@ class BaseHTTPSPublicKeyRetrieverTest(object):
         with self.assertRaises(ValueError):
             retriever.retrieve('example/eg')
 
+    @mock.patch.object(requests.Session, 'get',
+                       side_effect=requests.exceptions.HTTPError(mock.Mock(response=mock.Mock(status_code=403)),
+                                                                 'forbidden'))
+    def test_retrieve_fails_with_forbidden_error(self, mock_get_method):
+        """ tests that the retrieve method fails when the response is an
+        403 forbidden error.
+        """
+        _setup_mock_response_for_retriever(
+            mock_get_method, self._public_key_pem)
+        retriever = self.create_retriever(self.base_url)
+        with self.assertRaises(ValueError):
+            retriever.retrieve('example/eg')
+
 
 class BaseHTTPSMultiRepositoryPublicKeyRetrieverTest(
         BaseHTTPSPublicKeyRetrieverTest):
