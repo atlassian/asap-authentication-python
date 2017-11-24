@@ -79,8 +79,9 @@ class BaseHTTPSPublicKeyRetrieverTest(object):
             retriever.retrieve('example/eg')
 
     @mock.patch.object(requests.Session, 'get',
-                       side_effect=requests.exceptions.HTTPError(mock.Mock(response=mock.Mock(status_code=403)),
-                                                                 'forbidden'))
+                       side_effect=requests.exceptions.HTTPError(
+                           mock.Mock(response=mock.Mock(status_code=403)),
+                           'forbidden'))
     def test_retrieve_fails_with_forbidden_error(self, mock_get_method):
         """ tests that the retrieve method fails when the response is an
         403 forbidden error.
