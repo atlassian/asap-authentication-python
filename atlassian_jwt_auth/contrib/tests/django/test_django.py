@@ -19,10 +19,7 @@ def create_token(issuer, audience, key_id, private_key):
     return signer.generate_jwt(audience)
 
 
-@modify_settings(MIDDLEWARE={
-    'prepend': 'atlassian_jwt_auth.contrib.django.middleware.ASAPMiddleware',
-})
-class TestAsapMiddleware(RS256KeyTestMixin, SimpleTestCase):
+class DjangoAsapMixin(object):
 
     @classmethod
     def setUpClass(cls):
@@ -31,15 +28,15 @@ class TestAsapMiddleware(RS256KeyTestMixin, SimpleTestCase):
             'atlassian_jwt_auth.contrib.tests.django.settings')
 
         django.setup()
-        super(TestAsapMiddleware, cls).setUpClass()
+        super(DjangoAsapMixin, cls).setUpClass()
 
     @classmethod
     def tearDownClass(cls):
-        super(TestAsapMiddleware, cls).tearDownClass()
+        super(DjangoAsapMixin, cls).tearDownClass()
         del os.environ['DJANGO_SETTINGS_MODULE']
 
     def setUp(self):
-        super(TestAsapMiddleware, self).setUp()
+        super(DjangoAsapMixin, self).setUp()
         self._private_key_pem = self.get_new_private_key_in_pem_format()
         self._public_key_pem = utils.get_public_key_pem_for_private_key_pem(
             self._private_key_pem
@@ -52,6 +49,12 @@ class TestAsapMiddleware(RS256KeyTestMixin, SimpleTestCase):
         self.test_settings = {
             'ASAP_KEY_RETRIEVER_CLASS': self.retriever
         }
+
+
+@modify_settings(MIDDLEWARE={
+    'prepend': 'atlassian_jwt_auth.contrib.django.middleware.ASAPMiddleware',
+})
+class TestAsapMiddleware(DjangoAsapMixin, RS256KeyTestMixin, SimpleTestCase):
 
     def check_response(self,
                        view_name,
@@ -137,35 +140,7 @@ class TestAsapMiddleware(RS256KeyTestMixin, SimpleTestCase):
         self.check_response('unneeded', 'two')
 
 
-class TestAsapDecorator(RS256KeyTestMixin, SimpleTestCase):
-
-    @classmethod
-    def setUpClass(cls):
-        os.environ.setdefault(
-            'DJANGO_SETTINGS_MODULE',
-            'atlassian_jwt_auth.contrib.tests.django.settings')
-        django.setup()
-        super(TestAsapDecorator, cls).setUpClass()
-
-    @classmethod
-    def tearDownClass(cls):
-        super(TestAsapDecorator, cls).tearDownClass()
-        del os.environ['DJANGO_SETTINGS_MODULE']
-
-    def setUp(self):
-        super(TestAsapDecorator, self).setUp()
-        self._private_key_pem = self.get_new_private_key_in_pem_format()
-        self._public_key_pem = utils.get_public_key_pem_for_private_key_pem(
-            self._private_key_pem
-        )
-
-        self.retriever = get_static_retriever_class({
-            'client-app/key01': self._public_key_pem
-        })
-
-        self.test_settings = {
-            'ASAP_KEY_RETRIEVER_CLASS': self.retriever
-        }
+class TestAsapDecorator(DjangoAsapMixin, RS256KeyTestMixin, SimpleTestCase):
 
     def get(self, url, token, settings=None):
         if settings is None:
