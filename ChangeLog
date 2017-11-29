@@ -1,6 +1,11 @@
 CHANGES
 =======
 
+3.3.0
+-----
+
+* Sem-Ver: feature Add better Django ASAP middleware
+
 3.2.2
 -----
 
