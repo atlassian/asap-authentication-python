@@ -35,5 +35,10 @@ def unneeded_view(request):
 
 
 @validate_asap(issuers=['whitelist'])
-def restricted_view(request):
+def restricted_issuer_view(request):
     return HttpResponse('three')
+
+
+@validate_asap(subjects=['client-app'])
+def restricted_subject_view(request):
+    return HttpResponse('four')

@@ -11,5 +11,8 @@ urlpatterns = [
 
     url(r'^asap/needed$', views.needed_view, name='needed'),
     url(r'^asap/unneeded$', views.unneeded_view, name='unneeded'),
-    url(r'^asap/restricted$', views.restricted_view, name='restricted'),
+    url(r'^asap/restricted_issuer$', views.restricted_issuer_view,
+        name='restricted_issuer'),
+    url(r'^asap/restricted_subject$', views.restricted_subject_view,
+        name='restricted_subject'),
 ]
