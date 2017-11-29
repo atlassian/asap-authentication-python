@@ -43,4 +43,4 @@ def _get_verifier():
 
 
 def _build_response(message, status, headers=None):
-        return Response(message, status=status, headers=headers)
+    return Response(message, status=status, headers=headers)

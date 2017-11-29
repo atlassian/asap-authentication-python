@@ -1,6 +1,7 @@
 import logging
 
 from django.conf import settings
+from django.http.response import HttpResponse
 from jwt.exceptions import InvalidIssuerError
 
 
@@ -32,3 +33,14 @@ def verify_issuers(asap_claims, issuers=None):
         logger.error(message, extra={'iss': claim_iss})
 
         raise InvalidIssuerError(message)
+
+
+def _build_response(message, status, headers=None):
+    if headers is None:
+        headers = {}
+
+    response = HttpResponse(message, status=status)
+    for header, value in headers.items():
+        response[header] = value
+
+    return response
