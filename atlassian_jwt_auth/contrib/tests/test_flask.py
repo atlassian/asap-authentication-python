@@ -48,33 +48,30 @@ class FlaskTests(utils.RS256KeyTestMixin, unittest.TestCase):
         })
         self.app.config['ASAP_KEY_RETRIEVER_CLASS'] = retriever
 
+    def send_request(self, token):
+        """ returns the response of sending a request containing the given
+            token sent in the Authorization header.
+        """
+        return self.client.get('/', headers={
+            'Authorization': b'Bearer ' + token
+        })
+
     def test_request_with_valid_token_is_allowed(self):
         token = create_token(
             'client-app', 'server-app',
             'client-app/key01', self._private_key_pem
         )
-        response = self.client.get('/', headers={
-            'Authorization': b'Bearer ' + token
-        })
-
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(self.send_request(token).status_code, 200)
 
     def test_request_with_invalid_audience_is_rejected(self):
         token = create_token(
             'client-app', 'invalid-audience',
             'client-app/key01', self._private_key_pem
         )
-        response = self.client.get('/', headers={
-            'Authorization': b'Bearer ' + token
-        })
-
-        self.assertEqual(response.status_code, 401)
+        self.assertEqual(self.send_request(token).status_code, 401)
 
     def test_request_with_invalid_token_is_rejected(self):
-        response = self.client.get('/', headers={
-            'Authorization': b'Bearer notavalidtoken'
-        })
-
+        response = self.send_request(b'notavalidtoken')
         self.assertEqual(response.status_code, 401)
 
     def test_request_with_invalid_issuer_is_rejected(self):
@@ -84,13 +81,8 @@ class FlaskTests(utils.RS256KeyTestMixin, unittest.TestCase):
                 'another-client/key01': self._public_key_pem
             })
         )
-
         token = create_token(
             'another-client', 'server-app',
             'another-client/key01', self._private_key_pem
         )
-        response = self.client.get('/', headers={
-            'Authorization': b'Bearer ' + token
-        })
-
-        self.assertEqual(response.status_code, 403)
+        self.assertEqual(self.send_request(token).status_code, 403)
