@@ -26,22 +26,25 @@ def _requires_asap(verifier, auth, parse_jwt_func, build_response_func,
     if not auth or len(auth) != 2 or auth[0].lower() != b'bearer':
         return build_response_func('Unauthorized', status=401, headers={
             'WWW-Authenticate': 'Bearer'})
+    logger = logging.getLogger(__name__)
     try:
         asap_claims = parse_jwt_func(verifier, auth[1])
         if verify_issuers_func is not None:
             verify_issuers_func(asap_claims, issuers)
         asap_claim_holder.asap_claims = asap_claims
     except PublicKeyRetrieverException as e:
+        exception = e
         if e.status_code not in (403, 404):
             # Any error other than "not found" is a problem and should be dealt
             # with elsewhere.
             # Note that we treat 403 like 404 to account for the fact that
             # a server configured to secure directory listings will return 403
             # for a missing file to avoid leaking information.
-            raise
-        # Couldn't find key in key server
-        message = 'Unauthorized: Invalid key'
-        exception = e
+            logger.exception('Unexpected error when retrieving public key.')
+            message = 'Unauthorized: Backend server connection error'
+        else:
+            # Couldn't find key in key server
+            message = 'Unauthorized: Invalid key'
     except jwt.exceptions.InvalidIssuerError as e:
         message = 'Forbidden: Invalid token issuer'
         exception = e
@@ -50,7 +53,6 @@ def _requires_asap(verifier, auth, parse_jwt_func, build_response_func,
         message = 'Unauthorized: Invalid token'
         exception = e
     if message is not None:
-        logger = logging.getLogger(__name__)
         logger.debug(message,
                      extra={'original_message': str(exception)})
         if message.startswith('Unauthorized:'):
