@@ -1,16 +1,49 @@
-import logging
 from functools import wraps
 
 from django.conf import settings
 from django.http.response import HttpResponse
-from django.utils import six
-from jwt.exceptions import (InvalidIssuerError, InvalidTokenError)
-from requests.exceptions import RequestException
 
 import atlassian_jwt_auth
-from atlassian_jwt_auth.exceptions import (PrivateKeyRetrieverException,
-                                           PublicKeyRetrieverException)
-from .utils import parse_jwt, verify_issuers
+from .utils import parse_jwt, verify_issuers, _build_response
+from ..server.helpers import _requires_asap
+
+
+def validate_asap(issuers=None, subjects=None, required=True):
+    """Decorator to allow endpoint-specific ASAP authorization, assuming ASAP
+    authentication has already occurred.
+
+    :param list issuers: A list of issuers that are allowed to use the
+        endpoint.
+    :param list subjects: A list of subjects that are allowed to use the
+        endpoint.
+    :param boolean required: Whether or not to require ASAP on this endpoint.
+        Note that requirements will be still be verified if claims are present.
+    """
+    def validate_asap_decorator(func):
+        @wraps(func)
+        def validate_asap_wrapper(request, *args, **kwargs):
+            asap_claims = getattr(request, 'asap_claims', None)
+            if required and not asap_claims:
+                message = 'Unauthorized: Invalid or missing token'
+                response = HttpResponse(message, status=401)
+                response['WWW-Authenticate'] = 'Bearer'
+                return response
+
+            if asap_claims:
+                iss = asap_claims['iss']
+                if issuers and iss not in issuers:
+                    message = 'Forbidden: Invalid token issuer'
+                    return HttpResponse(message, status=403)
+
+                sub = asap_claims.get('sub')
+                if subjects and sub not in subjects:
+                    message = 'Forbidden: Invalid token subject'
+                    return HttpResponse(message, status=403)
+
+            return func(request, *args, **kwargs)
+
+        return validate_asap_wrapper
+    return validate_asap_decorator
 
 
 def requires_asap(issuers=None):
@@ -23,49 +56,18 @@ def requires_asap(issuers=None):
         def requires_asap_wrapper(request, *args, **kwargs):
             verifier = _get_verifier()
             auth_header = request.META.get('HTTP_AUTHORIZATION', b'')
-            # Per PEP-3333, headers must be in ISO-8859-1 or use an RFC-2047
-            # MIME encoding. We don't really care about MIME encoded
-            # headers, but some libraries allow sending bytes (Django tests)
-            # and some (requests) always send str so we need to convert if
-            # that is the case to properly support Python 3.
-            if isinstance(auth_header, six.string_types):
-                auth_header = auth_header.encode(encoding='iso-8859-1')
-            auth = auth_header.split(b' ')
-            if not auth or len(auth) != 2:
-                return HttpResponse('Unauthorized', status=401)
-
-            message = None
-            exception = None
-            try:
-                asap_claims = parse_jwt(verifier, auth[1])
-                verify_issuers(asap_claims, issuers)
-                request.asap_claims = asap_claims
+            err_response = _requires_asap(
+                verifier=verifier,
+                auth=auth_header,
+                parse_jwt_func=parse_jwt,
+                build_response_func=_build_response,
+                asap_claim_holder=request,
+                verify_issuers_func=verify_issuers,
+                issuers=issuers,
+            )
+            if err_response is None:
                 return func(request, *args, **kwargs)
-            except RequestException as e:
-                # Error communicating to get key
-                message = 'Unauthorized: Communications error retrieving key'
-                exception = e
-            except PrivateKeyRetrieverException as e:
-                # Error parsing or getting private key
-                message = 'Unauthorized: Unable to retrieve private key'
-                exception = e
-            except PublicKeyRetrieverException as e:
-                # Error parsing or getting public key
-                message = 'Unauthorized: Unable to retrieve public key'
-                exception = e
-            except InvalidIssuerError as e:
-                message = 'Unauthorized: Invalid token issuer'
-                exception = e
-            except InvalidTokenError as e:
-                # Something went wrong with decoding the JWT
-                message = 'Unauthorized: Invalid token'
-                exception = e
-            if message is not None:
-                logger = logging.getLogger(__name__)
-                logger.error(message,
-                             extra={'original_message': str(exception)})
-
-                return HttpResponse(message, status=401)
+            return err_response
 
         return requires_asap_wrapper
     return requires_asap_decorator

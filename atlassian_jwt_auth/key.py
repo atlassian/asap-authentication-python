@@ -93,7 +93,14 @@ class HTTPSPublicKeyRetriever(BasePublicKeyRetriever):
             key_identifier = KeyIdentifier(key_identifier)
 
         url = self.base_url + key_identifier.key_id
-        return self._retrieve(url, requests_kwargs)
+        try:
+            return self._retrieve(url, requests_kwargs)
+        except requests.RequestException as e:
+            try:
+                status_code = e.response.status_code
+            except AttributeError:
+                status_code = None
+            raise PublicKeyRetrieverException(e, status_code=status_code)
 
     def _retrieve(self, url, requests_kwargs):
         resp = self._session.get(url, headers={'accept': PEM_FILE_TYPE},
@@ -134,7 +141,8 @@ class HTTPSMultiRepositoryPublicKeyRetriever(BasePublicKeyRetriever):
                 logger.warn('Unable to retrieve public key from store',
                             extra={'underlying_error': str(e),
                                    'key repository': retriever.base_url})
-        raise KeyError('Cannot load key from key repositories')
+        raise PublicKeyRetrieverException(
+            'Cannot load key from key repositories')
 
 
 class BasePrivateKeyRetriever(object):
