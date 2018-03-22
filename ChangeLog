@@ -1,6 +1,13 @@
 CHANGES
 =======
 
+3.3.1
+-----
+
+* Sem-Ver: bugfix Use the raw string notation when specifying the key identifier regex
+* Sem-Ver: bugfix upgrade cryptography from using a version >= 2.1.3 < 2.2.0 to use a version >= 2.2.1 and < 2.3.0
+* Sem-Ver: bugfix upgrade CacheControl from version 0.12.3 to 0.12.4
+
 3.3.0
 -----
 
