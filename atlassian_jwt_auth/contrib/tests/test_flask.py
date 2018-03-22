@@ -1,11 +1,13 @@
 import unittest
 
 from flask import Flask
+import mock
 
 import atlassian_jwt_auth
 from atlassian_jwt_auth.tests import utils
 from atlassian_jwt_auth.contrib.flask_app import requires_asap
 from atlassian_jwt_auth.contrib.tests.utils import get_static_retriever_class
+from atlassian_jwt_auth.exceptions import PublicKeyRetrieverException
 
 
 def get_app():
@@ -86,3 +88,16 @@ class FlaskTests(utils.RS256KeyTestMixin, unittest.TestCase):
             'another-client/key01', self._private_key_pem
         )
         self.assertEqual(self.send_request(token).status_code, 403)
+
+    def test_retrieval_error_without_status_code(self):
+        """ test that 401 is returned when an error retrieving a public key
+            occurs.
+        """
+        class_of_mock_retriever = mock.Mock()
+        mock_retriever = mock.Mock()
+        class_of_mock_retriever.return_value = mock_retriever
+        mock_retriever.retrieve.side_effect = PublicKeyRetrieverException()
+        self.app.config['ASAP_KEY_RETRIEVER_CLASS'] = class_of_mock_retriever
+        token = create_token('client-app', 'server-app',
+                             'client-app/key01', self._private_key_pem)
+        self.assertEqual(self.send_request(token).status_code, 401)

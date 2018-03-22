@@ -7,9 +7,11 @@ try:
     from django.urls import reverse
 except ImportError:
     from django.core.urlresolvers import reverse
+import mock
 
 from atlassian_jwt_auth import create_signer
 from atlassian_jwt_auth.contrib.tests.utils import get_static_retriever_class
+from atlassian_jwt_auth.exceptions import PublicKeyRetrieverException
 from atlassian_jwt_auth.tests import utils
 from atlassian_jwt_auth.tests.utils import RS256KeyTestMixin
 
@@ -278,3 +280,23 @@ class TestAsapDecorator(DjangoAsapMixin, RS256KeyTestMixin, SimpleTestCase):
                                        HTTP_AUTHORIZATION=b'Bearer ' + token)
 
         self.assertContains(response, 'Any settings issuer is allowed.')
+
+    def test_retrieval_error_without_status_code(self):
+        """ test that 401 is returned when an error retrieving a public key
+            occurs.
+        """
+        expected_message = 'Unauthorized: Backend server connection error'
+        class_of_mock_retriever = mock.Mock()
+        mock_retriever = mock.Mock()
+        class_of_mock_retriever.return_value = mock_retriever
+        mock_retriever.retrieve.side_effect = PublicKeyRetrieverException()
+        token = create_token(
+            issuer='whitelist', audience='server-app',
+            key_id='whitelist/key01', private_key=self._private_key_pem
+        )
+        with override_settings(
+                ASAP_KEY_RETRIEVER_CLASS=class_of_mock_retriever):
+            response = self.client.get(reverse('settings'),
+                                       HTTP_AUTHORIZATION=b'Bearer ' + token)
+        self.assertContains(response, expected_message,
+                            status_code=401)
