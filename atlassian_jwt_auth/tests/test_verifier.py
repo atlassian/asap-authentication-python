@@ -101,8 +101,7 @@ class BaseJWTAuthVerifierTest(object):
         with self.assertRaisesRegexp(ValueError, 'has already been used'):
             verifier.verify_jwt(a_jwt, self._example_aud)
 
-    def test_verify_jwt_with_jwt_with_already_seen_jti_not_checking_unique(
-            self):
+    def test_verify_jwt_with_already_seen_jti_with_uniqueness_disabled(self):
         """ tests that verify_jwt accepts a jwt if the jti
             has already been seen and the verifier has been set
             to not check the uniqueness of jti.
