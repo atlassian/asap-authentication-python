@@ -16,6 +16,8 @@ class JWTAuthVerifier(object):
         self._seen_jti = OrderedDict()
         self._subject_should_match_issuer = kwargs.get(
             'subject_should_match_issuer', True)
+        self._check_jti_uniqueness = kwargs.get(
+            'check_jti_uniqueness', True)
 
     def verify_jwt(self, a_jwt, audience, leeway=0, **requests_kwargs):
         """Verify if the token is correct
@@ -69,12 +71,16 @@ class JWTAuthVerifier(object):
             _msg = ("Claims validity, '%s', exceeds the maximum 1 hour." %
                     (_exp - _iat))
             raise ValueError(_msg)
-
         _jti = claims['jti']
-        if _jti in self._seen_jti:
-            raise ValueError("The jti, '%s', has already been used." % _jti)
+        if self._check_jti_uniqueness:
+            self._check_jti(_jti)
+        return claims
+
+    def _check_jti(self, jti):
+        """Checks that the given jti has not been already been used."""
+        if jti in self._seen_jti:
+            raise ValueError("The jti, '%s', has already been used." % jti)
         else:
-            self._seen_jti[_jti] = None
+            self._seen_jti[jti] = None
             while len(self._seen_jti) > 1000:
                 self._seen_jti.popitem(last=False)
-        return claims
