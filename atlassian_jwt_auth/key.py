@@ -38,7 +38,7 @@ class KeyIdentifier(object):
 
 def validate_key_identifier(identifier):
     """ returns a validated key identifier. """
-    regex = re.compile('^[\w.\-\+/]*$')
+    regex = re.compile(r'^[\w.\-\+/]*$')
     _error_msg = 'Invalid key identifier %s' % identifier
     if not identifier:
         raise KeyIdentifierException(_error_msg)
