@@ -46,7 +46,7 @@ def validate_asap(issuers=None, subjects=None, required=True):
     return validate_asap_decorator
 
 
-def requires_asap(issuers=None, subject_should_match_issuer=True):
+def requires_asap(issuers=None, subject_should_match_issuer=None):
     """Decorator for Django endpoints to require ASAP
 
     :param list issuers: *required The 'iss' claims that this endpoint is from.
@@ -73,12 +73,15 @@ def requires_asap(issuers=None, subject_should_match_issuer=True):
     return requires_asap_decorator
 
 
-def _get_verifier(subject_should_match_issuer=True):
+def _get_verifier(subject_should_match_issuer=None):
     """Return a verifier for ASAP JWT tokens based on settings"""
     retriever_cls = getattr(settings, 'ASAP_KEY_RETRIEVER_CLASS',
                             atlassian_jwt_auth.HTTPSPublicKeyRetriever)
     retriever = retriever_cls(
         base_url=getattr(settings, 'ASAP_PUBLICKEY_REPOSITORY')
     )
+    if subject_should_match_issuer is None:
+        subject_should_match_issuer = getattr(
+            settings, 'ASAP_SUBJECT_SHOULD_MATCH_ISSUER', True)
     return atlassian_jwt_auth.JWTAuthVerifier(
         retriever, subject_should_match_issuer=subject_should_match_issuer)
