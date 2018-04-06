@@ -82,6 +82,8 @@ def _get_verifier(subject_should_match_issuer=None):
     )
     if subject_should_match_issuer is None:
         subject_should_match_issuer = getattr(
-            settings, 'ASAP_SUBJECT_SHOULD_MATCH_ISSUER', True)
-    return atlassian_jwt_auth.JWTAuthVerifier(
-        retriever, subject_should_match_issuer=subject_should_match_issuer)
+            settings, 'ASAP_SUBJECT_SHOULD_MATCH_ISSUER', None)
+    v_kwargs = {}
+    if subject_should_match_issuer is not None:
+        v_kwargs['subject_should_match_issuer'] = subject_should_match_issuer
+    return atlassian_jwt_auth.JWTAuthVerifier(retriever, **v_kwargs)
