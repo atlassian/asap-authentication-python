@@ -1,6 +1,13 @@
 CHANGES
 =======
 
+3.4.0
+-----
+
+* Sem-Ver: feature Support specifying if the subject should match the issue in the Django ASAPForwardedMiddleware
+* Sem-Ver: feature Support specifying if the subject should match the issue in the Django requires_asap decorator
+* Sem-Ver: feature Add support for specifying the subject for JWTAuthSigner to use when generating claims
+
 3.3.1
 -----
 
