@@ -14,8 +14,8 @@ from atlassian_jwt_auth.tests import utils
 from atlassian_jwt_auth.tests.utils import RS256KeyTestMixin
 
 
-def create_token(issuer, audience, key_id, private_key):
-    signer = create_signer(issuer, key_id, private_key)
+def create_token(issuer, audience, key_id, private_key, subject=None):
+    signer = create_signer(issuer, key_id, private_key, subject=subject)
     return signer.generate_jwt(audience)
 
 
@@ -278,3 +278,31 @@ class TestAsapDecorator(DjangoAsapMixin, RS256KeyTestMixin, SimpleTestCase):
                                        HTTP_AUTHORIZATION=b'Bearer ' + token)
 
         self.assertContains(response, 'Any settings issuer is allowed.')
+
+    def test_request_subject_does_not_need_to_match_issuer(self):
+        token = create_token(
+            issuer='client-app', audience='server-app',
+            key_id='client-app/key01', private_key=self._private_key_pem,
+            subject='not-client-app',
+        )
+        with override_settings(**self.test_settings):
+            response = self.client.get(
+                reverse('subject_does_not_need_to_match_issuer'),
+                HTTP_AUTHORIZATION=b'Bearer ' + token)
+
+        self.assertContains(response, 'Subject does not need to match issuer.')
+
+    def test_request_subject_does_not_need_to_match_issuer_from_settings(self):
+        token = create_token(
+            issuer='client-app', audience='server-app',
+            key_id='client-app/key01', private_key=self._private_key_pem,
+            subject='not-client-app',
+        )
+        with override_settings(**dict(
+                self.test_settings, ASAP_SUBJECT_SHOULD_MATCH_ISSUER=False)):
+            response = self.client.get(
+                reverse('subject_does_not_need_to_match_issuer_from_settings'),
+                HTTP_AUTHORIZATION=b'Bearer ' + token)
+
+        self.assertContains(
+            response, 'Subject does not need to match issuer (settings).')
