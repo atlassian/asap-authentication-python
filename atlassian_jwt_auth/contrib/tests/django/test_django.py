@@ -14,8 +14,8 @@ from atlassian_jwt_auth.tests import utils
 from atlassian_jwt_auth.tests.utils import RS256KeyTestMixin
 
 
-def create_token(issuer, audience, key_id, private_key):
-    signer = create_signer(issuer, key_id, private_key)
+def create_token(issuer, audience, key_id, private_key, subject=None):
+    signer = create_signer(issuer, key_id, private_key, subject=subject)
     return signer.generate_jwt(audience)
 
 
@@ -63,6 +63,7 @@ class TestAsapMiddleware(DjangoAsapMixin, RS256KeyTestMixin, SimpleTestCase):
                        issuer='client-app',
                        audience='server-app',
                        key_id='client-app/key01',
+                       subject=None,
                        private_key=None,
                        token=None,
                        authorization=None,
@@ -72,7 +73,8 @@ class TestAsapMiddleware(DjangoAsapMixin, RS256KeyTestMixin, SimpleTestCase):
                 if private_key is None:
                     private_key = self._private_key_pem
                 token = create_token(issuer=issuer, audience=audience,
-                                     key_id=key_id, private_key=private_key)
+                                     key_id=key_id, private_key=private_key,
+                                     subject=subject)
             authorization = b'Bearer ' + token
 
         test_settings = self.test_settings.copy()
@@ -149,6 +151,10 @@ class TestAsapMiddleware(DjangoAsapMixin, RS256KeyTestMixin, SimpleTestCase):
 
     def test_request_using_settings_only_is_allowed(self):
         self.check_response('unneeded', 'two')
+
+    def test_request_subject_does_not_need_to_match_issuer_from_settings(self):
+        self.test_settings['ASAP_SUBJECT_SHOULD_MATCH_ISSUER'] = False
+        self.check_response('needed', 'one', 200, subject='different_than_is')
 
 
 class TestAsapDecorator(DjangoAsapMixin, RS256KeyTestMixin, SimpleTestCase):
@@ -278,3 +284,31 @@ class TestAsapDecorator(DjangoAsapMixin, RS256KeyTestMixin, SimpleTestCase):
                                        HTTP_AUTHORIZATION=b'Bearer ' + token)
 
         self.assertContains(response, 'Any settings issuer is allowed.')
+
+    def test_request_subject_does_not_need_to_match_issuer(self):
+        token = create_token(
+            issuer='client-app', audience='server-app',
+            key_id='client-app/key01', private_key=self._private_key_pem,
+            subject='not-client-app',
+        )
+        with override_settings(**self.test_settings):
+            response = self.client.get(
+                reverse('subject_does_not_need_to_match_issuer'),
+                HTTP_AUTHORIZATION=b'Bearer ' + token)
+
+        self.assertContains(response, 'Subject does not need to match issuer.')
+
+    def test_request_subject_does_not_need_to_match_issuer_from_settings(self):
+        token = create_token(
+            issuer='client-app', audience='server-app',
+            key_id='client-app/key01', private_key=self._private_key_pem,
+            subject='not-client-app',
+        )
+        with override_settings(**dict(
+                self.test_settings, ASAP_SUBJECT_SHOULD_MATCH_ISSUER=False)):
+            response = self.client.get(
+                reverse('subject_does_not_need_to_match_issuer_from_settings'),
+                HTTP_AUTHORIZATION=b'Bearer ' + token)
+
+        self.assertContains(
+            response, 'Subject does not need to match issuer (settings).')
