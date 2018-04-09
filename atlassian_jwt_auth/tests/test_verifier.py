@@ -30,9 +30,9 @@ class BaseJWTAuthVerifierTest(object):
         m_public_key_ret.retrieve.return_value = pub_key_pem.decode()
         return m_public_key_ret
 
-    def _setup_jwt_auth_verifier(self, pub_key_pem):
+    def _setup_jwt_auth_verifier(self, pub_key_pem, **kwargs):
         m_public_key_ret = self._setup_mock_public_key_retriever(pub_key_pem)
-        return atlassian_jwt_auth.JWTAuthVerifier(m_public_key_ret)
+        return atlassian_jwt_auth.JWTAuthVerifier(m_public_key_ret, **kwargs)
 
     def test_verify_jwt_with_valid_jwt(self):
         """ test that verify_jwt verifies a valid jwt. """
@@ -100,6 +100,24 @@ class BaseJWTAuthVerifierTest(object):
             self._example_aud))
         with self.assertRaisesRegexp(ValueError, 'has already been used'):
             verifier.verify_jwt(a_jwt, self._example_aud)
+
+    def test_verify_jwt_subject_should_match_issuer(self):
+        verifier = self._setup_jwt_auth_verifier(
+            self._public_key_pem, subject_should_match_issuer=True)
+        a_jwt = self._jwt_auth_signer.generate_jwt(
+            self._example_aud,
+            additional_claims={'sub': 'not-' + self._example_issuer})
+        with self.assertRaisesRegexp(ValueError,
+                                     'Issuer does not match the subject.'):
+            verifier.verify_jwt(a_jwt, self._example_aud)
+
+    def test_verify_jwt_subject_does_not_need_to_match_issuer(self):
+        verifier = self._setup_jwt_auth_verifier(
+            self._public_key_pem, subject_should_match_issuer=False)
+        a_jwt = self._jwt_auth_signer.generate_jwt(
+            self._example_aud,
+            additional_claims={'sub': 'not-' + self._example_issuer})
+        self.assertIsNotNone(verifier.verify_jwt(a_jwt, self._example_aud))
 
 
 class JWTAuthVerifierRS256Test(
