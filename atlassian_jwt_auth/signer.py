@@ -14,7 +14,7 @@ class JWTAuthSigner(object):
         self.private_key_retriever = private_key_retriever
         self.lifetime = kwargs.get('lifetime', datetime.timedelta(hours=1))
         self.algorithm = kwargs.get('algorithm', 'RS256')
-        self.subject = kwargs.get('subject')
+        self.subject = kwargs.get('subject', None)
 
         if self.algorithm not in set(
                 algorithms.get_permitted_algorithm_names()):

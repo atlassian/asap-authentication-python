@@ -63,6 +63,7 @@ class TestAsapMiddleware(DjangoAsapMixin, RS256KeyTestMixin, SimpleTestCase):
                        issuer='client-app',
                        audience='server-app',
                        key_id='client-app/key01',
+                       subject=None,
                        private_key=None,
                        token=None,
                        authorization=None,
@@ -72,7 +73,8 @@ class TestAsapMiddleware(DjangoAsapMixin, RS256KeyTestMixin, SimpleTestCase):
                 if private_key is None:
                     private_key = self._private_key_pem
                 token = create_token(issuer=issuer, audience=audience,
-                                     key_id=key_id, private_key=private_key)
+                                     key_id=key_id, private_key=private_key,
+                                     subject=subject)
             authorization = b'Bearer ' + token
 
         test_settings = self.test_settings.copy()
@@ -149,6 +151,10 @@ class TestAsapMiddleware(DjangoAsapMixin, RS256KeyTestMixin, SimpleTestCase):
 
     def test_request_using_settings_only_is_allowed(self):
         self.check_response('unneeded', 'two')
+
+    def test_request_subject_does_not_need_to_match_issuer_from_settings(self):
+        self.test_settings['ASAP_SUBJECT_SHOULD_MATCH_ISSUER'] = False
+        self.check_response('needed', 'one', 200, subject='different_than_is')
 
 
 class TestAsapDecorator(DjangoAsapMixin, RS256KeyTestMixin, SimpleTestCase):
