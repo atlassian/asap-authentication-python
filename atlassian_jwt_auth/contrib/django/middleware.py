@@ -3,6 +3,7 @@ from django.conf import settings
 import atlassian_jwt_auth
 from ..server.helpers import _requires_asap
 from .utils import parse_jwt, verify_issuers, _build_response
+from .decorators import _get_verifier
 
 
 class ASAPForwardedMiddleware(object):
@@ -76,14 +77,7 @@ class ASAPMiddleware(ASAPForwardedMiddleware):
         self.client_auth = getattr(settings, 'ASAP_CLIENT_AUTH', False)
 
         # Configure verifier based on settings
-        retriever_kwargs = {}
-        retriever_cls = getattr(settings, 'ASAP_KEY_RETRIEVER_CLASS',
-                                atlassian_jwt_auth.HTTPSPublicKeyRetriever)
-        public_key_url = getattr(settings, 'ASAP_PUBLICKEY_REPOSITORY', None)
-        if public_key_url:
-            retriever_kwargs['base_url'] = public_key_url
-        retriever = retriever_cls(**retriever_kwargs)
-        self.verifier = atlassian_jwt_auth.JWTAuthVerifier(retriever)
+        self.verifier = _get_verifier()
 
     def process_request(self, request):
         auth_header = request.META.get('HTTP_AUTHORIZATION', b'')
