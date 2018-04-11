@@ -69,6 +69,20 @@ class BaseRequestsTest(object):
         token = self.assert_authorization_header_is_valid(auth)
         self.assertEqual(token.get('example'), 'claim')
 
+    def test_do_not_reuse_jwts(self):
+        auth = self.create_jwt_auth('issuer', 'issuer/key',
+                                    self._private_key_pem.decode(), 'audience',
+                                    algorithm=self.algorithm)
+        auth_header = self._get_auth_header(auth)
+        self.assertNotEqual(auth_header, self._get_auth_header(auth))
+
+    def test_reuse_jwts(self):
+        auth = self.create_jwt_auth('issuer', 'issuer/key',
+                                    self._private_key_pem.decode(), 'audience',
+                                    algorithm=self.algorithm, reuse_jwts=True)
+        auth_header = self._get_auth_header(auth)
+        self.assertEqual(auth_header, self._get_auth_header(auth))
+
 
 class RequestsRS256Test(BaseRequestsTest,
                         utils.RS256KeyTestMixin,

@@ -43,15 +43,15 @@ class JWTAuthSigner(object):
     def _now(self):
         return datetime.datetime.utcnow()
 
-    def generate_jwt(self, audience, **kwargs):
+    def generate_jwt(self, audience, return_claims=False, **kwargs):
         """ returns a new signed jwt for use. """
         key_identifier, private_key_pem = self.private_key_retriever.load(
             self.issuer)
-        return jwt.encode(
-            self._generate_claims(audience, **kwargs),
-            key=private_key_pem,
-            algorithm=self.algorithm,
-            headers={'kid': key_identifier.key_id})
+        claims = self._generate_claims(audience, **kwargs)
+        encoded_jwt = jwt.encode(dict(claims), key=private_key_pem,
+                                 algorithm=self.algorithm,
+                                 headers={'kid': key_identifier.key_id})
+        return (encoded_jwt, claims) if return_claims else encoded_jwt
 
 
 def create_signer(issuer, key_identifier, private_key_pem, **kwargs):
