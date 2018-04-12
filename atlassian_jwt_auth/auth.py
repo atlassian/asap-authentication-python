@@ -41,7 +41,7 @@ class BaseJWTAuth(object):
         if not self._reuse_jwts or self._encoded_jwt is None:
             return True
 
-        # Rengerate the JWT if it is about to expire
+        # Regenerate the JWT if it is about to expire
         return datetime.utcnow() > (self._claims['iat'] + timedelta(
             seconds=self._reuse_jwt_threshold *
             self._signer.lifetime.total_seconds()))
