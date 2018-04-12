@@ -28,7 +28,7 @@ def create_token(issuer, audience, key_id, private_key):
     signer = atlassian_jwt_auth.create_signer(
         issuer, key_id, private_key
     )
-    return signer.generate_jwt(audience)
+    return signer.generate_jwt(audience)[0]
 
 
 class FlaskTests(utils.RS256KeyTestMixin, unittest.TestCase):

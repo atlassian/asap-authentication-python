@@ -37,8 +37,7 @@ class BaseJWTAuthVerifierTest(object):
     def test_verify_jwt_with_valid_jwt(self):
         """ test that verify_jwt verifies a valid jwt. """
         verifier = self._setup_jwt_auth_verifier(self._public_key_pem)
-        signed_jwt = self._jwt_auth_signer.generate_jwt(
-            self._example_aud)
+        signed_jwt = self._jwt_auth_signer.generate_jwt(self._example_aud)[0]
         v_claims = verifier.verify_jwt(signed_jwt, self._example_aud)
         self.assertIsNotNone(v_claims)
         self.assertEqual(v_claims['aud'], self._example_aud)
@@ -53,7 +52,7 @@ class BaseJWTAuthVerifierTest(object):
             'issuer', 'issuerx', self._private_key_pem.decode(),
             algorithm=self.algorithm,
         )
-        a_jwt = signer.generate_jwt(self._example_aud)
+        a_jwt = signer.generate_jwt(self._example_aud)[0]
         with self.assertRaisesRegexp(ValueError, 'Issuer does not own'):
             verifier.verify_jwt(a_jwt, self._example_aud)
 
@@ -67,7 +66,7 @@ class BaseJWTAuthVerifierTest(object):
             'iss': self._example_issuer,
             'sub': self._example_issuer[::-1]
         }
-        a_jwt = self._jwt_auth_signer.generate_jwt(self._example_aud)
+        a_jwt = self._jwt_auth_signer.generate_jwt(self._example_aud)[0]
         verifier = self._setup_jwt_auth_verifier(self._public_key_pem)
         with self.assertRaisesRegexp(ValueError, expected_msg):
             verifier.verify_jwt(a_jwt, self._example_aud)
@@ -83,7 +82,7 @@ class BaseJWTAuthVerifierTest(object):
         for key in ['iat', 'exp']:
             claims[key] = claims[key].strftime('%s')
         m_j_decode.return_value = claims
-        a_jwt = self._jwt_auth_signer.generate_jwt(self._example_aud)
+        a_jwt = self._jwt_auth_signer.generate_jwt(self._example_aud)[0]
         verifier = self._setup_jwt_auth_verifier(self._public_key_pem)
         with self.assertRaisesRegexp(ValueError, expected_msg):
             verifier.verify_jwt(a_jwt, self._example_aud)
@@ -93,8 +92,7 @@ class BaseJWTAuthVerifierTest(object):
             has already been seen.
         """
         verifier = self._setup_jwt_auth_verifier(self._public_key_pem)
-        a_jwt = self._jwt_auth_signer.generate_jwt(
-            self._example_aud)
+        a_jwt = self._jwt_auth_signer.generate_jwt(self._example_aud)[0]
         self.assertIsNotNone(verifier.verify_jwt(
             a_jwt,
             self._example_aud))
@@ -106,7 +104,7 @@ class BaseJWTAuthVerifierTest(object):
             self._public_key_pem, subject_should_match_issuer=True)
         a_jwt = self._jwt_auth_signer.generate_jwt(
             self._example_aud,
-            additional_claims={'sub': 'not-' + self._example_issuer})
+            additional_claims={'sub': 'not-' + self._example_issuer})[0]
         with self.assertRaisesRegexp(ValueError,
                                      'Issuer does not match the subject.'):
             verifier.verify_jwt(a_jwt, self._example_aud)
@@ -116,7 +114,7 @@ class BaseJWTAuthVerifierTest(object):
             self._public_key_pem, subject_should_match_issuer=False)
         a_jwt = self._jwt_auth_signer.generate_jwt(
             self._example_aud,
-            additional_claims={'sub': 'not-' + self._example_issuer})
+            additional_claims={'sub': 'not-' + self._example_issuer})[0]
         self.assertIsNotNone(verifier.verify_jwt(a_jwt, self._example_aud))
 
 

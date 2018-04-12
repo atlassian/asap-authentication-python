@@ -32,7 +32,7 @@ To create a JWT for authentication
 
 
     signer = atlassian_jwt_auth.create_signer('issuer', 'issuer/key', private_key_pem)
-    a_jwt = signer.generate_jwt('audience')
+    a_jwt, claims = signer.generate_jwt('audience')
 
 
 To create a JWT using a file on disk in the conventional location
@@ -46,7 +46,7 @@ Each time you call ``generate_jwt`` this will find the latest active key file (e
 
 
     signer = atlassian_jwt_auth.create_signer_from_file_private_key_repository('issuer', '/opt/jwtprivatekeys')
-    a_jwt = signer.generate_jwt('audience')
+    a_jwt, claims = signer.generate_jwt('audience')
 
 To make an authenticated HTTP request
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

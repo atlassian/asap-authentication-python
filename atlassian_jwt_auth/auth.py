@@ -32,8 +32,7 @@ class BaseJWTAuth(object):
     def _get_header_value(self):
         if self._should_generate_jwt():
             self._encoded_jwt, self._claims = self._signer.generate_jwt(
-                self._audience, additional_claims=self._additional_claims,
-                return_claims=True)
+                self._audience, additional_claims=self._additional_claims)
         return b'Bearer ' + self._encoded_jwt
 
     def _should_generate_jwt(self):

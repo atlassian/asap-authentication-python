@@ -16,7 +16,7 @@ from atlassian_jwt_auth.tests.utils import RS256KeyTestMixin
 
 def create_token(issuer, audience, key_id, private_key, subject=None):
     signer = create_signer(issuer, key_id, private_key, subject=subject)
-    return signer.generate_jwt(audience)
+    return signer.generate_jwt(audience)[0]
 
 
 class DjangoAsapMixin(object):
