@@ -5,10 +5,10 @@ import atlassian_jwt_auth
 
 
 class TokenReusePolicy(object):
-    def cache_token(self, encoded_jwt, claims):
+    def cache_token(self, key, encoded_jwt, claims):
         pass
 
-    def get_cached_token(self):
+    def get_cached_token(self, key):
         return None
 
 
@@ -21,20 +21,23 @@ class ReuseTokens(TokenReusePolicy):
 
     def __init__(self, threshold=None):
         self._threshold = threshold or self._default_threshold
+        self._key = None
         self._encoded_jwt = None
         self._claims = None
 
-    def cache_token(self, encoded_jwt, claims):
+    def cache_token(self, key, encoded_jwt, claims):
+        self._key = key
         self._encoded_jwt = encoded_jwt
         self._claims = claims
 
-    def get_cached_token(self):
-        if self._encoded_jwt is None:
+    def get_cached_token(self, key):
+        if self._encoded_jwt is None or key != self._key:
             return None
         lifetime = (self._claims['exp'] - self._claims['iat']).total_seconds()
         about_to_expire = (self._claims['iat'] +
                            timedelta(seconds=self._threshold * lifetime))
         if datetime.utcnow() > about_to_expire:
+            self._key = None
             self._encoded_jwt = None
             self._claims = None
             return None
@@ -62,9 +65,16 @@ class BaseJWTAuth(object):
         return cls(signer, audience, **cls_kwargs)
 
     def _get_header_value(self):
-        encoded_jwt = self._reuse_policy.get_cached_token()
+        cache_key = ','.join([str(self._audience),
+                              str(self._signer.issuer),
+                              str(self._signer.lifetime.total_seconds()),
+                              str(self._signer.subject),
+                              ':'.join([str(k) + '=' + str(v) for k, v in
+                                        sorted(self._additional_claims.items())
+                                        ])])
+        encoded_jwt = self._reuse_policy.get_cached_token(cache_key)
         if encoded_jwt is None:
             encoded_jwt, claims = self._signer.generate_jwt(
                 self._audience, additional_claims=self._additional_claims)
-            self._reuse_policy.cache_token(encoded_jwt, claims)
+            self._reuse_policy.cache_token(cache_key, encoded_jwt, claims)
         return b'Bearer ' + encoded_jwt
