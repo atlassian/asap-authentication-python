@@ -1,3 +1,4 @@
+from datetime import timedelta
 import unittest
 
 import jwt
@@ -68,6 +69,72 @@ class BaseRequestsTest(object):
                              additional_claims={'example': 'claim'})
         token = self.assert_authorization_header_is_valid(auth)
         self.assertEqual(token.get('example'), 'claim')
+
+    def test_do_not_reuse_jwts(self):
+        auth = self.create_jwt_auth('issuer', 'issuer/key',
+                                    self._private_key_pem.decode(), 'audience',
+                                    algorithm=self.algorithm)
+        auth_header = self._get_auth_header(auth)
+        self.assertNotEqual(auth_header, self._get_auth_header(auth))
+
+    def test_reuse_jwts(self):
+        auth = self.create_jwt_auth('issuer', 'issuer/key',
+                                    self._private_key_pem.decode(), 'audience',
+                                    algorithm=self.algorithm, reuse_jwts=True)
+        auth_header = self._get_auth_header(auth)
+        self.assertEqual(auth_header, self._get_auth_header(auth))
+
+    def test_do_not_reuse_jwt_if_audience_changes(self):
+        auth = self.create_jwt_auth('issuer', 'issuer/key',
+                                    self._private_key_pem.decode(), 'audience',
+                                    algorithm=self.algorithm, reuse_jwts=True)
+        auth_header = self._get_auth_header(auth)
+        auth._audience = 'not-' + auth._audience
+        self.assertNotEqual(auth_header, self._get_auth_header(auth))
+
+    def test_do_not_reuse_jwt_if_issuer_changes(self):
+        auth = self.create_jwt_auth('issuer', 'issuer/key',
+                                    self._private_key_pem.decode(), 'audience',
+                                    algorithm=self.algorithm, reuse_jwts=True)
+        auth_header = self._get_auth_header(auth)
+        auth._signer.issuer = 'not-' + auth._signer.issuer
+        self.assertNotEqual(auth_header, self._get_auth_header(auth))
+
+    def test_do_not_reuse_jwt_if_lifetime_changes(self):
+        auth = self.create_jwt_auth('issuer', 'issuer/key',
+                                    self._private_key_pem.decode(), 'audience',
+                                    algorithm=self.algorithm, reuse_jwts=True)
+        auth_header = self._get_auth_header(auth)
+        auth._signer.lifetime = auth._signer.lifetime - timedelta(seconds=1)
+        self.assertNotEqual(auth_header, self._get_auth_header(auth))
+
+    def test_do_not_reuse_jwt_if_subject_changes(self):
+        auth = self.create_jwt_auth('issuer', 'issuer/key',
+                                    self._private_key_pem.decode(), 'audience',
+                                    algorithm=self.algorithm, reuse_jwts=True,
+                                    subject='subject')
+        auth_header = self._get_auth_header(auth)
+        auth._signer.subject = 'not-' + auth._signer.subject
+        self.assertNotEqual(auth_header, self._get_auth_header(auth))
+
+    def test_do_not_reuse_jwt_if_additional_claims_change(self):
+        auth = self.create_jwt_auth('issuer', 'issuer/key',
+                                    self._private_key_pem.decode(), 'audience',
+                                    algorithm=self.algorithm, reuse_jwts=True)
+        auth_header = self._get_auth_header(auth)
+        auth._additional_claims['foo'] = 'bar'
+        self.assertNotEqual(auth_header, self._get_auth_header(auth))
+
+    def test_reuse_jwt_with_additional_claims(self):
+        # calculating the cache key with additional claims is non-trivial
+        auth = self.create_jwt_auth('issuer', 'issuer/key',
+                                    self._private_key_pem.decode(), 'audience',
+                                    algorithm=self.algorithm, reuse_jwts=True)
+        auth._additional_claims['foo'] = 'bar'
+        auth._additional_claims['fool'] = 'blah'
+        auth._additional_claims['foot'] = 'quux'
+        auth_header = self._get_auth_header(auth)
+        self.assertEqual(auth_header, self._get_auth_header(auth))
 
 
 class RequestsRS256Test(BaseRequestsTest,
