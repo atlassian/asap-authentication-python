@@ -84,6 +84,24 @@ to authenticate ``aiohttp`` requests:
             ...
 
 
+If you want to reuse tokens that have the same claim within their period of validity
+then pass through `reuse_jwts=True` when calling  `create_signer`.
+For example:
+
+
+.. code:: python
+
+    import atlassian_jwt_auth
+    from atlassian_jwt_auth.contrib.requests import JWTAuth
+
+    signer = atlassian_jwt_auth.create_signer('issuer', 'issuer/key', private_key_pem, reuse_jwts=True)
+    response = requests.get(
+        'https://your-url',
+        auth=JWTAuth(signer, 'audience')
+    )
+
+
+
 To verify a JWT
 ~~~~~~~~~~~~~~~
 
