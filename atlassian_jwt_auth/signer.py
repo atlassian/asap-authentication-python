@@ -63,12 +63,19 @@ class TokenReusingJWTAuthSigner(JWTAuthSigner):
         self.reuse_threshold = kwargs.get('reuse_jwt_threshold', 0.95)
 
     def get_cached_token(self, audience, **kwargs):
+        """ returns the cached token. If there is no matching cached token
+            then None is returned.
+        """
         return getattr(self, '_previous_token', None)
 
     def set_cached_token(self, value):
+        """ sets the cached token."""
         self._previous_token = value
 
     def can_reuse_token(self, existing_token, claims):
+        """ returns True if the provided existing token can be reused
+            for the claims provided.
+        """
         if existing_token is None:
             return False
         existing_claims = jwt.decode(existing_token, verify=False)
