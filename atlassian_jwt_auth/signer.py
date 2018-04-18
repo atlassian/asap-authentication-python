@@ -1,3 +1,4 @@
+import calendar
 import datetime
 import random
 
@@ -71,19 +72,20 @@ class TokenReusingJWTAuthSigner(JWTAuthSigner):
         if existing_token is None:
             return False
         existing_claims = jwt.decode(existing_token, verify=False)
-        existing_lifetime = (existing_claims['exp'] -
-                             existing_claims['iat']).total_seconds()
-        about_to_expire = existing_claims['iat'] + datetime.timedelta(
-            self.reuse_threshold * prev_lifetime)
-        if self._now() > about_to_expire:
+        existing_lifetime = (int(existing_claims['exp']) -
+                             int(existing_claims['iat']))
+        about_to_expire = int(existing_claims['iat']) + (
+                self.reuse_threshold * existing_lifetime)
+        if calendar.timegm(self._now().utctimetuple()) > about_to_expire:
             return False
         if set(claims.keys()) != set(existing_claims.keys()):
             return False
         for key, val in claims.items():
-            for key in ['exp', 'iat', 'jti', 'nbf']:
+            if key in ['exp', 'iat', 'jti', 'nbf']:
                 continue
             if existing_claims[key] != val:
                 return False
+        return True
 
     def generate_jwt(self, audience, **kwargs):
         existing_token = self.get_cached_token()
