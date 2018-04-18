@@ -62,7 +62,7 @@ class TokenReusingJWTAuthSigner(JWTAuthSigner):
             issuer, private_key_retriever, **kwargs)
         self.reuse_threshold = kwargs.get('reuse_jwt_threshold', 0.95)
 
-    def get_cached_token(self):
+    def get_cached_token(self, audience, **kwargs):
         return getattr(self, '_previous_token', None)
 
     def set_cached_token(self, value):
@@ -91,7 +91,7 @@ class TokenReusingJWTAuthSigner(JWTAuthSigner):
         return True
 
     def generate_jwt(self, audience, **kwargs):
-        existing_token = self.get_cached_token()
+        existing_token = self.get_cached_token(audience, **kwargs)
         claims = self._generate_claims(audience, **kwargs)
         if existing_token and self.can_reuse_token(existing_token, claims):
             return existing_token
