@@ -78,7 +78,7 @@ class TokenReusingJWTAuthSigner(JWTAuthSigner):
         if existing_lifetime != this_lifetime:
             return False
         about_to_expire = int(existing_claims['iat']) + (
-                self.reuse_threshold * existing_lifetime)
+            self.reuse_threshold * existing_lifetime)
         if calendar.timegm(self._now().utctimetuple()) > about_to_expire:
             return False
         if set(claims.keys()) != set(existing_claims.keys()):
