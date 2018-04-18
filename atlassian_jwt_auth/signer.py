@@ -108,18 +108,20 @@ class TokenReusingJWTAuthSigner(JWTAuthSigner):
         return token
 
 
-def create_signer(issuer, key_identifier, private_key_pem, **kwargs):
-    private_key_retriever = key.StaticPrivateKeyRetriever(
-        key_identifier, private_key_pem)
+def _create_signer(issuer, private_key_retriever, **kwargs):
     signer_cls = JWTAuthSigner
     if kwargs.get('reuse_jwts', None):
         signer_cls = TokenReusingJWTAuthSigner
-    signer = signer_cls(issuer, private_key_retriever, **kwargs)
-    return signer
+    return signer_cls(issuer, private_key_retriever, **kwargs)
+
+
+def create_signer(issuer, key_identifier, private_key_pem, **kwargs):
+    private_key_retriever = key.StaticPrivateKeyRetriever(
+        key_identifier, private_key_pem)
+    return _create_signer(issuer, private_key_retriever, **kwargs)
 
 
 def create_signer_from_file_private_key_repository(
         issuer, private_key_repository, **kwargs):
     private_key_retriever = key.FilePrivateKeyRetriever(private_key_repository)
-    signer = JWTAuthSigner(issuer, private_key_retriever, **kwargs)
-    return signer
+    return _create_signer(issuer, private_key_retriever, **kwargs)
