@@ -73,18 +73,21 @@ class HTTPSPublicKeyRetriever(BasePublicKeyRetriever):
          given key id.
     """
 
-    def __init__(self, base_url):
+    def __init__(self, base_url, retry=3):
         if base_url is None or not base_url.startswith('https://'):
             raise PublicKeyRetrieverException(
                 'The base url must start with https://')
         if not base_url.endswith('/'):
             base_url += '/'
         self.base_url = base_url
+        self._retry = retry
         self._session = self._get_session()
 
     def _get_session(self):
         session = requests.Session()
-        session.mount('https://', cachecontrol.CacheControlAdapter())
+        session.mount('https://',
+                      cachecontrol.CacheControlAdapter(
+                        max_retries=self._retry))
         return session
 
     def retrieve(self, key_identifier, **requests_kwargs):
@@ -123,13 +126,13 @@ class HTTPSMultiRepositoryPublicKeyRetriever(BasePublicKeyRetriever):
         repository locations based upon key ids.
     """
 
-    def __init__(self, key_repository_urls):
+    def __init__(self, key_repository_urls, retry=3):
         if not isinstance(key_repository_urls, list):
             raise TypeError('keystore_urls must be a list of urls.')
-        self._retrievers = self._create_retrievers(key_repository_urls)
+        self._retrievers = self._create_retrievers(key_repository_urls, retry)
 
-    def _create_retrievers(self, key_repository_urls):
-        return [HTTPSPublicKeyRetriever(url) for url
+    def _create_retrievers(self, key_repository_urls, retry):
+        return [HTTPSPublicKeyRetriever(url, retry) for url
                 in key_repository_urls]
 
     def retrieve(self, key_identifier, **requests_kwargs):

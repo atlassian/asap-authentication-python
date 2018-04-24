@@ -2,7 +2,9 @@ import unittest
 
 import mock
 import requests
+import urllib3
 
+from atlassian_jwt_auth.exceptions import PublicKeyRetrieverException
 from atlassian_jwt_auth.key import (
     HTTPSPublicKeyRetriever,
     HTTPSMultiRepositoryPublicKeyRetriever,
@@ -13,9 +15,9 @@ from atlassian_jwt_auth.tests import utils
 class BaseHTTPSPublicKeyRetrieverTest(object):
     """ tests for the HTTPSPublicKeyRetriever class. """
 
-    def create_retriever(self, url):
+    def create_retriever(self, url, **kwargs):
         """ returns a public key retriever created using the given url. """
-        return HTTPSPublicKeyRetriever(url)
+        return HTTPSPublicKeyRetriever(url, **kwargs)
 
     def setUp(self):
         self._private_key_pem = self.get_new_private_key_in_pem_format()
@@ -157,13 +159,52 @@ def _setup_mock_response_for_retriever(
     return mock_method
 
 
+class RetryTestMixin(object):
+
+    @unittest.skipIf(not hasattr(unittest.TestCase, 'assertLogs'),
+                     "assertLogs not supported in this version")
+    @mock.patch.object(urllib3.connectionpool.HTTPConnectionPool,
+                       '_make_request')
+    def test_retrieve_default_retry(self, mock_conn):
+        """ tests that the retrieve method retries as expected. """
+        def raise_error(*args, **kwargs):
+            raise ConnectionError()
+        mock_conn.side_effect = raise_error
+        retriever = self.create_retriever(self.base_url)
+        with self.assertLogs() as logs:
+            with self.assertRaises(PublicKeyRetrieverException):
+                retriever.retrieve('example/eg')
+            self.assertEqual(3, len(logs.output))
+            for log in logs.output:
+                self.assertIn('Retrying', log)
+
+    @unittest.skipIf(not hasattr(unittest.TestCase, 'assertLogs'),
+                     "assertLogs not supported in this version")
+    @mock.patch.object(urllib3.connectionpool.HTTPConnectionPool,
+                       '_make_request')
+    def test_retrieve_disable_retry(self, mock_conn):
+        """ tests that the retrieve method retries as expected. """
+        def raise_error(*args, **kwargs):
+            raise ConnectionError()
+        mock_conn.side_effect = raise_error
+        retriever = self.create_retriever(self.base_url, retry=0)
+        with self.assertLogs() as logs:
+            with self.assertRaises(PublicKeyRetrieverException):
+                retriever.retrieve('example/eg')
+            self.assertEqual(0, len(logs.output))
+            # Fake a log to avoid blowing up:
+            logs.records.append(None)
+
+
 class HTTPSPublicKeyRetrieverRS256Test(BaseHTTPSPublicKeyRetrieverTest,
+                                       RetryTestMixin,
                                        utils.RS256KeyTestMixin,
                                        unittest.TestCase):
     pass
 
 
 class HTTPSPublicKeyRetrieverES256Test(BaseHTTPSPublicKeyRetrieverTest,
+                                       RetryTestMixin,
                                        utils.ES256KeyTestMixin,
                                        unittest.TestCase):
     pass
