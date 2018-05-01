@@ -1,21 +1,19 @@
 from django.conf import settings
+from django.utils.deprecation import MiddlewareMixin
 
-import atlassian_jwt_auth
-from ..server.helpers import _requires_asap
-from .utils import parse_jwt, verify_issuers, _build_response
-from .decorators import _get_verifier
+from atlassian_jwt_auth.frameworks.django.middleware import (
+    OldStyleASAPMiddleware
+)
 
 
-class ASAPForwardedMiddleware(object):
+class ProxiedAsapMiddleware(OldStyleASAPMiddleware, MiddlewareMixin):
     """Enable client auth for ASAP-enabled services that are forwarding
     non-ASAP client requests.
 
-    This must come before any authentication middleware.
-
-    DEPRECATED: use ASAPMiddleware instead.
-    """
+    This must come before any authentication middleware."""
 
     def __init__(self, get_response=None):
+        super(ProxiedAsapMiddleware, self).__init__()
         self.get_response = get_response
 
         # Rely on this header to tell us if a request has been forwarded
@@ -27,13 +25,14 @@ class ASAPForwardedMiddleware(object):
         self.xauth = getattr(settings, 'ASAP_PROXIED_AUTHORIZATION_HEADER',
                              'HTTP_X_ASAP_AUTHORIZATION')
 
-    def __call__(self, request):
-        early_response = self.process_request(request)
-        if early_response:
-            return early_response
-        return self.get_response(request)
-
     def process_request(self, request):
+        error_response = super(ProxiedAsapMiddleware, super).process_request(
+            request
+        )
+
+        if error_response:
+            return error_response
+
         forwarded_for = request.META.pop(self.xfwd, None)
         if forwarded_for is None:
             return
@@ -62,35 +61,3 @@ class ASAPForwardedMiddleware(object):
             request.META['HTTP_AUTHORIZATION'] = asap_auth
         if orig_auth is not None:
             request.META[self.xauth] = orig_auth
-
-
-class ASAPMiddleware(ASAPForwardedMiddleware):
-    """Enable ASAP for Django applications.
-
-    To use proxied credentials, this must come before any authentication
-    middleware.
-    """
-
-    def __init__(self, get_response=None):
-        super(ASAPMiddleware, self).__init__(get_response=get_response)
-        self.required = getattr(settings, 'ASAP_REQUIRED', True)
-        self.client_auth = getattr(settings, 'ASAP_CLIENT_AUTH', False)
-
-        # Configure verifier based on settings
-        self.verifier = _get_verifier()
-
-    def process_request(self, request):
-        auth_header = request.META.get('HTTP_AUTHORIZATION', b'')
-        asap_err = _requires_asap(
-            verifier=self.verifier,
-            auth=auth_header,
-            parse_jwt_func=parse_jwt,
-            build_response_func=_build_response,
-            asap_claim_holder=request,
-            verify_issuers_func=verify_issuers,
-        )
-
-        if asap_err and self.required:
-            return asap_err
-        elif self.client_auth:
-            super(ASAPMiddleware, self).process_request(request)

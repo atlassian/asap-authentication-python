@@ -37,7 +37,7 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-ROOT_URLCONF = 'atlassian_jwt_auth.contrib.tests.django.urls'
+ROOT_URLCONF = 'atlassian_jwt_auth.frameworks.django.tests.urls'
 
 TEMPLATES = [
     {
