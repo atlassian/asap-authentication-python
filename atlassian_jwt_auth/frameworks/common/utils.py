@@ -1,0 +1,94 @@
+from atlassian_jwt_auth.exceptions import PublicKeyRetrieverException
+from jwt.exceptions import InvalidIssuerError, InvalidTokenError
+from .exceptions import NoTokenProvidedError, SubjectIssuerMismatchError
+
+
+class SettingsDict(dict):
+    def __getattr__(self, name):
+        if name not in self:
+            raise AttributeError
+
+        return self[name]
+
+
+def process_asap_token(request, backend, issuers=None, required=None,
+                       subject_should_match_issuer=None):
+    verifier = backend.get_verifier()
+    token = backend.get_asap_token(request)
+    settings = backend.settings
+    error_response = None
+
+    try:
+        asap_claims = _check_asap_token(
+            token, verifier, settings,
+            valid_issuers=issuers,
+            subject_should_match_issuer=subject_should_match_issuer
+        )
+        backend.set_asap_claims_for_request(request, asap_claims)
+    except NoTokenProvidedError:
+        error_response = backend.get_401_response('Unauthorized')
+    except PublicKeyRetrieverException as e:
+        if e.status_code not in (403, 404):
+            # Any error other than "not found" is a problem and should
+            # be dealt with elsewhere.
+            # Note that we treat 403 like 404 to account for the fact
+            # that a server configured to secure directory listings
+            # will return 403 for a missing file to avoid leaking
+            # information.
+            raise
+
+        error_response = backend.get_401_response(
+            'Unauthorized: Key not found'
+        )
+    except InvalidIssuerError:
+        error_response = backend.get_403_response(
+            'Forbidden: Invalid token issuer'
+        )
+    except InvalidTokenError:
+        error_response = backend.get_401_response(
+            'Unauthorized: Invalid token'
+        )
+
+    required = required if required is not None else settings.ASAP_REQUIRED
+
+    if error_response and required:
+        return error_response
+
+
+def _check_asap_token(token, verifier, settings, valid_issuers=None,
+                      subject_should_match_issuer=None):
+    if token is None:
+        raise NoTokenProvidedError
+
+    asap_claims = verifier.verify_jwt(
+        token,
+        settings.ASAP_VALID_AUDIENCE,
+        leeway=settings.ASAP_VALID_LEEWAY,
+    )
+
+    _validate_claims(
+        asap_claims, valid_issuers, subject_should_match_issuer, settings
+    )
+
+    return asap_claims
+
+
+def _validate_claims(claims, valid_issuers, subject_should_match_issuer,
+                     settings):
+    valid_issuers = (
+        valid_issuers if valid_issuers is not None
+        else settings.ASAP_VALID_ISSUERS
+    )
+
+    if valid_issuers:
+        issuer = claims.get('iss')
+        if issuer not in valid_issuers:
+            raise InvalidIssuerError
+
+    subject_should_match_issuer = (
+        subject_should_match_issuer if subject_should_match_issuer is not None
+        else settings.ASAP_SUBJECT_SHOULD_MATCH_ISSUER
+    )
+
+    if subject_should_match_issuer and claims.get('iss') != claims.get('sub'):
+        raise SubjectIssuerMismatchError

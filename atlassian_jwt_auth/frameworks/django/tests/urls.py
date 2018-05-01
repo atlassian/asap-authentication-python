@@ -1,6 +1,6 @@
 from django.conf.urls import url
 
-from atlassian_jwt_auth.contrib.tests.django import views
+from atlassian_jwt_auth.frameworks.django.tests import views
 
 
 urlpatterns = [
@@ -21,6 +21,4 @@ urlpatterns = [
     url(r'^asap/unneeded$', views.unneeded_view, name='unneeded'),
     url(r'^asap/restricted_issuer$', views.restricted_issuer_view,
         name='restricted_issuer'),
-    url(r'^asap/restricted_subject$', views.restricted_subject_view,
-        name='restricted_subject'),
 ]
