@@ -51,3 +51,8 @@ class PrivateKeyRetrieverException(_WithStatus, ASAPAuthenticationException):
 
 class KeyIdentifierException(ASAPAuthenticationException):
     """Raise when there are issues validating the key identifier"""
+
+
+class NoTokenProvidedError(ASAPAuthenticationException):
+    """Raise when no token is provided"""
+    pass

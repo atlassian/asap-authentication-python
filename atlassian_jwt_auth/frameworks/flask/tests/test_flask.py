@@ -4,6 +4,7 @@ from flask import Flask
 
 import atlassian_jwt_auth
 from atlassian_jwt_auth.tests import utils
+from atlassian_jwt_auth.frameworks.flask import with_asap
 from atlassian_jwt_auth.contrib.flask_app import requires_asap
 from atlassian_jwt_auth.contrib.tests.utils import get_static_retriever_class
 
@@ -19,6 +20,11 @@ def get_app():
     @app.route("/")
     @requires_asap
     def view():
+        return "OK"
+
+    @app.route("/restricted-to-another-client/")
+    @with_asap(issuers=['another-client'])
+    def view_for_another_client_app():
         return "OK"
 
     return app
@@ -48,11 +54,11 @@ class FlaskTests(utils.RS256KeyTestMixin, unittest.TestCase):
         })
         self.app.config['ASAP_KEY_RETRIEVER_CLASS'] = retriever
 
-    def send_request(self, token):
+    def send_request(self, token, url='/'):
         """ returns the response of sending a request containing the given
             token sent in the Authorization header.
         """
-        return self.client.get('/', headers={
+        return self.client.get(url, headers={
             'Authorization': b'Bearer ' + token
         })
 
@@ -86,3 +92,12 @@ class FlaskTests(utils.RS256KeyTestMixin, unittest.TestCase):
             'another-client/key01', self._private_key_pem
         )
         self.assertEqual(self.send_request(token).status_code, 403)
+
+    def test_decorated_request_with_invalid_issuer_is_rejected(self):
+        # Try with a different audience with a valid signature
+        token = create_token(
+            'client-app', 'server-app',
+            'client-app/key01', self._private_key_pem
+        )
+        url = '/restricted-to-another-client/'
+        self.assertEqual(self.send_request(token, url=url).status_code, 403)
