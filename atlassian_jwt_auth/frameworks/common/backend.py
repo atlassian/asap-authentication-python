@@ -26,7 +26,7 @@ class Backend():
         # This is primarily useful when phasing in ASAP authentication
         'ASAP_REQUIRED': True,
 
-        # The valid audience valuw expected when authenticating tokens
+        # The valid audience value expected when authenticating tokens
         'ASAP_VALID_AUDIENCE': None,
 
         # The amount of leeway to apply when evaluating token expiration
