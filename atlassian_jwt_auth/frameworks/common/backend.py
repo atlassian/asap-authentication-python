@@ -33,7 +33,7 @@ class Backend():
         # timestamps
         'ASAP_VALID_LEEWAY': 0,
 
-        # A list of valid token issuers allowed to authenticate
+        # An iterable of valid token issuers allowed to authenticate
         # (this can be overridden at the decorator level)
         'ASAP_VALID_ISSUERS': None,
 
@@ -93,3 +93,10 @@ class Backend():
             # This is handled in utils.validate_claims
             subject_should_match_issuer=False,
         )
+
+    def _process_settings(self, settings):
+        valid_issuers = settings.get('ASAP_VALID_ISSUERS')
+        if valid_issuers:
+            settings['ASAP_VALID_ISSUERS'] = set(valid_issuers)
+
+        return SettingsDict(settings)

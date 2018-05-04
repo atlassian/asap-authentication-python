@@ -48,4 +48,4 @@ class DjangoBackend(Backend):
 
             settings[k] = value
 
-        return SettingsDict(settings)
+        return self._process_settings(settings)

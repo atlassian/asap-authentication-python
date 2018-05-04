@@ -10,19 +10,18 @@ class SettingsDict(dict):
 
         return self[name]
 
+    def __setitem__(self, key, value):
+        raise AttributeError('SettingsDict properties are immutable')
 
-def process_asap_token(request, backend, issuers=None, required=None,
-                       subject_should_match_issuer=None):
+
+def process_asap_token(request, backend, settings):
     verifier = backend.get_verifier()
     token = backend.get_asap_token(request)
-    settings = backend.settings
     error_response = None
 
     try:
         asap_claims = _check_asap_token(
-            token, verifier, settings,
-            valid_issuers=issuers,
-            subject_should_match_issuer=subject_should_match_issuer
+            token, verifier, settings
         )
         backend.set_asap_claims_for_request(request, asap_claims)
     except NoTokenProvidedError:
@@ -49,14 +48,11 @@ def process_asap_token(request, backend, issuers=None, required=None,
             'Unauthorized: Invalid token'
         )
 
-    required = required if required is not None else settings.ASAP_REQUIRED
-
-    if error_response and required:
+    if error_response and settings.ASAP_REQUIRED:
         return error_response
 
 
-def _check_asap_token(token, verifier, settings, valid_issuers=None,
-                      subject_should_match_issuer=None):
+def _check_asap_token(token, verifier, settings):
     if token is None:
         raise NoTokenProvidedError
 
@@ -67,28 +63,17 @@ def _check_asap_token(token, verifier, settings, valid_issuers=None,
     )
 
     _validate_claims(
-        asap_claims, valid_issuers, subject_should_match_issuer, settings
+        asap_claims, settings
     )
 
     return asap_claims
 
 
-def _validate_claims(claims, valid_issuers, subject_should_match_issuer,
-                     settings):
-    valid_issuers = (
-        valid_issuers if valid_issuers is not None
-        else settings.ASAP_VALID_ISSUERS
-    )
+def _validate_claims(claims, settings):
+    if (settings.ASAP_VALID_ISSUERS
+            and claims.get('iss') not in settings.ASAP_VALID_ISSUERS):
+        raise InvalidIssuerError
 
-    if valid_issuers:
-        issuer = claims.get('iss')
-        if issuer not in valid_issuers:
-            raise InvalidIssuerError
-
-    subject_should_match_issuer = (
-        subject_should_match_issuer if subject_should_match_issuer is not None
-        else settings.ASAP_SUBJECT_SHOULD_MATCH_ISSUER
-    )
-
-    if subject_should_match_issuer and claims.get('iss') != claims.get('sub'):
+    if (settings.ASAP_SUBJECT_SHOULD_MATCH_ISSUER
+            and claims.get('iss') != claims.get('sub')):
         raise SubjectIssuerMismatchError
