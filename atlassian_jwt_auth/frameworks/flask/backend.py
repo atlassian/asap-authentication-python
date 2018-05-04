@@ -1,7 +1,6 @@
 from flask import Response, current_app, g, request as current_req
 
 from ..common.backend import Backend
-from ..common.utils import SettingsDict
 
 
 class FlaskBackend(Backend):
