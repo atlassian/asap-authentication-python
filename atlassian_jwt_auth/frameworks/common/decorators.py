@@ -1,6 +1,7 @@
 from functools import wraps
 from jwt.exceptions import InvalidIssuerError, InvalidTokenError
-from .utils import process_asap_token, _validate_claims, SettingsDict
+from .asap import _process_asap_token, _validate_claims
+from .utils import SettingsDict
 
 
 def _with_asap(func=None, backend=None, issuers=None, required=None,
@@ -23,7 +24,7 @@ def _with_asap(func=None, backend=None, issuers=None, required=None,
             if len(args) > 0:
                 request = args[0]
 
-            error_response = process_asap_token(
+            error_response = _process_asap_token(
                 request, backend, settings
             )
 
