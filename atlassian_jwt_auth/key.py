@@ -136,7 +136,10 @@ class HTTPSMultiRepositoryPublicKeyRetriever(BasePublicKeyRetriever):
         for retriever in self._retrievers:
             try:
                 return retriever.retrieve(key_identifier, **requests_kwargs)
-            except RequestException as e:
+            except (RequestException, PublicKeyRetrieverException) as e:
+                if isinstance(e, PublicKeyRetrieverException):
+                    if e.status_code is None or e.status_code < 500:
+                        raise
                 logger = logging.getLogger(__name__)
                 logger.warn('Unable to retrieve public key from store',
                             extra={'underlying_error': str(e),
