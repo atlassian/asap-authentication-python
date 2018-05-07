@@ -1,6 +1,12 @@
 CHANGES
 =======
 
+3.6.0
+-----
+
+* Sem-Ver: feature Support disabling checking if jwt jti are unique
+* Sem-Ver: bugfix The HTTPSMultiRepositoryPublicKeyRetriever should try the next key repository upon encountering a server error (status code >= 500)
+
 3.5.0
 -----
 
