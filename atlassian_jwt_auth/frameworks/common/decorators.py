@@ -87,7 +87,7 @@ def _restrict_asap(func=None, backend=None, issuers=None,
     return restrict_asap_decorator
 
 
-def _update_settings_from_kwargs(settings, issuers=None, required=None,
+def _update_settings_from_kwargs(settings, issuers=None, required=True,
                                  subject_should_match_issuer=None):
     settings = settings.copy()
 
