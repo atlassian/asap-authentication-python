@@ -10,6 +10,7 @@ class ProxiedAsapMiddleware(OldStyleASAPMiddleware):
     non-ASAP client requests.
 
     This must come before any authentication middleware."""
+
     def __init__(self, get_response=None):
         super(ProxiedAsapMiddleware, self).__init__()
         self.get_response = get_response
