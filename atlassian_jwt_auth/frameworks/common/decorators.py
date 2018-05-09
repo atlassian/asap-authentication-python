@@ -4,7 +4,7 @@ from .asap import _process_asap_token, _verify_issuers
 from .utils import SettingsDict
 
 
-def _with_asap(func=None, backend=None, issuers=None, required=None,
+def _with_asap(func=None, backend=None, issuers=None, required=True,
                subject_should_match_issuer=None):
     if backend is None:
         raise ValueError(
@@ -42,7 +42,7 @@ def _with_asap(func=None, backend=None, issuers=None, required=None,
 
 
 def _restrict_asap(func=None, backend=None, issuers=None,
-                   required=None, subject_should_match_issuer=None):
+                   required=True, subject_should_match_issuer=None):
     """Decorator to allow endpoint-specific ASAP authorization, assuming ASAP
     authentication has already occurred.
     """
