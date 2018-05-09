@@ -43,7 +43,7 @@ def validate_asap(issuers=None, subjects=None, required=True):
     return validate_asap_decorator
 
 
-def requires_asap(func=None, issuers=None, subject_should_match_issuer=None):
+def requires_asap(issuers=None, subject_should_match_issuer=None, func=None):
     return with_asap(func=func,
                      required=True,
                      issuers=issuers,
