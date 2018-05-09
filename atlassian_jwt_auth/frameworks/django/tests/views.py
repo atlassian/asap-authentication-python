@@ -1,7 +1,8 @@
 from django.http import HttpResponse
 
 from atlassian_jwt_auth.frameworks.django import with_asap, restrict_asap
-from atlassian_jwt_auth.contrib.django.decorators import requires_asap
+from atlassian_jwt_auth.contrib.django.decorators import (requires_asap,
+                                                          validate_asap)
 
 
 @with_asap(issuers=['client-app'])
@@ -47,3 +48,8 @@ def unneeded_view(request):
 @restrict_asap(issuers=['whitelist'])
 def restricted_issuer_view(request):
     return HttpResponse('three')
+
+
+@validate_asap(subjects=['client-app'])
+def restricted_subject_view(request):
+    return HttpResponse('four')
