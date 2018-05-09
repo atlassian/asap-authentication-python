@@ -1,10 +1,17 @@
 from functools import wraps
 
-from flask import Response, current_app, g, request
+from flask import Response, current_app, g, request as current_req
 
-import atlassian_jwt_auth
-from .utils import parse_jwt
-from ..server.helpers import _requires_asap
+from ..server.helpers import _requires_asap, Backend
+
+
+class FlaskBackend(Backend):
+
+    def get_request_header_value(self, request, header_name):
+        return request.headers.get(header_name, None)
+
+    def get_setting(self, setting, default=None):
+        return current_app.config.get(setting, default)
 
 
 def requires_asap(f):
@@ -15,12 +22,11 @@ def requires_asap(f):
 
     @wraps(f)
     def decorated(*args, **kwargs):
-        verifier = _get_verifier()
-        auth = request.headers.get('AUTHORIZATION', '')
+        backend = FlaskBackend()
         err_response = _requires_asap(
-            verifier=verifier,
-            auth=auth,
-            parse_jwt_func=parse_jwt,
+            verifier=backend.get_verifier(),
+            auth=backend.get_request_auth_header_value(current_req),
+            parse_jwt_func=backend.parse_jwt,
             build_response_func=_build_response,
             asap_claim_holder=g,
         )
@@ -29,17 +35,6 @@ def requires_asap(f):
         return err_response
 
     return decorated
-
-
-def _get_verifier():
-    """Returns a verifier for ASAP JWT tokens basd on application settings"""
-    retriever_cls = current_app.config.get(
-        'ASAP_KEY_RETRIEVER_CLASS', atlassian_jwt_auth.HTTPSPublicKeyRetriever
-    )
-    retriever = retriever_cls(
-        base_url=current_app.config.get('ASAP_PUBLICKEY_REPOSITORY')
-    )
-    return atlassian_jwt_auth.JWTAuthVerifier(retriever)
 
 
 def _build_response(message, status, headers=None):

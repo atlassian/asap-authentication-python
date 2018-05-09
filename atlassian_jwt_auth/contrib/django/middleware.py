@@ -1,9 +1,8 @@
 from django.conf import settings
 
-import atlassian_jwt_auth
 from ..server.helpers import _requires_asap
-from .utils import parse_jwt, verify_issuers, _build_response
-from .decorators import _get_verifier
+from .utils import verify_issuers, _build_response
+from .decorators import DjangoBackend
 
 
 class ASAPForwardedMiddleware(object):
@@ -77,14 +76,14 @@ class ASAPMiddleware(ASAPForwardedMiddleware):
         self.client_auth = getattr(settings, 'ASAP_CLIENT_AUTH', False)
 
         # Configure verifier based on settings
-        self.verifier = _get_verifier()
+        self.verifier = DjangoBackend().get_verifier()
 
     def process_request(self, request):
-        auth_header = request.META.get('HTTP_AUTHORIZATION', b'')
+        backend = DjangoBackend()
         asap_err = _requires_asap(
             verifier=self.verifier,
-            auth=auth_header,
-            parse_jwt_func=parse_jwt,
+            auth=backend.get_request_auth_header_value(request),
+            parse_jwt_func=backend.parse_jwt,
             build_response_func=_build_response,
             asap_claim_holder=request,
             verify_issuers_func=verify_issuers,

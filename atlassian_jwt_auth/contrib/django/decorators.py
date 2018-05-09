@@ -1,11 +1,26 @@
 from functools import wraps
 
-from django.conf import settings
+import django.conf
 from django.http.response import HttpResponse
 
-import atlassian_jwt_auth
-from .utils import parse_jwt, verify_issuers, _build_response
+from .utils import verify_issuers, _build_response
 from ..server.helpers import _requires_asap
+from ..server.helpers import Backend
+
+
+class DjangoBackend(Backend):
+
+    def get_request_header_value(self, request, header_name):
+        return request.META.get(header_name, None)
+
+    def get_request_auth_header_value(self, request):
+        auth = self.get_request_header_value(request, 'HTTP_AUTHORIZATION')
+        if auth is None:
+            return b''
+        return auth
+
+    def get_setting(self, name, default=None):
+        return getattr(django.conf.settings, name, default)
 
 
 def validate_asap(issuers=None, subjects=None, required=True):
@@ -54,12 +69,11 @@ def requires_asap(issuers=None, subject_should_match_issuer=None):
     def requires_asap_decorator(func):
         @wraps(func)
         def requires_asap_wrapper(request, *args, **kwargs):
-            verifier = _get_verifier(subject_should_match_issuer)
-            auth_header = request.META.get('HTTP_AUTHORIZATION', b'')
+            backend = DjangoBackend()
             err_response = _requires_asap(
-                verifier=verifier,
-                auth=auth_header,
-                parse_jwt_func=parse_jwt,
+                verifier=backend.get_verifier(subject_should_match_issuer),
+                auth=backend.get_request_auth_header_value(request),
+                parse_jwt_func=backend.parse_jwt,
                 build_response_func=_build_response,
                 asap_claim_holder=request,
                 verify_issuers_func=verify_issuers,
@@ -71,19 +85,3 @@ def requires_asap(issuers=None, subject_should_match_issuer=None):
 
         return requires_asap_wrapper
     return requires_asap_decorator
-
-
-def _get_verifier(subject_should_match_issuer=None):
-    """Return a verifier for ASAP JWT tokens based on settings"""
-    retriever_cls = getattr(settings, 'ASAP_KEY_RETRIEVER_CLASS',
-                            atlassian_jwt_auth.HTTPSPublicKeyRetriever)
-    retriever = retriever_cls(
-        base_url=getattr(settings, 'ASAP_PUBLICKEY_REPOSITORY')
-    )
-    if subject_should_match_issuer is None:
-        subject_should_match_issuer = getattr(
-            settings, 'ASAP_SUBJECT_SHOULD_MATCH_ISSUER', None)
-    v_kwargs = {}
-    if subject_should_match_issuer is not None:
-        v_kwargs['subject_should_match_issuer'] = subject_should_match_issuer
-    return atlassian_jwt_auth.JWTAuthVerifier(retriever, **v_kwargs)
