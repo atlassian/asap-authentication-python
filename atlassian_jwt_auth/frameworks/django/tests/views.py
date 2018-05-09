@@ -1,6 +1,7 @@
 from django.http import HttpResponse
 
 from atlassian_jwt_auth.frameworks.django import with_asap, restrict_asap
+from atlassian_jwt_auth.contrib.django.decorators import requires_asap
 
 
 @with_asap(issuers=['client-app'])
@@ -18,7 +19,7 @@ def decorated_view(request):
     return HttpResponse('Only the right issuer is allowed.')
 
 
-@with_asap()
+@requires_asap()
 def settings_view(request):
     return HttpResponse('Any settings issuer is allowed.')
 

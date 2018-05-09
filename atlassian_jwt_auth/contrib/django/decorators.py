@@ -2,6 +2,8 @@ from functools import wraps
 
 from django.http.response import HttpResponse
 
+from atlassian_jwt_auth.frameworks.django.decorators import with_asap
+
 
 def validate_asap(issuers=None, subjects=None, required=True):
     """Decorator to allow endpoint-specific ASAP authorization, assuming ASAP
@@ -39,3 +41,10 @@ def validate_asap(issuers=None, subjects=None, required=True):
 
         return validate_asap_wrapper
     return validate_asap_decorator
+
+
+def requires_asap(func=None, issuers=None, subject_should_match_issuer=None):
+    return with_asap(func=func,
+                     required=True,
+                     issuers=issuers,
+                     subject_should_match_issuer=subject_should_match_issuer)
