@@ -58,7 +58,3 @@ def _validate_claims(claims, settings):
     if (settings.ASAP_VALID_ISSUERS
             and claims.get('iss') not in settings.ASAP_VALID_ISSUERS):
         raise InvalidIssuerError
-
-    if (settings.ASAP_SUBJECT_SHOULD_MATCH_ISSUER
-            and claims.get('iss') != claims.get('sub')):
-        raise SubjectIssuerMismatchError
