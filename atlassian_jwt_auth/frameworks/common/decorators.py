@@ -1,6 +1,6 @@
 from functools import wraps
 from jwt.exceptions import InvalidIssuerError, InvalidTokenError
-from .asap import _process_asap_token, _validate_claims
+from .asap import _process_asap_token, _verify_issuers
 from .utils import SettingsDict
 
 
@@ -64,7 +64,7 @@ def _restrict_asap(func=None, backend=None, issuers=None,
                 )
 
             try:
-                _validate_claims(asap_claims, settings)
+                _verify_issuers(asap_claims, settings.ASAP_VALID_ISSUERS)
             except InvalidIssuerError:
                 error_response = backend.get_403_response(
                     'Forbidden: Invalid token issuer'

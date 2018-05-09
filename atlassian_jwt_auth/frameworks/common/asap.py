@@ -20,9 +20,7 @@ def _process_asap_token(request, backend, settings):
             leeway=settings.ASAP_VALID_LEEWAY,
         )
 
-        _validate_claims(
-            asap_claims, settings
-        )
+        _verify_issuers(asap_claims, settings.ASAP_VALID_ISSUERS)
 
         backend.set_asap_claims_for_request(request, asap_claims)
     except NoTokenProvidedError:
@@ -53,8 +51,8 @@ def _process_asap_token(request, backend, settings):
         return error_response
 
 
-def _validate_claims(claims, settings):
-    """Validates a set of ASAP claims against ASAP-specific validation logic"""
-    if (settings.ASAP_VALID_ISSUERS
-            and claims.get('iss') not in settings.ASAP_VALID_ISSUERS):
+def _verify_issuers(asap_claims, issuers=None):
+    """Verify that the issuer in the claims is valid and is expected."""
+    claim_iss = asap_claims.get('iss')
+    if issuers and claim_iss not in issuers:
         raise InvalidIssuerError
