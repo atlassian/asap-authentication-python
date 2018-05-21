@@ -138,6 +138,14 @@ class TestAsapMiddleware(DjangoAsapMixin, RS256KeyTestMixin, SimpleTestCase):
                             key_id='whitelist/key01',
                             retriever_key='whitelist/key01')
 
+    # TODO: modify JWTAuthSigner to allow non-issuer subjects and update the
+    # decorated subject test cases
+    def test_request_non_decorated_subject_is_rejected(self):
+        self.check_response('restricted_subject', 'Forbidden', 403,
+                            issuer='whitelist',
+                            key_id='whitelist/key01',
+                            retriever_key='whitelist/key01')
+
     def test_request_using_settings_only_is_allowed(self):
         self.check_response('unneeded', 'two')
 

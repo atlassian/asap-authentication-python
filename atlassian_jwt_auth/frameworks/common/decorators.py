@@ -1,10 +1,10 @@
 from functools import wraps
 from jwt.exceptions import InvalidIssuerError, InvalidTokenError
-from .asap import _process_asap_token, _validate_claims
+from .asap import _process_asap_token, _verify_issuers
 from .utils import SettingsDict
 
 
-def _with_asap(func=None, backend=None, issuers=None, required=None,
+def _with_asap(func=None, backend=None, issuers=None, required=True,
                subject_should_match_issuer=None):
     if backend is None:
         raise ValueError(
@@ -42,7 +42,7 @@ def _with_asap(func=None, backend=None, issuers=None, required=None,
 
 
 def _restrict_asap(func=None, backend=None, issuers=None,
-                   required=None, subject_should_match_issuer=None):
+                   required=True, subject_should_match_issuer=None):
     """Decorator to allow endpoint-specific ASAP authorization, assuming ASAP
     authentication has already occurred.
     """
@@ -64,7 +64,7 @@ def _restrict_asap(func=None, backend=None, issuers=None,
                 )
 
             try:
-                _validate_claims(asap_claims, settings)
+                _verify_issuers(asap_claims, settings.ASAP_VALID_ISSUERS)
             except InvalidIssuerError:
                 error_response = backend.get_403_response(
                     'Forbidden: Invalid token issuer', request=request
@@ -87,7 +87,7 @@ def _restrict_asap(func=None, backend=None, issuers=None,
     return restrict_asap_decorator
 
 
-def _update_settings_from_kwargs(settings, issuers=None, required=None,
+def _update_settings_from_kwargs(settings, issuers=None, required=True,
                                  subject_should_match_issuer=None):
     settings = settings.copy()
 

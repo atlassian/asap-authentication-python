@@ -20,15 +20,11 @@ def _process_asap_token(request, backend, settings):
             leeway=settings.ASAP_VALID_LEEWAY,
         )
 
-        _validate_claims(
-            asap_claims, settings
-        )
+        _verify_issuers(asap_claims, settings.ASAP_VALID_ISSUERS)
 
         backend.set_asap_claims_for_request(request, asap_claims)
     except NoTokenProvidedError:
-        error_response = backend.get_401_response(
-            'Unauthorized', request=request
-        )
+        error_response = backend.get_401_response('Unauthorized')
     except PublicKeyRetrieverException as e:
         if e.status_code not in (403, 404):
             # Any error other than "not found" is a problem and should
@@ -40,27 +36,23 @@ def _process_asap_token(request, backend, settings):
             raise
 
         error_response = backend.get_401_response(
-            'Unauthorized: Key not found', request=request
+            'Unauthorized: Key not found'
         )
     except InvalidIssuerError:
         error_response = backend.get_403_response(
-            'Forbidden: Invalid token issuer', request=request
+            'Forbidden: Invalid token issuer'
         )
-    except InvalidTokenError as ex:
+    except InvalidTokenError:
         error_response = backend.get_401_response(
-            'Unauthorized: Invalid token', request=request
+            'Unauthorized: Invalid token'
         )
 
-    if error_response is not None and settings.ASAP_REQUIRED:
+    if error_response and settings.ASAP_REQUIRED:
         return error_response
 
 
-def _validate_claims(claims, settings):
-    """Validates a set of ASAP claims against ASAP-specific validation logic"""
-    if (settings.ASAP_VALID_ISSUERS
-            and claims.get('iss') not in settings.ASAP_VALID_ISSUERS):
+def _verify_issuers(asap_claims, issuers=None):
+    """Verify that the issuer in the claims is valid and is expected."""
+    claim_iss = asap_claims.get('iss')
+    if issuers and claim_iss not in issuers:
         raise InvalidIssuerError
-
-    if (settings.ASAP_SUBJECT_SHOULD_MATCH_ISSUER
-            and claims.get('iss') != claims.get('sub')):
-        raise SubjectIssuerMismatchError
