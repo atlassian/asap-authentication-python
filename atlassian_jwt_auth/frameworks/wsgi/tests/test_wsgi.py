@@ -52,7 +52,7 @@ class WsgiTests(utils.RS256KeyTestMixin, unittest.TestCase):
 
         environ = {}
         if token:
-            environ['HTTP_AUTHORIZATION'] = 'Bearer %s' % token
+            environ['HTTP_AUTHORIZATION'] = b'Bearer %s' % token
 
         app = self.get_app_with_middleware(config or self.config)
         return app(environ, start_response), resp_info, environ
