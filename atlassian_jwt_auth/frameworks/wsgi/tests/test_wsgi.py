@@ -64,6 +64,7 @@ class WsgiTests(utils.RS256KeyTestMixin, unittest.TestCase):
         )
         body, resp_info, environ = self.send_request(token=token)
         assert resp_info['status'] == '200 OK'
+        assert 'ATL_ASAP_CLAIMS' in environ
 
     def test_request_with_invalid_audience_is_rejected(self):
         token = create_token(
@@ -72,7 +73,10 @@ class WsgiTests(utils.RS256KeyTestMixin, unittest.TestCase):
         )
         body, resp_info, environ = self.send_request(token=token)
         assert resp_info['status'] == '401 Unauthorized'
+        assert 'ATL_ASAP_CLAIMS' not in environ
 
     def test_request_with_invalid_token_is_rejected(self):
         body, resp_info, environ = self.send_request(token=b'notavalidtoken')
         assert resp_info['status'] == '401 Unauthorized'
+        assert 'ATL_ASAP_CLAIMS' not in environ
+
