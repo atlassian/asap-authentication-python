@@ -9,7 +9,7 @@ def asap_middleware(get_response):
 
     def middleware(request):
         error_response = _process_asap_token(request, backend, settings)
-        if error_response:
+        if error_response is not None:
             return error_response
 
         return get_response(request)
@@ -29,5 +29,5 @@ class OldStyleASAPMiddleware(object):
         error_response = _process_asap_token(
             request, self.backend, self.settings
         )
-        if error_response:
+        if error_response is not None:
             return error_response

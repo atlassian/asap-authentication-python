@@ -12,6 +12,9 @@ urlpatterns = [
     url(r'^asap/subject_does_not_need_to_match_issuer$',
         views.subject_does_not_need_to_match_issuer_view,
         name='subject_does_not_need_to_match_issuer'),
+    url(r'^asap/subject_does_need_to_match_issuer_view$',
+        views.subject_does_need_to_match_issuer_view,
+        name='subject_does_need_to_match_issuer'),
 
     url(r'^asap/subject_does_not_need_to_match_issuer_from_settings$',
         views.subject_does_not_need_to_match_issuer_from_settings_view,
