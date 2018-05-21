@@ -28,7 +28,7 @@ def _with_asap(func=None, backend=None, issuers=None, required=None,
                 request, backend, settings
             )
 
-            if error_response:
+            if error_response is not None:
                 return error_response
 
             return func(*args, **kwargs)
@@ -60,18 +60,18 @@ def _restrict_asap(func=None, backend=None, issuers=None,
 
             if required and not asap_claims:
                 return backend.get_401_response(
-                    'Unauthorized'
+                    'Unauthorized', request=request
                 )
 
             try:
                 _validate_claims(asap_claims, settings)
             except InvalidIssuerError:
                 error_response = backend.get_403_response(
-                    'Forbidden: Invalid token issuer'
+                    'Forbidden: Invalid token issuer', request=request
                 )
             except InvalidTokenError:
                 error_response = backend.get_401_response(
-                    'Unauthorized: Invalid token'
+                    'Unauthorized: Invalid token', request=request
                 )
 
             if error_response and required:
