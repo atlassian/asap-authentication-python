@@ -1,11 +1,12 @@
 from django.conf import settings
+from django.utils.deprecation import MiddlewareMixin
 
 from atlassian_jwt_auth.frameworks.django.middleware import (
     OldStyleASAPMiddleware
 )
 
 
-class ProxiedAsapMiddleware(OldStyleASAPMiddleware):
+class ProxiedAsapMiddleware(OldStyleASAPMiddleware, MiddlewareMixin):
     """Enable client auth for ASAP-enabled services that are forwarding
     non-ASAP client requests.
 
