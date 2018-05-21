@@ -46,11 +46,11 @@ class Backend():
         pass
 
     @abstractmethod
-    def get_401_response(self, data=None, headers=None):
+    def get_401_response(self, data=None, headers=None, request=None):
         pass
 
     @abstractmethod
-    def get_403_response(self, data=None, headers=None):
+    def get_403_response(self, data=None, headers=None, request=None):
         pass
 
     @abstractmethod
