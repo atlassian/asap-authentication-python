@@ -30,6 +30,11 @@ def subject_does_not_need_to_match_issuer_view(request):
     return HttpResponse('Subject does not need to match issuer.')
 
 
+@with_asap(subject_should_match_issuer=True)
+def subject_does_need_to_match_issuer_view(request):
+    return HttpResponse('Subject does need to match issuer.')
+
+
 @with_asap()
 def subject_does_not_need_to_match_issuer_from_settings_view(request):
     return HttpResponse('Subject does not need to match issuer (settings).')

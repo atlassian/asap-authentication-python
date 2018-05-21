@@ -44,6 +44,10 @@ def validate_asap(issuers=None, subjects=None, required=True):
 
 
 def requires_asap(issuers=None, subject_should_match_issuer=None, func=None):
+    """Decorator for Django endpoints to require ASAP
+
+    :param list issuers: *required The 'iss' claims that this endpoint is from.
+    """
     return with_asap(func=func,
                      required=True,
                      issuers=issuers,

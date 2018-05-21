@@ -9,14 +9,13 @@ from atlassian_jwt_auth.exceptions import (
 def _process_asap_token(request, backend, settings):
     """ Verifies an ASAP token, validates the claims, and returns an error
     response"""
-    verifier = backend.get_verifier()
     token = backend.get_asap_token(request)
     error_response = None
 
     try:
         if token is None:
             raise NoTokenProvidedError
-
+        verifier = backend.get_verifier(settings=settings)
         asap_claims = verifier.verify_jwt(
             token,
             settings.ASAP_VALID_AUDIENCE,
@@ -26,7 +25,9 @@ def _process_asap_token(request, backend, settings):
         _verify_issuers(asap_claims, settings.ASAP_VALID_ISSUERS)
         backend.set_asap_claims_for_request(request, asap_claims)
     except NoTokenProvidedError:
-        error_response = backend.get_401_response('Unauthorized')
+        error_response = backend.get_401_response(
+            'Unauthorized', request=request
+        )
     except PublicKeyRetrieverException as e:
         if e.status_code not in (403, 404):
             # Any error other than "not found" is a problem and should
@@ -38,18 +39,18 @@ def _process_asap_token(request, backend, settings):
             raise
 
         error_response = backend.get_401_response(
-            'Unauthorized: Key not found'
+            'Unauthorized: Key not found', request=request
         )
     except InvalidIssuerError:
         error_response = backend.get_403_response(
-            'Forbidden: Invalid token issuer'
+            'Forbidden: Invalid token issuer', request=request
         )
     except InvalidTokenError:
         error_response = backend.get_401_response(
-            'Unauthorized: Invalid token'
+            'Unauthorized: Invalid token', request=request
         )
 
-    if error_response and settings.ASAP_REQUIRED:
+    if error_response is not None and settings.ASAP_REQUIRED:
         return error_response
 
 
