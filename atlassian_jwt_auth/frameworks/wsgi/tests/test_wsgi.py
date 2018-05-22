@@ -79,4 +79,3 @@ class WsgiTests(utils.RS256KeyTestMixin, unittest.TestCase):
         body, resp_info, environ = self.send_request(token=b'notavalidtoken')
         assert resp_info['status'] == '401 Unauthorized'
         assert 'ATL_ASAP_CLAIMS' not in environ
-
