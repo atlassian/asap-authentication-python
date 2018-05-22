@@ -13,7 +13,7 @@ class WSGIBackend(Backend):
         return request.environ.get('HTTP_AUTHORIZATION', b'')
 
     def get_401_response(self, data=None, headers=None, request=None):
-        if not request:
+        if request is None:
             raise TypeError("request must have a value")
 
         if headers is None:
@@ -25,7 +25,7 @@ class WSGIBackend(Backend):
         return ""
 
     def get_403_response(self, data=None, headers=None, request=None):
-        if not request:
+        if request is None:
             raise TypeError("request must have a value")
 
         if headers is None:
