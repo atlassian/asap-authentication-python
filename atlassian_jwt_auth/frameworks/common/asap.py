@@ -6,7 +6,6 @@ from .exceptions import NoTokenProvidedError, SubjectIssuerMismatchError
 def _process_asap_token(request, backend, settings):
     """ Verifies an ASAP token, validates the claims, and returns an error
     response"""
-    verifier = backend.get_verifier()
     token = backend.get_asap_token(request)
     error_response = None
 
@@ -14,6 +13,7 @@ def _process_asap_token(request, backend, settings):
         if token is None:
             raise NoTokenProvidedError
 
+        verifier = backend.get_verifier()
         asap_claims = verifier.verify_jwt(
             token,
             settings.ASAP_VALID_AUDIENCE,
