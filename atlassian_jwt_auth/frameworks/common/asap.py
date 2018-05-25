@@ -12,8 +12,7 @@ def _process_asap_token(request, backend, settings):
     try:
         if token is None:
             raise NoTokenProvidedError
-
-        verifier = backend.get_verifier()
+        verifier = backend.get_verifier(settings=settings)
         asap_claims = verifier.verify_jwt(
             token,
             settings.ASAP_VALID_AUDIENCE,
