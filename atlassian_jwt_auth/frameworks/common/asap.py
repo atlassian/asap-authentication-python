@@ -1,6 +1,6 @@
 from atlassian_jwt_auth.exceptions import PublicKeyRetrieverException
 from jwt.exceptions import InvalidIssuerError, InvalidTokenError
-from .exceptions import NoTokenProvidedError, SubjectIssuerMismatchError
+from .exceptions import NoTokenProvidedError
 
 
 def _process_asap_token(request, backend, settings):
