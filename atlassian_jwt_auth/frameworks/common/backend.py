@@ -38,7 +38,7 @@ class Backend():
         'ASAP_VALID_ISSUERS': None,
 
         # Enforce that the ASAP subject must match the issuer
-        'ASAP_SUBJECT_SHOULD_MATCH_ISSUER': None
+        'ASAP_SUBJECT_SHOULD_MATCH_ISSUER': False
     }
 
     @abstractmethod
