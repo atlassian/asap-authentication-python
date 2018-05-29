@@ -2,8 +2,7 @@ from django.conf import settings
 from django.utils.deprecation import MiddlewareMixin
 
 from atlassian_jwt_auth.frameworks.django.middleware import (
-    OldStyleASAPMiddleware,
-    asap_middleware as ASAPMiddleware,
+    OldStyleASAPMiddleware
 )
 
 
