@@ -1,6 +1,6 @@
 from atlassian_jwt_auth.exceptions import PublicKeyRetrieverException
 from jwt.exceptions import InvalidIssuerError, InvalidTokenError
-from .exceptions import NoTokenProvidedError, SubjectIssuerMismatchError
+from .exceptions import NoTokenProvidedError
 
 
 def _process_asap_token(request, backend, settings):
@@ -12,8 +12,7 @@ def _process_asap_token(request, backend, settings):
     try:
         if token is None:
             raise NoTokenProvidedError
-
-        verifier = backend.get_verifier()
+        verifier = backend.get_verifier(settings=settings)
         asap_claims = verifier.verify_jwt(
             token,
             settings.ASAP_VALID_AUDIENCE,
