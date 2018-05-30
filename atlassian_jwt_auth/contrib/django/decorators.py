@@ -49,11 +49,6 @@ def requires_asap(issuers=None, subject_should_match_issuer=None, func=None):
 
     :param list issuers: *required The 'iss' claims that this endpoint is from.
     """
-    warnings.warn(
-        "requires_asap in the contrib package is deprecated;"
-        "use atlassian_jwt_auth.frameworks.django.requires_asap instead",
-        DeprecationWarning
-    )
     return with_asap(func=func,
                      required=True,
                      issuers=issuers,
