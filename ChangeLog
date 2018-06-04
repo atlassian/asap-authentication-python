@@ -6,7 +6,7 @@ CHANGES
 -----
 
 * Sem-Ver: feature Add WSGI middleware
-* Sem-Ver: api-break Rework Django and Flask support
+* Sem-Ver: api-break Rework Django and Flask support. As part of this change the Django and Flask support has moved from the `contrib` package to the new `frameworks` package.
 * Add a readme to the contrib module
 
 3.6.0
