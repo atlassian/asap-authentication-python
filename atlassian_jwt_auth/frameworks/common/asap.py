@@ -11,7 +11,9 @@ def _process_asap_token(request, backend, settings):
     response"""
     token = backend.get_asap_token(request)
     error_response = None
-
+    if token is None and not settings.ASAP_REQUIRED and (
+            settings.ASAP_REQUIRED is not None):
+        return
     try:
         if token is None:
             raise NoTokenProvidedError
