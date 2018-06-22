@@ -1,6 +1,11 @@
 CHANGES
 =======
 
+4.0.1
+-----
+
+* Sem-Ver: bugfix When asap is not required and no asap token has been provided return early in _process_asap_token
+* Update the changelog with more specific information on has changed with regards to the Django and Flask support
 
 4.0.0
 -----
