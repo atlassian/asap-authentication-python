@@ -47,7 +47,8 @@ class DjangoAsapMixin(object):
         })
 
         self.test_settings = {
-            'ASAP_KEY_RETRIEVER_CLASS': self.retriever
+            'ASAP_KEY_RETRIEVER_CLASS': self.retriever,
+            'ASAP_EXCLUDE_PATHS': ['/excluded']
         }
 
 
@@ -152,6 +153,10 @@ class TestAsapMiddleware(DjangoAsapMixin, RS256KeyTestMixin, SimpleTestCase):
     def test_request_subject_does_not_need_to_match_issuer_from_settings(self):
         self.test_settings['ASAP_SUBJECT_SHOULD_MATCH_ISSUER'] = False
         self.check_response('needed', 'one', 200, subject='different_than_is')
+
+    def test_request_with_excluded_path(self):
+        response = self.client.get('/excluded')
+        assert response.status_code == 200
 
 
 class TestAsapDecorator(DjangoAsapMixin, RS256KeyTestMixin, SimpleTestCase):
@@ -285,7 +290,7 @@ class TestAsapDecorator(DjangoAsapMixin, RS256KeyTestMixin, SimpleTestCase):
                 self.test_settings, ASAP_SUBJECT_SHOULD_MATCH_ISSUER=False)):
             message = 'Issuer does not match the subject'
             with self.assertRaisesRegexp(ValueError, message):
-                response = self.client.get(
+                self.client.get(
                     reverse('subject_does_need_to_match_issuer'),
                     HTTP_AUTHORIZATION=b'Bearer ' + token)
 

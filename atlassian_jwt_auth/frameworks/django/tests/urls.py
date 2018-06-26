@@ -26,4 +26,6 @@ urlpatterns = [
         name='restricted_issuer'),
     url(r'^asap/restricted_subject$', views.restricted_subject_view,
         name='restricted_subject'),
+
+    url(r'^excluded', views.excluded, name='excluded'),
 ]

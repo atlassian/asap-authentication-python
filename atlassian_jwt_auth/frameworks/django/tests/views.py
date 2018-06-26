@@ -58,3 +58,7 @@ def restricted_issuer_view(request):
 @validate_asap(subjects=['client-app'])
 def restricted_subject_view(request):
     return HttpResponse('four')
+
+
+def excluded(request):
+    return HttpResponse('OK')
