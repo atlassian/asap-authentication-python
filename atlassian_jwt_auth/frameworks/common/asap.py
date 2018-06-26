@@ -14,6 +14,13 @@ def _process_asap_token(request, backend, settings):
     if token is None and not settings.ASAP_REQUIRED and (
             settings.ASAP_REQUIRED is not None):
         return
+
+    if request and settings.ASAP_EXCLUDE_PATHS:
+        path = request.environ.get('PATH_INFO')
+        excluded_paths = settings.ASAP_EXCLUDE_PATHS
+        if any([excluded.match(path) for excluded in excluded_paths]):
+            return
+
     try:
         if token is None:
             raise NoTokenProvidedError

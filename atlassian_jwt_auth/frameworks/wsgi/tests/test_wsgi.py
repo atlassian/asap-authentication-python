@@ -39,7 +39,7 @@ class WsgiTests(utils.RS256KeyTestMixin, unittest.TestCase):
     def get_app_with_middleware(self, config):
         return ASAPMiddleware(app, config)
 
-    def send_request(self, url='/', config=None, token=None):
+    def send_request(self, path='/', app=None, config=None, token=None):
         """ returns the response of sending a request containing the given
             token sent in the Authorization header.
         """
@@ -50,11 +50,11 @@ class WsgiTests(utils.RS256KeyTestMixin, unittest.TestCase):
             resp_info['status'] = status
             resp_info['headers'] = response_headers
 
-        environ = {}
+        environ = {'PATH_INFO': path}
         if token:
             environ['HTTP_AUTHORIZATION'] = b'Bearer ' + token
 
-        app = self.get_app_with_middleware(config or self.config)
+        app = app or self.get_app_with_middleware(config or self.config)
         return app(environ, start_response), resp_info, environ
 
     def test_request_with_valid_token_is_allowed(self):
@@ -78,4 +78,17 @@ class WsgiTests(utils.RS256KeyTestMixin, unittest.TestCase):
     def test_request_with_invalid_token_is_rejected(self):
         body, resp_info, environ = self.send_request(token=b'notavalidtoken')
         assert resp_info['status'] == '401 Unauthorized'
+        assert 'ATL_ASAP_CLAIMS' not in environ
+
+    def test_request_with_excluded_path(self):
+        config = dict(self.config)
+        config['ASAP_EXCLUDE_PATHS'] = ['/excluded']
+        app = self.get_app_with_middleware(config)
+
+        body, resp_info, environ = self.send_request(path='/included', app=app)
+        assert resp_info['status'] == '401 Unauthorized'
+        assert 'ATL_ASAP_CLAIMS' not in environ
+
+        body, resp_info, environ = self.send_request(path='/excluded', app=app)
+        assert resp_info['status'] == '200 OK'
         assert 'ATL_ASAP_CLAIMS' not in environ

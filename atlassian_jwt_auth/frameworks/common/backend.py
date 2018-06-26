@@ -1,4 +1,5 @@
 from abc import ABCMeta, abstractmethod, abstractproperty
+import re
 
 from atlassian_jwt_auth import HTTPSPublicKeyRetriever, JWTAuthVerifier
 
@@ -38,7 +39,10 @@ class Backend():
         'ASAP_VALID_ISSUERS': None,
 
         # Enforce that the ASAP subject must match the issuer
-        'ASAP_SUBJECT_SHOULD_MATCH_ISSUER': None
+        'ASAP_SUBJECT_SHOULD_MATCH_ISSUER': None,
+
+        # Exclude the follow paths from ASAP authentications
+        'ASAP_EXCLUDE_PATHS': []
     }
 
     @abstractmethod
@@ -102,5 +106,11 @@ class Backend():
         valid_issuers = settings.get('ASAP_VALID_ISSUERS')
         if valid_issuers:
             settings['ASAP_VALID_ISSUERS'] = set(valid_issuers)
+
+        exclude_paths = settings.get('ASAP_EXCLUDE_PATHS')
+        if exclude_paths:
+            settings['ASAP_EXCLUDE_PATHS'] = [
+                re.compile(regex) for regex in exclude_paths
+            ]
 
         return SettingsDict(settings)
