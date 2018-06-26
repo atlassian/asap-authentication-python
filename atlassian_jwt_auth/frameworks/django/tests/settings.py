@@ -111,3 +111,4 @@ STATIC_URL = '/static/'
 ASAP_VALID_AUDIENCE = 'server-app'
 ASAP_VALID_ISSUERS = ('client-app', 'whitelist')
 ASAP_PUBLICKEY_REPOSITORY = None
+ASAP_EXCLUDE_PATHS = ['/excluded']
