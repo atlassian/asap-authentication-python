@@ -290,7 +290,7 @@ class TestAsapDecorator(DjangoAsapMixin, RS256KeyTestMixin, SimpleTestCase):
                 self.test_settings, ASAP_SUBJECT_SHOULD_MATCH_ISSUER=False)):
             message = 'Issuer does not match the subject'
             with self.assertRaisesRegexp(ValueError, message):
-                response = self.client.get(
+                self.client.get(
                     reverse('subject_does_need_to_match_issuer'),
                     HTTP_AUTHORIZATION=b'Bearer ' + token)
 
