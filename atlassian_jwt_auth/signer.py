@@ -3,6 +3,8 @@ import datetime
 import random
 
 import jwt
+from cryptography.hazmat.backends import default_backend
+from cryptography.hazmat.primitives import serialization
 
 from atlassian_jwt_auth import algorithms
 from atlassian_jwt_auth import key
@@ -24,6 +26,18 @@ class JWTAuthSigner(object):
         if self.lifetime > datetime.timedelta(hours=1):
             raise ValueError("lifetime, '%s',exceeds the allowed 1 hour max" %
                              (self.lifetime))
+
+    @property
+    def _private_key(self):
+        key_identifier, private_key_pem = self.private_key_retriever.load(
+            self.issuer)
+        if not isinstance(private_key_pem, bytes):
+            private_key_pem = private_key_pem.encode()
+        return serialization.load_pem_private_key(
+            private_key_pem,
+            password=None,
+            backend=default_backend()
+        )
 
     def _generate_claims(self, audience, **kwargs):
         """ returns a new dictionary of claims. """
@@ -50,7 +64,7 @@ class JWTAuthSigner(object):
             self.issuer)
         return jwt.encode(
             self._generate_claims(audience, **kwargs),
-            key=private_key_pem,
+            key=self._private_key,
             algorithm=self.algorithm,
             headers={'kid': key_identifier.key_id})
 
