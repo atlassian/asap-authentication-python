@@ -18,6 +18,7 @@ class JWTAuthSigner(object):
         self.lifetime = kwargs.get('lifetime', datetime.timedelta(hours=1))
         self.algorithm = kwargs.get('algorithm', 'RS256')
         self.subject = kwargs.get('subject', None)
+        self._private_key = None
 
         if self.algorithm not in set(
                 algorithms.get_permitted_algorithm_names()):
@@ -27,17 +28,18 @@ class JWTAuthSigner(object):
             raise ValueError("lifetime, '%s',exceeds the allowed 1 hour max" %
                              (self.lifetime))
 
-    @property
-    def _private_key(self):
+    def _fetch_private_key(self):
         key_identifier, private_key_pem = self.private_key_retriever.load(
             self.issuer)
         if not isinstance(private_key_pem, bytes):
             private_key_pem = private_key_pem.encode()
-        return serialization.load_pem_private_key(
+
+        self._private_key = serialization.load_pem_private_key(
             private_key_pem,
             password=None,
             backend=default_backend()
         )
+        self._key_identifier = key_identifier
 
     def _generate_claims(self, audience, **kwargs):
         """ returns a new dictionary of claims. """
@@ -60,13 +62,14 @@ class JWTAuthSigner(object):
 
     def generate_jwt(self, audience, **kwargs):
         """ returns a new signed jwt for use. """
-        key_identifier, private_key_pem = self.private_key_retriever.load(
-            self.issuer)
+        if not self._private_key:
+            self._fetch_private_key()
+
         return jwt.encode(
             self._generate_claims(audience, **kwargs),
             key=self._private_key,
             algorithm=self.algorithm,
-            headers={'kid': key_identifier.key_id})
+            headers={'kid': self._key_identifier.key_id})
 
 
 class TokenReusingJWTAuthSigner(JWTAuthSigner):
