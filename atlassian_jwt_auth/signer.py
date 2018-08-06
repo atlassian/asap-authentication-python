@@ -18,6 +18,7 @@ class JWTAuthSigner(object):
         self.lifetime = kwargs.get('lifetime', datetime.timedelta(hours=1))
         self.algorithm = kwargs.get('algorithm', 'RS256')
         self.subject = kwargs.get('subject', None)
+        self._private_keys_cache = dict()
 
         if self.algorithm not in set(
                 algorithms.get_permitted_algorithm_names()):
@@ -27,17 +28,24 @@ class JWTAuthSigner(object):
             raise ValueError("lifetime, '%s',exceeds the allowed 1 hour max" %
                              (self.lifetime))
 
-    @property
-    def _private_key(self):
-        key_identifier, private_key_pem = self.private_key_retriever.load(
-            self.issuer)
+    def _obtain_private_key(self, key_identifier, private_key_pem):
+        """ returns a loaded instance of the given private key either from
+            cache or from the given private_key_pem.
+        """
+        priv_key = self._private_keys_cache.get(key_identifier.key_id, None)
+        if priv_key is not None:
+            return priv_key
         if not isinstance(private_key_pem, bytes):
             private_key_pem = private_key_pem.encode()
-        return serialization.load_pem_private_key(
+        priv_key = serialization.load_pem_private_key(
             private_key_pem,
             password=None,
             backend=default_backend()
         )
+        if len(self._private_keys_cache) > 10:
+            self._private_keys_cache = dict()
+        self._private_keys_cache[key_identifier.key_id] = priv_key
+        return priv_key
 
     def _generate_claims(self, audience, **kwargs):
         """ returns a new dictionary of claims. """
@@ -62,9 +70,11 @@ class JWTAuthSigner(object):
         """ returns a new signed jwt for use. """
         key_identifier, private_key_pem = self.private_key_retriever.load(
             self.issuer)
+        private_key = self._obtain_private_key(
+            key_identifier, private_key_pem)
         return jwt.encode(
             self._generate_claims(audience, **kwargs),
-            key=self._private_key,
+            key=private_key,
             algorithm=self.algorithm,
             headers={'kid': key_identifier.key_id})
 
