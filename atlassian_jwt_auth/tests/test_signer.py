@@ -2,6 +2,7 @@ import datetime
 import unittest
 
 import mock
+from cryptography.hazmat.primitives import serialization
 
 import atlassian_jwt_auth
 from atlassian_jwt_auth.tests import utils
@@ -72,9 +73,16 @@ class BaseJWTAuthSignerTest(object):
         jwt_auth_signer.generate_jwt(expected_aud)
         m_jwt_encode.assert_called_with(
             expected_claims,
-            key=self._private_key_pem,
+            key=mock.ANY,
             algorithm=self.algorithm,
             headers={'kid': expected_key_id})
+        for name, args, kwargs in m_jwt_encode.mock_calls:
+            call_private_key = kwargs['key'].private_bytes(
+                encoding=serialization.Encoding.PEM,
+                format=serialization.PrivateFormat.TraditionalOpenSSL,
+                encryption_algorithm=serialization.NoEncryption()
+            )
+            self.assertEqual(call_private_key, self._private_key_pem)
 
 
 class JWTAuthSignerRS256Test(
