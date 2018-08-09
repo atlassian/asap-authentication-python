@@ -1,6 +1,11 @@
 CHANGES
 =======
 
+4.1.0
+-----
+
+* Sem-Ver: feature Reduce the time taken to generate a jwt by caching loaded private key instances
+
 4.0.2
 -----
 
