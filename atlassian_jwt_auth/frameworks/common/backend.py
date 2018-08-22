@@ -83,6 +83,10 @@ class Backend():
 
     def get_verifier(self, settings=None):
         """Returns a verifier for ASAP JWT tokens"""
+        verifier = getattr(self, '_verifier', None)
+        if verifier is not None:
+            return verifier
+
         if settings is None:
             settings = self.settings
 
@@ -93,10 +97,12 @@ class Backend():
         if settings.ASAP_SUBJECT_SHOULD_MATCH_ISSUER is not None:
             kwargs = {'subject_should_match_issuer':
                       settings.ASAP_SUBJECT_SHOULD_MATCH_ISSUER}
-        return JWTAuthVerifier(
+        verifier = JWTAuthVerifier(
             retriever,
             **kwargs
         )
+        self._verifier = verifier
+        return verifier
 
     def _process_settings(self, settings):
         valid_issuers = settings.get('ASAP_VALID_ISSUERS')
