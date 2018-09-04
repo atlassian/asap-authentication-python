@@ -1,6 +1,11 @@
 CHANGES
 =======
 
+4.1.1
+-----
+
+*  Sem-Ver: bugfix Django middleware super call
+
 4.1.0
 -----
 
