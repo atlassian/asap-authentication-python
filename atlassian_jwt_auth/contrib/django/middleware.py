@@ -26,7 +26,7 @@ class ProxiedAsapMiddleware(OldStyleASAPMiddleware, MiddlewareMixin):
                              'HTTP_X_ASAP_AUTHORIZATION')
 
     def process_request(self, request):
-        error_response = super(ProxiedAsapMiddleware, super).process_request(
+        error_response = super(ProxiedAsapMiddleware, self).process_request(
             request
         )
 
