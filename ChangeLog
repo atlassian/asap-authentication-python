@@ -1,6 +1,16 @@
 CHANGES
 =======
 
+4.1.2
+-----
+
+* Sem-Ver: bugfix upgrade cryptography from using a version >= 2.4.0 < 2.5.0 to use a version >= 2.5.0 and < 2.6.0
+* Sem-Ver: bugfix upgrade the version of Django used for testing to using version 1.11
+* Sem-Ver: bugfix upgrade pbr to use a version before 6.0.0
+* Sem-Ver: bugfix upgrade cryptography from using a version >= 2.3.0 < 2.4.0 to use a version >= 2.4.0 and < 2.5.0
+* Sem-Ver: bugfix upgrade the version of flask used for testing from versions below 0.12 to versions below 1.1.0
+* Sem-Ver: bugfix upgrade CacheControl from version 0.12.4 to 0.12.5
+
 4.1.1
 -----
 
