@@ -6,9 +6,11 @@ def asap_middleware(get_response):
     """Middleware to enable ASAP for all requests"""
     backend = DjangoBackend()
     settings = backend.settings
+    _verifier = backend.get_verifier(settings=settings)
 
     def middleware(request):
-        error_response = _process_asap_token(request, backend, settings)
+        error_response = _process_asap_token(request, backend, settings,
+                                             verifier=_verifier)
         if error_response is not None:
             return error_response
 
@@ -24,10 +26,11 @@ class OldStyleASAPMiddleware(object):
     def __init__(self):
         self.backend = DjangoBackend()
         self.settings = self.backend.settings
+        self._verifier = backend.get_verifier(settings=self.settings)
 
     def process_request(self, request):
         error_response = _process_asap_token(
-            request, self.backend, self.settings
+            request, self.backend, self.settings, verifier=self._verifier
         )
         if error_response is not None:
             return error_response
