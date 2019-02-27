@@ -1,6 +1,10 @@
 CHANGES
 =======
 
+4.1.3
+
+* Changed HTTP caching session to be shared among HTTPSPublicKeyRetriever instances
+
 4.1.2
 -----
 

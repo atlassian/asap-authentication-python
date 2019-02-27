@@ -8,12 +8,15 @@ from atlassian_jwt_auth.tests import utils
 
 
 class DummyHTTPSPublicKeyRetriever(HTTPSPublicKeyRetriever):
+    def __init__(self, base_url, *, loop=None):
+        super().__init__(base_url, loop=loop)
+        self._aiosession = self._get_session()
 
     def set_headers(self, headers):
-        self._session.get.return_value.headers.update(headers)
+        self._aiosession.get.return_value.headers.update(headers)
 
     def set_text(self, text):
-        self._session.get.return_value.text.return_value = text
+        self._aiosession.get.return_value.text.return_value = text
 
     def _get_session(self):
         session = Mock(spec=aiohttp.ClientSession)

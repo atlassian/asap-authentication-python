@@ -72,6 +72,9 @@ class HTTPSPublicKeyRetriever(BasePublicKeyRetriever):
     """ This class retrieves public key from a https location based upon the
          given key id.
     """
+    # Use a static requests session, reused/shared by all instances of
+    # HTTPSPublicKeyRetriever:
+    _session = None
 
     def __init__(self, base_url):
         if base_url is None or not base_url.startswith('https://'):
@@ -80,12 +83,12 @@ class HTTPSPublicKeyRetriever(BasePublicKeyRetriever):
         if not base_url.endswith('/'):
             base_url += '/'
         self.base_url = base_url
-        self._session = self._get_session()
-
-    def _get_session(self):
-        session = requests.Session()
-        session.mount('https://', cachecontrol.CacheControlAdapter())
-        return session
+        if HTTPSPublicKeyRetriever._session is None:
+            HTTPSPublicKeyRetriever._session = requests.Session()
+            HTTPSPublicKeyRetriever._session.mount(
+                'http://', cachecontrol.CacheControlAdapter())
+            HTTPSPublicKeyRetriever._session.mount(
+                'https://', cachecontrol.CacheControlAdapter())
 
     def retrieve(self, key_identifier, **requests_kwargs):
         """ returns the public key for given key_identifier. """
