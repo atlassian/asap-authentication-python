@@ -2,3 +2,4 @@ nose
 mock
 flask<1.1.0
 Django==1.11
+atlassian-httptest==0.8

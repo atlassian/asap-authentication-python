@@ -11,6 +11,7 @@ from atlassian_jwt_auth.key import (
 
 class HTTPSPublicKeyRetriever(_HTTPSPublicKeyRetriever):
     """A class for retrieving JWT public keys with aiohttp"""
+    _class_session = None
 
     def __init__(self, base_url, *, loop=None):
         if loop is None:
@@ -19,7 +20,10 @@ class HTTPSPublicKeyRetriever(_HTTPSPublicKeyRetriever):
         super().__init__(base_url)
 
     def _get_session(self):
-        return aiohttp.ClientSession(loop=self.loop)
+        if HTTPSPublicKeyRetriever._class_session is None:
+            HTTPSPublicKeyRetriever._class_session = aiohttp.ClientSession(
+                loop=self.loop)
+        return HTTPSPublicKeyRetriever._class_session
 
     async def _retrieve(self, url, requests_kwargs):
         try:
