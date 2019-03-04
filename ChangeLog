@@ -1,6 +1,12 @@
 CHANGES
 =======
 
+5.0.0
+-----
+
+* Sem-Ver: api-break Re-use verifiers in the various middlewares and add an optional verifier argument to the _process_asap_token method
+* Sem-Ver: api-break Share request sessions across key retriever instances so as to use a common cache
+
 4.1.2
 -----
 
