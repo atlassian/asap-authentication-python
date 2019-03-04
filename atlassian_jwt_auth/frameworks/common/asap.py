@@ -6,7 +6,7 @@ from atlassian_jwt_auth.exceptions import (
 )
 
 
-def _process_asap_token(request, backend, settings):
+def _process_asap_token(request, backend, settings, verifier=None):
     """ Verifies an ASAP token, validates the claims, and returns an error
     response"""
     token = backend.get_asap_token(request)
@@ -17,7 +17,8 @@ def _process_asap_token(request, backend, settings):
     try:
         if token is None:
             raise NoTokenProvidedError
-        verifier = backend.get_verifier(settings=settings)
+        if verifier is None:
+            verifier = backend.get_verifier(settings=settings)
         asap_claims = verifier.verify_jwt(
             token,
             settings.ASAP_VALID_AUDIENCE,
