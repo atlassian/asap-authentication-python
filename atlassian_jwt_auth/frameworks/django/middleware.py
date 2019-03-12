@@ -26,7 +26,7 @@ class OldStyleASAPMiddleware(object):
     def __init__(self):
         self.backend = DjangoBackend()
         self.settings = self.backend.settings
-        self._verifier = backend.get_verifier(settings=self.settings)
+        self._verifier = self.backend.get_verifier(settings=self.settings)
 
     def process_request(self, request):
         error_response = _process_asap_token(
