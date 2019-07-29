@@ -1,6 +1,11 @@
 CHANGES
 =======
 
+5.0.2
+-----
+
+* Sem-Ver: bugfix upgrade cryptography from using a version >= 2.5.0 < 2.6.0 to use a version >= 2.7.0 and < 2.8.0
+
 5.0.1
 -----
 
