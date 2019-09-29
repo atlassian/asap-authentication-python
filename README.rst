@@ -48,6 +48,20 @@ Each time you call ``generate_jwt`` this will find the latest active key file (e
     signer = atlassian_jwt_auth.create_signer_from_file_private_key_repository('issuer', '/opt/jwtprivatekeys')
     a_jwt = signer.generate_jwt('audience')
 
+To create a JWT using a data uri
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. code:: python
+
+    import atlassian_jwt_auth
+    from atlassian_jwt_auth.key import DataUriPrivateKeyRetriever
+
+    pem_id, private_key_pem = DataUriPrivateKeyRetriever('Your base64 encoded data uri').load('issuer/key')
+    signer = atlassian_jwt_auth.create_signer('issuer', 'issuer/key', private_key_pem)
+    a_jwt = signer.generate_jwt('audience')
+
+
+
 To make an authenticated HTTP request
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -72,7 +86,7 @@ to authenticate ``aiohttp`` requests:
 .. code:: python
 
     import aiohttp
-    
+
     import atlassian_jwt_auth
     from atlassian_jwt_auth.contrib.aiohttp import JWTAuth
 
@@ -115,7 +129,7 @@ To verify a JWT
 
 For Python versions starting from ``Python 3.5`` ``atlassian_jwt_auth.contrib.aiohttp``
 provides drop-in replacements for the components that
-perform HTTP requests, so that they use ``aiohttp`` instead of ``requests``: 
+perform HTTP requests, so that they use ``aiohttp`` instead of ``requests``:
 
 .. code:: python
 
