@@ -1,5 +1,4 @@
 nose
-mock
 flask<1.1.0
-Django==1.11
+Django==2.2
 atlassian-httptest==0.8

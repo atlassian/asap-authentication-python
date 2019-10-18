@@ -1,7 +1,6 @@
 import datetime
 import unittest
-
-import mock
+from unittest import mock
 
 import atlassian_jwt_auth
 from atlassian_jwt_auth.tests import utils
