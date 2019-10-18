@@ -56,7 +56,7 @@ To create a JWT using a data uri
     import atlassian_jwt_auth
     from atlassian_jwt_auth.key import DataUriPrivateKeyRetriever
 
-    pem_id, private_key_pem = DataUriPrivateKeyRetriever('Your base64 encoded data uri').load('issuer')
+    key_id, private_key_pem = DataUriPrivateKeyRetriever('Your base64 encoded data uri').load('issuer')
     signer = atlassian_jwt_auth.create_signer('issuer', 'issuer/key', private_key_pem)
     a_jwt = signer.generate_jwt('audience')
 
