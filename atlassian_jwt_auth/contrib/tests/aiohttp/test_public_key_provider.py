@@ -21,7 +21,7 @@ class DummyHTTPSPublicKeyRetriever(HTTPSPublicKeyRetriever):
 
         resp = session.get.return_value
         resp.headers = CIMultiDict({"content-type": PEM_FILE_TYPE})
-        resp.text.return_value = 'i-am-a-public-key'
+        resp.text = CoroutineMock(return_value='i-am-a-public-key')
         return session
 
 
