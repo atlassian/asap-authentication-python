@@ -53,6 +53,10 @@ class KeyIdentifierException(ASAPAuthenticationException):
     """Raise when there are issues validating the key identifier"""
 
 
+class JtiUniqunessException(ASAPAuthenticationException):
+    """Raise when a JTI is seen more than once. """
+
+
 class NoTokenProvidedError(ASAPAuthenticationException):
     """Raise when no token is provided"""
     pass
