@@ -1,5 +1,6 @@
 nose
 mock
+Jinja2<3.0.0
 flask<1.1.0
 Django>=1.11,<2.0.0
 atlassian-httptest==0.8
