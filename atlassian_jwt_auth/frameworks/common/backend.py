@@ -1,4 +1,8 @@
 from abc import ABCMeta, abstractmethod, abstractproperty
+try:
+    from functools import lru_cache
+except ImportError:
+    from backports.functools_lru_cache import lru_cache
 
 from atlassian_jwt_auth import HTTPSPublicKeyRetriever, JWTAuthVerifier
 
@@ -85,7 +89,10 @@ class Backend():
         """Returns a verifier for ASAP JWT tokens"""
         if settings is None:
             settings = self.settings
+        return self._get_verifier(settings)
 
+    @lru_cache(maxsize=130)
+    def _get_verifier(self, settings):
         retriever = settings.ASAP_KEY_RETRIEVER_CLASS(
             base_url=settings.ASAP_PUBLICKEY_REPOSITORY
         )
