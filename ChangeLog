@@ -1,6 +1,15 @@
 CHANGES
 =======
 
+6.0.0
+-----
+
+* Add release notes for version 6.0.0
+* Sem-Ver: bugfix For python 2.7 and 3.5 testing we need to pin Jinja2 to a version < 3.0.0
+* Sem-Ver: bugfix Update CacheControl from version 0.12.5 to 0.12.6
+* Sem-Ver: feature Add support for python 3.7
+* Sem-Ver: api-break Drop support for python3.4
+
 5.0.3
 -----
 
