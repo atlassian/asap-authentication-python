@@ -63,7 +63,8 @@ class JWTAuthVerifier(object):
 
         if self._subject_should_match_issuer and (
                 claims.get('sub') and claims['iss'] != claims['sub']):
-            raise ValueError('Issuer does not match the subject.')
+            raise exceptions.SubjectDoesNotMatchIssuerException(
+                'Issuer does not match the subject.')
 
         _aud = claims['aud']
         _exp = int(claims['exp'])

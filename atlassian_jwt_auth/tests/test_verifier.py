@@ -70,8 +70,12 @@ class BaseJWTAuthVerifierTest(object):
         }
         a_jwt = self._jwt_auth_signer.generate_jwt(self._example_aud)
         verifier = self._setup_jwt_auth_verifier(self._public_key_pem)
-        with self.assertRaisesRegexp(ValueError, expected_msg):
-            verifier.verify_jwt(a_jwt, self._example_aud)
+        for exception in [
+            ValueError,
+            atlassian_jwt_auth.exceptions.SubjectDoesNotMatchIssuerException,
+        ]:
+            with self.assertRaisesRegexp(exception, expected_msg):
+                verifier.verify_jwt(a_jwt, self._example_aud)
 
     @mock.patch('atlassian_jwt_auth.verifier.jwt.decode')
     def test_verify_jwt_with_jwt_lasting_gt_max_time(self, m_j_decode):

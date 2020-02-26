@@ -57,6 +57,10 @@ class JtiUniquenessException(ASAPAuthenticationException):
     """Raise when a JTI is seen more than once. """
 
 
+class SubjectDoesNotMatchIssuerException(ASAPAuthenticationException):
+    """Raise when the subject and issuer differ. """
+
+
 class NoTokenProvidedError(ASAPAuthenticationException):
     """Raise when no token is provided"""
     pass
