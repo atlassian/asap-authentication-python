@@ -1,21 +1,16 @@
 import unittest
 
-import atlassian_jwt_auth
-from atlassian_jwt_auth.tests import utils
 from atlassian_jwt_auth.contrib.tests.utils import get_static_retriever_class
 from atlassian_jwt_auth.frameworks.wsgi.middleware import ASAPMiddleware
+from atlassian_jwt_auth.tests import utils
+from atlassian_jwt_auth.tests.utils import (
+    create_token,
+)
 
 
 def app(environ, start_response):
     start_response('200 OK', [], None)
     return "OK"
-
-
-def create_token(issuer, audience, key_id, private_key):
-    signer = atlassian_jwt_auth.create_signer(
-        issuer, key_id, private_key
-    )
-    return signer.generate_jwt(audience)
 
 
 class WsgiTests(utils.RS256KeyTestMixin, unittest.TestCase):
