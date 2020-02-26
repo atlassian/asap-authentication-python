@@ -4,6 +4,7 @@ import jwt
 
 from atlassian_jwt_auth import algorithms
 from atlassian_jwt_auth import key
+from atlassian_jwt_auth import exceptions
 
 
 class JWTAuthVerifier(object):
@@ -79,7 +80,8 @@ class JWTAuthVerifier(object):
     def _check_jti(self, jti):
         """Checks that the given jti has not been already been used."""
         if jti in self._seen_jti:
-            raise ValueError("The jti, '%s', has already been used." % jti)
+            raise exceptions.JtiUniqunessException(
+                "The jti, '%s', has already been used." % jti)
         self._seen_jti[jti] = None
         while len(self._seen_jti) > 1000:
             self._seen_jti.popitem(last=False)

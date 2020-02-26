@@ -4,6 +4,7 @@ import unittest
 import mock
 
 import atlassian_jwt_auth
+import atlassian_jwt_auth.exceptions
 from atlassian_jwt_auth.tests import utils
 
 
@@ -98,8 +99,10 @@ class BaseJWTAuthVerifierTest(object):
         self.assertIsNotNone(verifier.verify_jwt(
             a_jwt,
             self._example_aud))
-        with self.assertRaisesRegexp(ValueError, 'has already been used'):
-            verifier.verify_jwt(a_jwt, self._example_aud)
+        for exception in [ValueError,
+                          atlassian_jwt_auth.exceptions.JtiUniqunessException]:
+            with self.assertRaisesRegexp(exception, 'has already been used'):
+                verifier.verify_jwt(a_jwt, self._example_aud)
 
     def test_verify_jwt_with_already_seen_jti_with_uniqueness_disabled(self):
         """ tests that verify_jwt accepts a jwt if the jti
