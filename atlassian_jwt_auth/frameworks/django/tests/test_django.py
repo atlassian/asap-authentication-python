@@ -163,6 +163,14 @@ class TestAsapMiddleware(DjangoAsapMixin, RS256KeyTestMixin, SimpleTestCase):
         self.test_settings['ASAP_SUBJECT_SHOULD_MATCH_ISSUER'] = False
         self.check_response('needed', 'one', 200, subject='different_than_is')
 
+    def test_request_subject_and_issue_not_matching(self):
+        self.check_response(
+            'needed',
+            'Subject and Issuer do not match',
+            401,
+            subject='different_than_is',
+        )
+
 
 class TestAsapDecorator(DjangoAsapMixin, RS256KeyTestMixin, SimpleTestCase):
     def test_request_with_valid_token_is_allowed(self):
@@ -294,10 +302,14 @@ class TestAsapDecorator(DjangoAsapMixin, RS256KeyTestMixin, SimpleTestCase):
         with override_settings(**dict(
                 self.test_settings, ASAP_SUBJECT_SHOULD_MATCH_ISSUER=False)):
             message = 'Issuer does not match the subject'
-            with self.assertRaisesRegexp(ValueError, message):
-                response = self.client.get(
-                    reverse('subject_does_need_to_match_issuer'),
-                    HTTP_AUTHORIZATION=b'Bearer ' + token)
+            response = self.client.get(
+                reverse('subject_does_need_to_match_issuer'),
+                HTTP_AUTHORIZATION=b'Bearer ' + token)
+            self.assertContains(
+                response,
+                'Unauthorized: Subject and Issuer do not match',
+                status_code=401
+            )
 
     def test_request_subject_does_not_need_to_match_issuer_from_settings(self):
         token = create_token(

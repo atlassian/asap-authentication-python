@@ -4,6 +4,7 @@ from atlassian_jwt_auth.exceptions import (
     PublicKeyRetrieverException,
     NoTokenProvidedError,
     JtiUniquenessException,
+    SubjectDoesNotMatchIssuerException,
 )
 
 
@@ -56,6 +57,10 @@ def _process_asap_token(request, backend, settings, verifier=None):
     except JtiUniquenessException:
         error_response = backend.get_401_response(
             'Unauthorized: Invalid token - duplicate jti', request=request
+        )
+    except SubjectDoesNotMatchIssuerException:
+        error_response = backend.get_401_response(
+            'Unauthorized: Subject and Issuer do not match', request=request
         )
 
     if error_response is not None and settings.ASAP_REQUIRED:

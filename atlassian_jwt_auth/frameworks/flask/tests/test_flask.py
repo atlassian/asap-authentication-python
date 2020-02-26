@@ -105,3 +105,20 @@ class FlaskTests(utils.RS256KeyTestMixin, unittest.TestCase):
         )
         url = '/restricted-to-another-client/'
         self.assertEqual(self.send_request(token, url=url).status_code, 403)
+
+    def test_request_subject_and_issue_not_matching(self):
+        token = create_token(
+            'client-app', 'server-app',
+            'client-app/key01', self._private_key_pem,
+            subject='different'
+        )
+        self.assertEqual(self.send_request(token).status_code, 401)
+
+    def test_request_subject_does_not_need_to_match_issuer_from_settings(self):
+        self.app.config['ASAP_SUBJECT_SHOULD_MATCH_ISSUER'] = False
+        token = create_token(
+            'client-app', 'server-app',
+            'client-app/key01', self._private_key_pem,
+            subject='different'
+        )
+        self.assertEqual(self.send_request(token).status_code, 200)

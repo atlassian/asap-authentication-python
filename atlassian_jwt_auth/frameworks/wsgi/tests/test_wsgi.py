@@ -87,3 +87,24 @@ class WsgiTests(utils.RS256KeyTestMixin, unittest.TestCase):
         body, resp_info, environ = self.send_request(token=b'notavalidtoken')
         self.assertEqual(resp_info['status'], '401 Unauthorized')
         self.assertNotIn('ATL_ASAP_CLAIMS', environ)
+
+    def test_request_subject_and_issue_not_matching(self):
+        token = create_token(
+            'client-app', 'server-app',
+            'client-app/key01', self._private_key_pem,
+            subject='different'
+        )
+        body, resp_info, environ = self.send_request(token=token)
+        self.assertEqual(resp_info['status'], '401 Unauthorized')
+        self.assertNotIn('ATL_ASAP_CLAIMS', environ)
+
+    def test_request_subject_does_not_need_to_match_issuer_from_settings(self):
+        self.config['ASAP_SUBJECT_SHOULD_MATCH_ISSUER'] = False
+        token = create_token(
+            'client-app', 'server-app',
+            'client-app/key01', self._private_key_pem,
+            subject='different'
+        )
+        body, resp_info, environ = self.send_request(token=token)
+        self.assertEqual(resp_info['status'], '200 OK')
+        self.assertIn('ATL_ASAP_CLAIMS', environ)
