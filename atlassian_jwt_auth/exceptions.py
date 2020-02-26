@@ -53,7 +53,7 @@ class KeyIdentifierException(ASAPAuthenticationException):
     """Raise when there are issues validating the key identifier"""
 
 
-class JtiUniqunessException(ASAPAuthenticationException):
+class JtiUniquenessException(ASAPAuthenticationException):
     """Raise when a JTI is seen more than once. """
 
 

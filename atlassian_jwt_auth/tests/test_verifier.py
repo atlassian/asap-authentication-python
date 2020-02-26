@@ -99,8 +99,9 @@ class BaseJWTAuthVerifierTest(object):
         self.assertIsNotNone(verifier.verify_jwt(
             a_jwt,
             self._example_aud))
-        for exception in [ValueError,
-                          atlassian_jwt_auth.exceptions.JtiUniqunessException]:
+        for exception in [
+                ValueError,
+                atlassian_jwt_auth.exceptions.JtiUniquenessException]:
             with self.assertRaisesRegexp(exception, 'has already been used'):
                 verifier.verify_jwt(a_jwt, self._example_aud)
 
