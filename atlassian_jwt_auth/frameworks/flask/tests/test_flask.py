@@ -64,6 +64,15 @@ class FlaskTests(utils.RS256KeyTestMixin, unittest.TestCase):
         )
         self.assertEqual(self.send_request(token).status_code, 200)
 
+    @unittest.expectedFailure
+    def test_request_with_duplicate_jti_is_rejected(self):
+        token = create_token(
+            'client-app', 'server-app',
+            'client-app/key01', self._private_key_pem
+        )
+        self.assertEqual(self.send_request(token).status_code, 200)
+        self.assertEqual(self.send_request(token).status_code, 401)
+
     def test_request_with_invalid_audience_is_rejected(self):
         token = create_token(
             'client-app', 'invalid-audience',

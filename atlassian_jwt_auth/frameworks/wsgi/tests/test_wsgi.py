@@ -34,7 +34,7 @@ class WsgiTests(utils.RS256KeyTestMixin, unittest.TestCase):
     def get_app_with_middleware(self, config):
         return ASAPMiddleware(app, config)
 
-    def send_request(self, url='/', config=None, token=None):
+    def send_request(self, url='/', config=None, token=None, application=None):
         """ returns the response of sending a request containing the given
             token sent in the Authorization header.
         """
@@ -48,9 +48,9 @@ class WsgiTests(utils.RS256KeyTestMixin, unittest.TestCase):
         environ = {}
         if token:
             environ['HTTP_AUTHORIZATION'] = b'Bearer ' + token
-
-        app = self.get_app_with_middleware(config or self.config)
-        return app(environ, start_response), resp_info, environ
+        if application is None:
+            application = self.get_app_with_middleware(config or self.config)
+        return application(environ, start_response), resp_info, environ
 
     def test_request_with_valid_token_is_allowed(self):
         token = create_token(
@@ -60,6 +60,19 @@ class WsgiTests(utils.RS256KeyTestMixin, unittest.TestCase):
         body, resp_info, environ = self.send_request(token=token)
         self.assertEqual(resp_info['status'], '200 OK')
         self.assertIn('ATL_ASAP_CLAIMS', environ)
+
+    def test_request_with_duplicate_jti_is_rejected(self):
+        token = create_token(
+            'client-app', 'server-app',
+            'client-app/key01', self._private_key_pem
+        )
+        application = self.get_app_with_middleware(self.config)
+        body, resp_info, environ = self.send_request(
+            token=token, application=application)
+        self.assertEqual(resp_info['status'], '200 OK')
+        body, resp_info, environ = self.send_request(
+            token=token, application=application)
+        self.assertEqual(resp_info['status'], '401 Unauthorized')
 
     def test_request_with_invalid_audience_is_rejected(self):
         token = create_token(
