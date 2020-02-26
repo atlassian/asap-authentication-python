@@ -3,20 +3,20 @@ import os
 import django
 from django.test.testcases import SimpleTestCase
 from django.test.utils import override_settings, modify_settings
+
 try:
     from django.urls import reverse
 except ImportError:
     from django.core.urlresolvers import reverse
 
-from atlassian_jwt_auth import create_signer
-from atlassian_jwt_auth.contrib.tests.utils import get_static_retriever_class
+from atlassian_jwt_auth.contrib.tests.utils import (
+    get_static_retriever_class,
+)
 from atlassian_jwt_auth.tests import utils
-from atlassian_jwt_auth.tests.utils import RS256KeyTestMixin
-
-
-def create_token(issuer, audience, key_id, private_key, subject=None):
-    signer = create_signer(issuer, key_id, private_key, subject=subject)
-    return signer.generate_jwt(audience)
+from atlassian_jwt_auth.tests.utils import (
+    create_token,
+    RS256KeyTestMixin,
+)
 
 
 class DjangoAsapMixin(object):

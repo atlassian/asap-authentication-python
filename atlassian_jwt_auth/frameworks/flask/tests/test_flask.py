@@ -2,11 +2,13 @@ import unittest
 
 from flask import Flask
 
-import atlassian_jwt_auth
-from atlassian_jwt_auth.tests import utils
-from atlassian_jwt_auth.frameworks.flask import with_asap
 from atlassian_jwt_auth.contrib.flask_app import requires_asap
 from atlassian_jwt_auth.contrib.tests.utils import get_static_retriever_class
+from atlassian_jwt_auth.frameworks.flask import with_asap
+from atlassian_jwt_auth.tests import utils
+from atlassian_jwt_auth.tests.utils import (
+    create_token,
+)
 
 
 def get_app():
@@ -28,13 +30,6 @@ def get_app():
         return "OK"
 
     return app
-
-
-def create_token(issuer, audience, key_id, private_key):
-    signer = atlassian_jwt_auth.create_signer(
-        issuer, key_id, private_key
-    )
-    return signer.generate_jwt(audience)
 
 
 class FlaskTests(utils.RS256KeyTestMixin, unittest.TestCase):

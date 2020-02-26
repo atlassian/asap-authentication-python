@@ -41,6 +41,13 @@ def get_example_jwt_auth_signer(**kwargs):
         issuer, key_id, key, algorithm=algorithm)
 
 
+def create_token(issuer, audience, key_id, private_key, subject=None):
+    """" returns a token based upon the supplied parameters. """
+    signer = atlassian_jwt_auth.create_signer(
+        issuer, key_id, private_key, subject=subject)
+    return signer.generate_jwt(audience)
+
+
 class BaseJWTAlgorithmTestMixin(object):
 
     """ A mixin class to make testing different support for different
