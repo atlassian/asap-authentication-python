@@ -1,3 +1,5 @@
+import logging
+
 from jwt.exceptions import InvalidIssuerError, InvalidTokenError
 
 from atlassian_jwt_auth.exceptions import (
@@ -11,6 +13,7 @@ from atlassian_jwt_auth.exceptions import (
 def _process_asap_token(request, backend, settings, verifier=None):
     """ Verifies an ASAP token, validates the claims, and returns an error
     response"""
+    logger = logging.getLogger('asap')
     token = backend.get_asap_token(request)
     error_response = None
     if token is None and not settings.ASAP_REQUIRED and (
@@ -30,6 +33,7 @@ def _process_asap_token(request, backend, settings, verifier=None):
         _verify_issuers(asap_claims, settings.ASAP_VALID_ISSUERS)
         backend.set_asap_claims_for_request(request, asap_claims)
     except NoTokenProvidedError:
+        logger.info('No token provided')
         error_response = backend.get_401_response(
             'Unauthorized', request=request
         )
@@ -42,26 +46,33 @@ def _process_asap_token(request, backend, settings, verifier=None):
             # will return 403 for a missing file to avoid leaking
             # information.
             raise
-
+            logger.warning('Could not retrieve the matching public key')
         error_response = backend.get_401_response(
             'Unauthorized: Key not found', request=request
         )
     except InvalidIssuerError:
+        logger.warning('Invalid token - issuer')
         error_response = backend.get_403_response(
             'Forbidden: Invalid token issuer', request=request
         )
     except InvalidTokenError:
+        logger.warning('Invalid token')
         error_response = backend.get_401_response(
             'Unauthorized: Invalid token', request=request
         )
     except JtiUniquenessException:
+        logger.warning('Invalid token - duplicate jti')
         error_response = backend.get_401_response(
             'Unauthorized: Invalid token - duplicate jti', request=request
         )
     except SubjectDoesNotMatchIssuerException:
+        logger.warning('Invalid token - subject and issuer do not match')
         error_response = backend.get_401_response(
             'Unauthorized: Subject and Issuer do not match', request=request
         )
+    except ValueError:
+        logger.exception('An error occured while checking an asap token')
+        raise
 
     if error_response is not None and settings.ASAP_REQUIRED:
         return error_response
