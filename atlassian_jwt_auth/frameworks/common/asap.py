@@ -3,6 +3,7 @@ from jwt.exceptions import InvalidIssuerError, InvalidTokenError
 from atlassian_jwt_auth.exceptions import (
     PublicKeyRetrieverException,
     NoTokenProvidedError,
+    JtiUniquenessException,
 )
 
 
@@ -51,6 +52,10 @@ def _process_asap_token(request, backend, settings, verifier=None):
     except InvalidTokenError:
         error_response = backend.get_401_response(
             'Unauthorized: Invalid token', request=request
+        )
+    except JtiUniquenessException:
+        error_response = backend.get_401_response(
+            'Unauthorized: Invalid token - duplicate jti', request=request
         )
 
     if error_response is not None and settings.ASAP_REQUIRED:
