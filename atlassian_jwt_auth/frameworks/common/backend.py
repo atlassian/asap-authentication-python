@@ -45,6 +45,7 @@ class Backend():
         'ASAP_SUBJECT_SHOULD_MATCH_ISSUER': None,
 
         # Enforce that tokens have a unique JTI
+        # Set this to True to enforce JTI uniqueness checking.
         'ASAP_CHECK_JTI_UNIQUENESS': None,
     }
 
