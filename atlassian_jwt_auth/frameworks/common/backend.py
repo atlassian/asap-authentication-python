@@ -42,7 +42,10 @@ class Backend():
         'ASAP_VALID_ISSUERS': None,
 
         # Enforce that the ASAP subject must match the issuer
-        'ASAP_SUBJECT_SHOULD_MATCH_ISSUER': None
+        'ASAP_SUBJECT_SHOULD_MATCH_ISSUER': None,
+
+        # Enforce that tokens have a unique JTI
+        'ASAP_CHECK_JTI_UNIQUENESS': None,
     }
 
     @abstractmethod
@@ -100,6 +103,8 @@ class Backend():
         if settings.ASAP_SUBJECT_SHOULD_MATCH_ISSUER is not None:
             kwargs = {'subject_should_match_issuer':
                       settings.ASAP_SUBJECT_SHOULD_MATCH_ISSUER}
+        if settings.ASAP_CHECK_JTI_UNIQUENESS is not None:
+            kwargs['check_jti_uniqueness'] = settings.ASAP_CHECK_JTI_UNIQUENESS
         return JWTAuthVerifier(
             retriever,
             **kwargs
