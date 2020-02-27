@@ -70,7 +70,7 @@ def _process_asap_token(request, backend, settings, verifier=None):
         error_response = backend.get_401_response(
             'Unauthorized: Subject and Issuer do not match', request=request
         )
-    except ValueError:
+    except Exception:
         logger.exception('An error occured while checking an asap token')
         raise
 
