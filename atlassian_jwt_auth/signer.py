@@ -114,10 +114,10 @@ class TokenReusingJWTAuthSigner(JWTAuthSigner):
             return False
         if set(claims.keys()) != set(existing_claims.keys()):
             return False
-        for key, val in claims.items():
-            if key in ['exp', 'iat', 'jti', 'nbf']:
+        for dict_key, val in claims.items():
+            if dict_key in ['exp', 'iat', 'jti', 'nbf']:
                 continue
-            if existing_claims[key] != val:
+            if existing_claims[dict_key] != val:
                 return False
         return True
 

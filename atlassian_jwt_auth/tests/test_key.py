@@ -9,7 +9,7 @@ class TestKeyModule(unittest.TestCase):
 
     def test_key_identifier_with_invalid_keys(self):
         """ test that invalid key identifiers are not permitted. """
-        keys = ['../aha', '/a', '\c:a', 'lk2j34/#$', 'a../../a', 'a/;a',
+        keys = ['../aha', '/a', r'\c:a', 'lk2j34/#$', 'a../../a', 'a/;a',
                 ' ', ' / ', ' /',
                 u'dir/some\0thing', 'a/#a', 'a/a?x', 'a/a;',
                 ]
