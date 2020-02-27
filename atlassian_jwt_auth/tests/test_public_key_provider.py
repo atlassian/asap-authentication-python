@@ -30,20 +30,20 @@ class BaseHTTPSPublicKeyRetrieverTest(object):
             base urls.
         """
         with self.assertRaises(ValueError):
-            retriever = self.create_retriever('http://example.com')
+            self.create_retriever('http://example.com')
 
     def test_https_public_key_retriever_does_not_support_none_url(self):
         """ tests that HTTPSPublicKeyRetriever does not support None
             base urls.
         """
         with self.assertRaises(ValueError):
-            retriever = self.create_retriever(None)
+            self.create_retriever(None)
 
     def test_https_public_key_retriever_supports_https_url(self):
         """ tests that HTTPSPublicKeyRetriever supports https://
             base urls.
         """
-        retriever = self.create_retriever(self.base_url)
+        self.create_retriever(self.base_url)
 
     @mock.patch.object(requests.Session, 'get')
     def test_retrieve(self, mock_get_method):

@@ -61,7 +61,7 @@ class WsgiTests(utils.RS256KeyTestMixin, unittest.TestCase):
         self.assertEqual(resp_info['status'], '200 OK')
         self.assertIn('ATL_ASAP_CLAIMS', environ)
 
-    def test_request_with_duplicate_jti_is_accepted_as_per_setting(self):
+    def test_request_with_duplicate_jti_is_rejected_as_per_setting(self):
         self.config['ASAP_CHECK_JTI_UNIQUENESS'] = True
         token = create_token(
             'client-app', 'server-app',
