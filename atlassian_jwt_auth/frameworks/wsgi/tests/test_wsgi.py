@@ -61,7 +61,8 @@ class WsgiTests(utils.RS256KeyTestMixin, unittest.TestCase):
         self.assertEqual(resp_info['status'], '200 OK')
         self.assertIn('ATL_ASAP_CLAIMS', environ)
 
-    def test_request_with_duplicate_jti_is_rejected(self):
+    def test_request_with_duplicate_jti_is_accepted_as_per_setting(self):
+        self.config['ASAP_CHECK_JTI_UNIQUENESS'] = True
         token = create_token(
             'client-app', 'server-app',
             'client-app/key01', self._private_key_pem
@@ -74,12 +75,11 @@ class WsgiTests(utils.RS256KeyTestMixin, unittest.TestCase):
             token=token, application=application)
         self.assertEqual(resp_info['status'], '401 Unauthorized')
 
-    def test_request_with_duplicate_jti_is_accepted_as_per_setting(self):
+    def _assert_request_with_duplicate_jti_is_accepted(self):
         token = create_token(
             'client-app', 'server-app',
             'client-app/key01', self._private_key_pem
         )
-        self.config['ASAP_CHECK_JTI_UNIQUENESS'] = False
         application = self.get_app_with_middleware(self.config)
         body, resp_info, environ = self.send_request(
             token=token, application=application)
@@ -87,6 +87,13 @@ class WsgiTests(utils.RS256KeyTestMixin, unittest.TestCase):
         body, resp_info, environ = self.send_request(
             token=token, application=application)
         self.assertEqual(resp_info['status'], '200 OK')
+
+    def test_request_with_duplicate_jti_is_accepted(self):
+        self._assert_request_with_duplicate_jti_is_accepted()
+
+    def test_request_with_duplicate_jti_is_accepted_as_per_setting(self):
+        self.config['ASAP_CHECK_JTI_UNIQUENESS'] = False
+        self._assert_request_with_duplicate_jti_is_accepted()
 
     def test_request_with_invalid_audience_is_rejected(self):
         token = create_token(

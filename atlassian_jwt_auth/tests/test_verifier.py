@@ -97,7 +97,8 @@ class BaseJWTAuthVerifierTest(object):
         """ tests that verify_jwt rejects a jwt if the jti
             has already been seen.
         """
-        verifier = self._setup_jwt_auth_verifier(self._public_key_pem)
+        verifier = self._setup_jwt_auth_verifier(
+            self._public_key_pem, check_jti_uniqueness=True)
         a_jwt = self._jwt_auth_signer.generate_jwt(
             self._example_aud)
         self.assertIsNotNone(verifier.verify_jwt(
@@ -109,6 +110,12 @@ class BaseJWTAuthVerifierTest(object):
             with self.assertRaisesRegexp(exception, 'has already been used'):
                 verifier.verify_jwt(a_jwt, self._example_aud)
 
+    def assert_jwt_accepted_more_than_once(self, verifier, a_jwt):
+        """ asserts that the given jwt is accepted more than once. """
+        for i in range(0, 3):
+            self.assertIsNotNone(
+                verifier.verify_jwt(a_jwt, self._example_aud))
+
     def test_verify_jwt_with_already_seen_jti_with_uniqueness_disabled(self):
         """ tests that verify_jwt accepts a jwt if the jti
             has already been seen and the verifier has been set
@@ -117,9 +124,16 @@ class BaseJWTAuthVerifierTest(object):
         verifier = self._setup_jwt_auth_verifier(
             self._public_key_pem, check_jti_uniqueness=False)
         a_jwt = self._jwt_auth_signer.generate_jwt(self._example_aud)
-        for i in range(0, 3):
-            self.assertIsNotNone(
-                verifier.verify_jwt(a_jwt, self._example_aud))
+        self.assert_jwt_accepted_more_than_once(verifier, a_jwt)
+
+    def test_verify_jwt_with_already_seen_jti_default(self):
+        """ tests that verify_jwt by default accepts a jwt if the jti
+            has already been seen.
+        """
+        verifier = self._setup_jwt_auth_verifier(
+            self._public_key_pem)
+        a_jwt = self._jwt_auth_signer.generate_jwt(self._example_aud)
+        self.assert_jwt_accepted_more_than_once(verifier, a_jwt)
 
     def test_verify_jwt_subject_should_match_issuer(self):
         verifier = self._setup_jwt_auth_verifier(

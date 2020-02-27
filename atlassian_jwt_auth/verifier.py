@@ -18,7 +18,7 @@ class JWTAuthVerifier(object):
         self._subject_should_match_issuer = kwargs.get(
             'subject_should_match_issuer', True)
         self._check_jti_uniqueness = kwargs.get(
-            'check_jti_uniqueness', True)
+            'check_jti_uniqueness', False)
 
     def verify_jwt(self, a_jwt, audience, leeway=0, **requests_kwargs):
         """Verify if the token is correct

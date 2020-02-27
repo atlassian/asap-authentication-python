@@ -94,7 +94,8 @@ class TestAsapMiddleware(DjangoAsapMixin, RS256KeyTestMixin, SimpleTestCase):
     def test_request_with_valid_token_is_allowed(self):
         self.check_response('needed', 'one', 200)
 
-    def test_request_with_duplicate_jti_is_rejected(self):
+    def test_request_with_duplicate_jti_is_rejected_as_per_setting(self):
+        self.test_settings['ASAP_CHECK_JTI_UNIQUENESS'] = True
         token = create_token(
             issuer='client-app', audience='server-app',
             key_id='client-app/key01', private_key=self._private_key_pem
@@ -104,8 +105,7 @@ class TestAsapMiddleware(DjangoAsapMixin, RS256KeyTestMixin, SimpleTestCase):
         self.check_response('needed', 'duplicate jti', 401,
                             authorization=str_auth)
 
-    def test_request_with_duplicate_jti_is_accepted_as_per_setting(self):
-        self.test_settings['ASAP_CHECK_JTI_UNIQUENESS'] = False
+    def _assert_request_with_duplicate_jti_is_accepted(self):
         token = create_token(
             issuer='client-app', audience='server-app',
             key_id='client-app/key01', private_key=self._private_key_pem
@@ -113,6 +113,13 @@ class TestAsapMiddleware(DjangoAsapMixin, RS256KeyTestMixin, SimpleTestCase):
         str_auth = 'Bearer ' + token.decode(encoding='iso-8859-1')
         self.check_response('needed', 'one', 200, authorization=str_auth)
         self.check_response('needed', 'one', 200, authorization=str_auth)
+
+    def test_request_with_duplicate_jti_is_accepted(self):
+        self._assert_request_with_duplicate_jti_is_accepted()
+
+    def test_request_with_duplicate_jti_is_accepted_as_per_setting(self):
+        self.test_settings['ASAP_CHECK_JTI_UNIQUENESS'] = False
+        self._assert_request_with_duplicate_jti_is_accepted()
 
     def test_request_with_string_headers_is_allowed(self):
         token = create_token(
