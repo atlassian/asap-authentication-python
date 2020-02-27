@@ -1,6 +1,26 @@
 CHANGES
 =======
 
+7.0.0
+-----
+
+* Add release notes for version 7.0.0
+* Sem-Ver: feature Log information on general exceptions in addition to specific exceptions
+* Sem-Ver: bugfix Fix some issues that flake8 detected
+* Sem-Ver: api-break Disable jti uniqueness checking by default
+* Sem-Ver: bugfix Reduce the backend verifier cache max size from 130 to 20
+* Sem-Ver: feature Add support to the various frameworks for being able to specify to not check jti uniqueness
+* Sem-Ver: feature Cache Backend verifiers
+* Sem-Ver: feature Add logging to the framework asap token checking code
+* Sem-Ver: bugfix Catch SubjectDoesNotMatchIssuerException in the frameworks
+* Sem-Ver: feature Add a SubjectDoesNotMatchIssuerException for when the subject does not match the issuer
+* Sem-Ver: bugfix Catch JtiUniquenessException and respond with a 401 inside \_process\_asap\_token
+* Sem-Ver: bugfix Deduplicate the various framework test create\_token methods
+* Sem-Ver: bugfix Fix the spelling of the duplicate jti exception (rename JtiUniqunessException to JtiUniquenessException)
+* Sem-Ver: feature Allow SettingsDict instances to be hashed
+* Sem-Ver: feature Add and use a specific exception, JtiUniqunessException, for when a JTI is used more than once
+* Sem-Ver: bugfix Switch the wsgi tests to use unittest assertions
+
 6.0.0
 -----
 
