@@ -12,8 +12,8 @@ import atlassian_jwt_auth.signer
 from atlassian_jwt_auth.tests import utils
 
 
-class NoneAlgorithmJwtSigner(atlassian_jwt_auth.signer.JWTAuthSigner):
-    """ A JwtSigner that generates JWTs using the none algorithm
+class NoneAlgorithmJwtAuthSigner(atlassian_jwt_auth.signer.JWTAuthSigner):
+    """ A JWTAuthSigner that generates JWTs using the none algorithm
         and supports specifying arbitrary alg jwt header values.
     """
 
@@ -72,7 +72,7 @@ class BaseJWTAuthVerifierTest(object):
         verifier = self._setup_jwt_auth_verifier(self._public_key_pem)
         private_key_ret = atlassian_jwt_auth.key.StaticPrivateKeyRetriever(
             self._example_key_id, self._private_key_pem.decode())
-        jwt_signer = NoneAlgorithmJwtSigner(
+        jwt_signer = NoneAlgorithmJwtAuthSigner(
             issuer=self._example_issuer,
             private_key_retriever=private_key_ret,
         )
