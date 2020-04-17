@@ -1,11 +1,31 @@
 import datetime
 import unittest
 
+import jwt
+import jwt.exceptions
 import mock
 
 import atlassian_jwt_auth
 import atlassian_jwt_auth.exceptions
+import atlassian_jwt_auth.key
+import atlassian_jwt_auth.signer
 from atlassian_jwt_auth.tests import utils
+
+
+class NoneAlgorithmJwtSigner(atlassian_jwt_auth.signer.JWTAuthSigner):
+    """ A JwtSigner that generates JWTs using the none algorithm
+        and supports specifying arbitrary alg jwt header values.
+    """
+
+    def generate_jwt(self, audience, **kwargs):
+        alg_header = kwargs.get('alg_header', 'none')
+        key_identifier, private_key_pem = self.private_key_retriever.load(
+            self.issuer)
+        return jwt.encode(self._generate_claims(audience, **kwargs),
+                          algorithm=None,
+                          key=None,
+                          headers={'kid': key_identifier.key_id,
+                                   'alg': alg_header})
 
 
 class BaseJWTAuthVerifierTest(object):
@@ -44,6 +64,25 @@ class BaseJWTAuthVerifierTest(object):
         self.assertIsNotNone(v_claims)
         self.assertEqual(v_claims['aud'], self._example_aud)
         self.assertEqual(v_claims['iss'], self._example_issuer)
+
+    def test_verify_jwt_with_none_algorithm(self):
+        """ tests that verify_jwt does not accept jwt that use the none
+            algorithm.
+        """
+        verifier = self._setup_jwt_auth_verifier(self._public_key_pem)
+        private_key_ret = atlassian_jwt_auth.key.StaticPrivateKeyRetriever(
+            self._example_key_id, self._private_key_pem.decode())
+        jwt_signer = NoneAlgorithmJwtSigner(
+            issuer=self._example_issuer,
+            private_key_retriever=private_key_ret,
+        )
+        for algorithm in ['none', 'None', 'nOne', 'nonE', 'NONE']:
+            jwt_token = jwt_signer.generate_jwt(
+                self._example_aud, alg_header=algorithm)
+            jwt_headers = jwt.get_unverified_header(jwt_token)
+            self.assertEqual(jwt_headers['alg'], algorithm)
+            with self.assertRaises(jwt.exceptions.InvalidAlgorithmError):
+                verifier.verify_jwt(jwt_token, self._example_aud)
 
     def test_verify_jwt_with_key_identifier_not_starting_with_issuer(self):
         """ tests that verify_jwt rejects a jwt if the key identifier does
