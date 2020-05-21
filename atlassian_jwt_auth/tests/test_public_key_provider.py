@@ -190,6 +190,23 @@ class BaseHTTPSMultiRepositoryPublicKeyRetrieverTest(
             retriever.retrieve('example/eg'),
             self._public_key_pem)
 
+    @mock.patch.object(requests.Session, 'get')
+    def test_retrieve_with_connection_error(self, mock_get_method):
+        """ tests that the retrieve method works as expected
+            when the first key repository encounters a connection error.
+        """
+        retriever = HTTPSMultiRepositoryPublicKeyRetriever(self.keystore_urls)
+        _setup_mock_response_for_retriever(
+            mock_get_method, self._public_key_pem)
+        valid_response = mock_get_method.return_value
+        del mock_get_method.return_value
+        connection_exception = requests.exceptions.ConnectionError(
+            response=mock.Mock(status_code=None))
+        mock_get_method.side_effect = [connection_exception, valid_response]
+        self.assertEqual(
+            retriever.retrieve('example/eg'),
+            self._public_key_pem)
+
 
 def _setup_mock_response_for_retriever(
         mock_method, public_key_pem, headers=None):
