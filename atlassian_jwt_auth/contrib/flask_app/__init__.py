@@ -1,6 +1,6 @@
 import warnings
 
-from .decorators import requires_asap
+from .decorators import requires_asap  # noqa
 
 
 warnings.warn(
