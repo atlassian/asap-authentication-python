@@ -130,9 +130,9 @@ class HTTPSMultiRepositoryPublicKeyRetriever(BasePublicKeyRetriever):
     def __init__(self, key_repository_urls, failover_on=None):
         if not isinstance(key_repository_urls, list):
             raise TypeError('keystore_urls must be a list of urls.')
-        if failover_on is None:
-            failover_on = (404, 500, 502, 503, 504)
-        self.failover_on = failover_on
+        self.failover_on = set()
+        if failover_on is not None:
+            self.failover_on = set(failover_on)
         self._retrievers = self._create_retrievers(key_repository_urls)
 
     def _create_retrievers(self, key_repository_urls):
@@ -145,8 +145,9 @@ class HTTPSMultiRepositoryPublicKeyRetriever(BasePublicKeyRetriever):
                 return retriever.retrieve(key_identifier, **requests_kwargs)
             except (RequestException, PublicKeyRetrieverException) as e:
                 if isinstance(e, PublicKeyRetrieverException):
-                    if (e.status_code is None
-                            or e.status_code not in self.failover_on):
+                    if e.status_code is None or (
+                            e.status_code < 500
+                            and e.status_code not in self.failover_on):
                         raise
                 logger = logging.getLogger(__name__)
                 logger.warn('Unable to retrieve public key from store',

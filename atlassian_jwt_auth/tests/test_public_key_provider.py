@@ -180,7 +180,8 @@ class BaseHTTPSMultiRepositoryPublicKeyRetrieverTest(
             when the first key repository returns a generic client error
             response.
         """
-        retriever = HTTPSMultiRepositoryPublicKeyRetriever(self.keystore_urls)
+        retriever = HTTPSMultiRepositoryPublicKeyRetriever(
+            self.keystore_urls)
         _setup_mock_response_for_retriever(
             mock_get_method, self._public_key_pem)
         valid_response = mock_get_method.return_value
@@ -196,7 +197,8 @@ class BaseHTTPSMultiRepositoryPublicKeyRetrieverTest(
         """ tests that the retrieve method works as expected
             when the first key repository returns a not found response.
         """
-        retriever = HTTPSMultiRepositoryPublicKeyRetriever(self.keystore_urls)
+        retriever = HTTPSMultiRepositoryPublicKeyRetriever(
+            self.keystore_urls, [404])
         _setup_mock_response_for_retriever(
             mock_get_method, self._public_key_pem)
         valid_response = mock_get_method.return_value
