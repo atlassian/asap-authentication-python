@@ -66,7 +66,11 @@ class JWTAuthVerifier(object):
             raise exceptions.SubjectDoesNotMatchIssuerException(
                 'Issuer does not match the subject.')
 
-        _aud = claims['aud']
+        _aud = claims.get('aud', None)
+        if _aud is None:
+            _msg = ("Claims validity, the aud claim must be provided and "
+                    "cannot be empty.")
+            raise KeyError(_msg)
         _exp = int(claims['exp'])
         _iat = int(claims['iat'])
         if _exp - _iat > 3600:

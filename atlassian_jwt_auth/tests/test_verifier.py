@@ -192,6 +192,41 @@ class BaseJWTAuthVerifierTest(object):
             additional_claims={'sub': 'not-' + self._example_issuer})
         self.assertIsNotNone(verifier.verify_jwt(a_jwt, self._example_aud))
 
+    @mock.patch('atlassian_jwt_auth.verifier.jwt.decode')
+    def test_verify_jwt_with_missing_aud_claim(self, m_j_decode):
+        """ tests that verify_jwt rejects jwt that do not have an aud
+            claim.
+        """
+        expected_msg = ('Claims validity, the aud claim must be provided and '
+                        'cannot be empty.')
+        claims = self._jwt_auth_signer._generate_claims(self._example_aud)
+        del claims['aud']
+        m_j_decode.return_value = claims
+        a_jwt = self._jwt_auth_signer.generate_jwt(self._example_aud)
+        verifier = self._setup_jwt_auth_verifier(self._public_key_pem)
+        with self.assertRaisesRegexp(KeyError, expected_msg):
+            verifier.verify_jwt(a_jwt, self._example_aud)
+
+    def test_verify_jwt_with_none_aud(self):
+        """ tests that verify_jwt rejects jwt that have a None aud claim. """
+        verifier = self._setup_jwt_auth_verifier(self._public_key_pem)
+        a_jwt = self._jwt_auth_signer.generate_jwt(
+            self._example_aud,
+            additional_claims={'aud': None})
+        with self.assertRaises(jwt.exceptions.InvalidAudienceError):
+            verifier.verify_jwt(a_jwt, self._example_aud)
+
+    def test_verify_jwt_with_non_matching_aud(self):
+        """ tests that verify_jwt rejects a jwt if the aud claim does not
+            match the given & expected audience.
+        """
+        verifier = self._setup_jwt_auth_verifier(self._public_key_pem)
+        a_jwt = self._jwt_auth_signer.generate_jwt(
+            self._example_aud,
+            additional_claims={'aud': self._example_aud + '-different'})
+        with self.assertRaises(jwt.exceptions.InvalidAudienceError):
+            verifier.verify_jwt(a_jwt, self._example_aud)
+
 
 class JWTAuthVerifierRS256Test(
         BaseJWTAuthVerifierTest,
