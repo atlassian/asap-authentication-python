@@ -10,7 +10,7 @@ import cryptography.hazmat.backends
 import jwt
 import requests
 from cryptography.hazmat.primitives import serialization
-from requests.exceptions import RequestException
+from requests.exceptions import RequestException, ConnectionError
 
 from atlassian_jwt_auth.exceptions import (KeyIdentifierException,
                                            PublicKeyRetrieverException,
@@ -141,6 +141,10 @@ class HTTPSMultiRepositoryPublicKeyRetriever(BasePublicKeyRetriever):
             retrieval.
         """
         if isinstance(exception, PublicKeyRetrieverException):
+            original_exception = getattr(
+                exception, 'original_exception', None)
+            if isinstance(original_exception, ConnectionError):
+                return
             if exception.status_code is None or exception.status_code < 500:
                 raise
 
