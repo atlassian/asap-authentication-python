@@ -1,6 +1,20 @@
 CHANGES
 =======
 
+7.1.0
+-----
+
+* Add release notes for version 7.1.0
+* Sem-Ver: bugfix When a connection error is encountered while attempting to fetch public keys in HTTPSMultiRepositoryPublicKeyRetriever continue to attempt key retrieval using other retrievers
+* Sem-Ver: feature Add a handle\_retrieval\_exception method to the HTTPSMultiRepositoryPublicKeyRetriever class
+* Sem-Ver: bugfix In CI move to using setup.py nosetests as setup.py test has been deprecated
+* Sem-Ver: bugfix Run flake8 in ci
+* Sem-Ver: bugfix Flake8 fix up - add an explicit check that the aud claim has been provided. This is not a breaking change because even if verify\_jwt was to use an audience value of None & a jwt did not have an aud claim, a KeyError would be raised
+* Sem-Ver: bugfix Fix some issues that flake8 detected
+* Sem-Ver: bugfix Fix up the name of the None algorithm auth signer
+* Sem-Ver: bugfix For python 2.7 and 3.5 testing we need to pin MarkupSafe to a version < 2.0.0
+* Sem-Ver: bugfix Add an explicit test for how none algorithm jwt are handled
+
 7.0.0
 -----
 
