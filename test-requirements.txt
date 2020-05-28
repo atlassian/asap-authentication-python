@@ -1,5 +1,4 @@
 nose
-mock
 Jinja2<3.0.0
 MarkupSafe<2.0.0
 flask<1.1.0

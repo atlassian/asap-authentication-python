@@ -1,9 +1,9 @@
 import datetime
 import unittest
+from unittest import mock
 
 import jwt
 import jwt.exceptions
-import mock
 
 import atlassian_jwt_auth
 import atlassian_jwt_auth.exceptions

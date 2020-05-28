@@ -1,7 +1,7 @@
 import datetime
 import unittest
+from unittest import mock
 
-import mock
 from cryptography.hazmat.primitives import serialization
 
 import atlassian_jwt_auth
