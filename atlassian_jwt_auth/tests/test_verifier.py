@@ -94,7 +94,7 @@ class BaseJWTAuthVerifierTest(object):
             algorithm=self.algorithm,
         )
         a_jwt = signer.generate_jwt(self._example_aud)
-        with self.assertRaisesRegexp(ValueError, 'Issuer does not own'):
+        with self.assertRaisesRegex(ValueError, 'Issuer does not own'):
             verifier.verify_jwt(a_jwt, self._example_aud)
 
     @mock.patch('atlassian_jwt_auth.verifier.jwt.decode')
@@ -113,7 +113,7 @@ class BaseJWTAuthVerifierTest(object):
             ValueError,
             atlassian_jwt_auth.exceptions.SubjectDoesNotMatchIssuerException,
         ]:
-            with self.assertRaisesRegexp(exception, expected_msg):
+            with self.assertRaisesRegex(exception, expected_msg):
                 verifier.verify_jwt(a_jwt, self._example_aud)
 
     @mock.patch('atlassian_jwt_auth.verifier.jwt.decode')
@@ -129,7 +129,7 @@ class BaseJWTAuthVerifierTest(object):
         m_j_decode.return_value = claims
         a_jwt = self._jwt_auth_signer.generate_jwt(self._example_aud)
         verifier = self._setup_jwt_auth_verifier(self._public_key_pem)
-        with self.assertRaisesRegexp(ValueError, expected_msg):
+        with self.assertRaisesRegex(ValueError, expected_msg):
             verifier.verify_jwt(a_jwt, self._example_aud)
 
     def test_verify_jwt_with_jwt_with_already_seen_jti(self):
@@ -146,7 +146,7 @@ class BaseJWTAuthVerifierTest(object):
         for exception in [
                 ValueError,
                 atlassian_jwt_auth.exceptions.JtiUniquenessException]:
-            with self.assertRaisesRegexp(exception, 'has already been used'):
+            with self.assertRaisesRegex(exception, 'has already been used'):
                 verifier.verify_jwt(a_jwt, self._example_aud)
 
     def assert_jwt_accepted_more_than_once(self, verifier, a_jwt):
@@ -180,8 +180,8 @@ class BaseJWTAuthVerifierTest(object):
         a_jwt = self._jwt_auth_signer.generate_jwt(
             self._example_aud,
             additional_claims={'sub': 'not-' + self._example_issuer})
-        with self.assertRaisesRegexp(ValueError,
-                                     'Issuer does not match the subject.'):
+        with self.assertRaisesRegex(ValueError,
+                                    'Issuer does not match the subject.'):
             verifier.verify_jwt(a_jwt, self._example_aud)
 
     def test_verify_jwt_subject_does_not_need_to_match_issuer(self):
@@ -204,7 +204,7 @@ class BaseJWTAuthVerifierTest(object):
         m_j_decode.return_value = claims
         a_jwt = self._jwt_auth_signer.generate_jwt(self._example_aud)
         verifier = self._setup_jwt_auth_verifier(self._public_key_pem)
-        with self.assertRaisesRegexp(KeyError, expected_msg):
+        with self.assertRaisesRegex(KeyError, expected_msg):
             verifier.verify_jwt(a_jwt, self._example_aud)
 
     def test_verify_jwt_with_none_aud(self):
