@@ -5,3 +5,5 @@ MarkupSafe<2.0.0
 flask<1.1.0
 Django>=1.11,<2.0.0
 atlassian-httptest==0.8
+aiohttp==3.6.2
+asynctest==0.13.0

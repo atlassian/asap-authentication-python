@@ -3,7 +3,7 @@ import cgi
 import logging
 import os
 import re
-import sys
+from urllib.parse import unquote_plus
 
 import cachecontrol
 import cryptography.hazmat.backends
@@ -16,10 +16,6 @@ from atlassian_jwt_auth.exceptions import (KeyIdentifierException,
                                            PublicKeyRetrieverException,
                                            PrivateKeyRetrieverException)
 
-if sys.version_info[0] >= 3:
-    from urllib.parse import unquote_plus
-else:
-    from urllib import unquote_plus
 
 PEM_FILE_TYPE = 'application/x-pem-file'
 
