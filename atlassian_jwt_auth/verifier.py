@@ -1,6 +1,15 @@
 from collections import OrderedDict
+from functools import lru_cache
 
 import jwt
+import jwt.api_jwt
+from cryptography.hazmat.primitives.asymmetric.ec import (
+    EllipticCurvePublicKey
+)
+from cryptography.hazmat.primitives.asymmetric.rsa import (
+    RSAPublicKey
+)
+from jwt.exceptions import InvalidAlgorithmError
 
 from atlassian_jwt_auth import algorithms
 from atlassian_jwt_auth import key
@@ -32,13 +41,29 @@ class JWTAuthVerifier(object):
         key_identifier = key._get_key_id_from_jwt_header(a_jwt)
         public_key = self._retrieve_pub_key(key_identifier, requests_kwargs)
 
+        alg = jwt.get_unverified_header(a_jwt).get('alg', None)
+        public_key_obj = self._load_public_key(public_key, alg)
         return self._decode_jwt(
-            a_jwt, key_identifier, public_key,
+            a_jwt, key_identifier, public_key_obj,
             audience=audience, leeway=leeway)
 
     def _retrieve_pub_key(self, key_identifier, requests_kwargs):
         return self.public_key_retriever.retrieve(
             key_identifier, **requests_kwargs)
+
+    @lru_cache(maxsize=10)
+    def _load_public_key(self, public_key, algorithm):
+        """ Returns a public key object instance given the public key and
+            algorithm.
+        """
+        if isinstance(public_key, (RSAPublicKey, EllipticCurvePublicKey)):
+            return public_key
+        if algorithm not in self.algorithms:
+            raise InvalidAlgorithmError(
+                'The specified alg value is not allowed')
+        py_jws = jwt.api_jws.PyJWS(algorithms=self.algorithms)
+        alg_obj = py_jws._algorithms[algorithm]
+        return alg_obj.prepare_key(public_key)
 
     def _decode_jwt(self, a_jwt, key_identifier, jwt_key,
                     audience=None, leeway=0):
