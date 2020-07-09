@@ -9,6 +9,7 @@ import cachecontrol
 import cryptography.hazmat.backends
 import jwt
 import requests
+import requests.utils
 from cryptography.hazmat.primitives import serialization
 from requests.exceptions import RequestException, ConnectionError
 
@@ -88,6 +89,9 @@ class HTTPSPublicKeyRetriever(BasePublicKeyRetriever):
     def _get_session(self):
         if HTTPSPublicKeyRetriever._class_session is None:
             session = cachecontrol.CacheControl(requests.Session())
+            session.proxies = requests.utils.get_environ_proxies(
+                self.base_url)
+            session.trust_env = False
             HTTPSPublicKeyRetriever._class_session = session
         return HTTPSPublicKeyRetriever._class_session
 
