@@ -1,3 +1,4 @@
+import os
 import re
 import unittest
 
@@ -8,8 +9,24 @@ import requests
 from atlassian_jwt_auth.key import (
     HTTPSPublicKeyRetriever,
     HTTPSMultiRepositoryPublicKeyRetriever,
+    PEM_FILE_TYPE,
 )
 from atlassian_jwt_auth.tests import utils
+
+
+def get_expected_and_os_proxies_dict(proxy_location):
+    """ returns expected proxy & environmental
+        proxy dictionary based upon the provided proxy location.
+    """
+    expected_proxies = {
+        'http': proxy_location,
+        'https': proxy_location,
+    }
+    os_proxy_dict = {
+        'HTTP_PROXY': proxy_location,
+        'HTTPS_PROXY': proxy_location
+    }
+    return expected_proxies, os_proxy_dict
 
 
 class BaseHTTPSPublicKeyRetrieverTest(object):
@@ -39,6 +56,21 @@ class BaseHTTPSPublicKeyRetrieverTest(object):
         with self.assertRaises(ValueError):
             self.create_retriever(None)
 
+    def test_https_public_key_retriever_session_uses_env_proxy(self):
+        """ tests that the underlying session makes use of environmental
+            proxy configured.
+        """
+        proxy_location = 'https://example.proxy'
+        expected_proxies, proxy_dict = get_expected_and_os_proxies_dict(
+            proxy_location)
+        with mock.patch.dict(os.environ, proxy_dict, clear=True):
+            retriever = self.create_retriever(self.base_url)
+            key_retrievers = [retriever]
+            if isinstance(retriever, HTTPSMultiRepositoryPublicKeyRetriever):
+                key_retrievers = retriever._retrievers
+            for key_retriever in key_retrievers:
+                self.assertEqual(key_retriever._proxies, expected_proxies)
+
     def test_https_public_key_retriever_supports_https_url(self):
         """ tests that HTTPSPublicKeyRetriever supports https://
             base urls.
@@ -54,6 +86,48 @@ class BaseHTTPSPublicKeyRetrieverTest(object):
         self.assertEqual(
             retriever.retrieve('example/eg'),
             self._public_key_pem)
+
+    @mock.patch.object(requests.Session, 'get')
+    def test_retrieve_with_proxy(self, mock_get_method):
+        """ tests that the retrieve method works as expected when a proxy
+            should be used.
+        """
+        proxy_location = 'https://example.proxy'
+        key_id = 'example/eg'
+        expected_proxies, proxy_dict = get_expected_and_os_proxies_dict(
+            proxy_location)
+        _setup_mock_response_for_retriever(
+            mock_get_method, self._public_key_pem)
+        with mock.patch.dict(os.environ, proxy_dict, clear=True):
+            retriever = self.create_retriever(self.base_url)
+            retriever.retrieve(key_id)
+            mock_get_method.assert_called_once_with(
+                '%s/%s' % (self.base_url, key_id),
+                headers={'accept': PEM_FILE_TYPE},
+                proxies=expected_proxies
+            )
+
+    @mock.patch.object(requests.Session, 'get')
+    def test_retrieve_with_proxy_explicitly_set(self, mock_get_method):
+        """ tests that the retrieve method works as expected when a proxy
+            should be used and has been explicitly provided.
+        """
+        proxy_location = 'https://example.proxy'
+        explicit_proxy_location = 'https://explicit.proxy'
+        key_id = 'example/eg'
+        _, proxy_dict = get_expected_and_os_proxies_dict(proxy_location)
+        expected_proxies, _ = get_expected_and_os_proxies_dict(
+            explicit_proxy_location)
+        _setup_mock_response_for_retriever(
+            mock_get_method, self._public_key_pem)
+        with mock.patch.dict(os.environ, proxy_dict, clear=True):
+            retriever = self.create_retriever(self.base_url)
+            retriever.retrieve(key_id, proxies=expected_proxies)
+            mock_get_method.assert_called_once_with(
+                '%s/%s' % (self.base_url, key_id),
+                headers={'accept': PEM_FILE_TYPE},
+                proxies=expected_proxies
+            )
 
     @mock.patch.object(requests.Session, 'get')
     def test_retrieve_with_charset_in_content_type_h(self, mock_get_method):
