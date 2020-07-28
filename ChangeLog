@@ -1,6 +1,13 @@
 CHANGES
 =======
 
+8.0.0
+-----
+
+* Add release notes for version 8.0.0
+* Sem-Ver: api-break Optimise the standard requests session based public key retrieval by obtaining proxy information from the environment once per a public key server and setting session.trust\_env to False. As a result of this change retrieving the same public key, with caching enabled, 10,000 times takes ~ 6 seconds instead of ~ 14 seconds
+* Sem-Ver: bugfix For python 2.7 and 3.5 testing we need to pin itsdangerous to a version < 2.0.0
+
 7.1.0
 -----
 
