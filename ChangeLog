@@ -1,6 +1,12 @@
 CHANGES
 =======
 
+8.0.1
+-----
+
+* Add release notes for version 8.0.1
+* Sem-Ver: bugfix upgrade cryptography from using a version >= 2.8.0 < 2.9.0 to use a version >= 3.1.0 and < 3.2.0
+
 8.0.0
 -----
 
