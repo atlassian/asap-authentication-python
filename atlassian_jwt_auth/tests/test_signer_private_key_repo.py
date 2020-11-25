@@ -55,12 +55,12 @@ class BaseJWTAuthSignerWithFilePrivateKeyRetrieverTest(object):
 
     def test_fails_if_issuer_has_no_valid_keys(self):
         signer = self.create_signer_for_issuer('invalid-issuer')
-        with self.assertRaisesRegexp(IOError, 'Issuer has no valid keys'):
+        with self.assertRaisesRegex(IOError, 'Issuer has no valid keys'):
             signer.generate_jwt('audience')
 
     def test_fails_if_issuer_does_not_exist(self):
         signer = self.create_signer_for_issuer('this-does-not-exist')
-        with self.assertRaisesRegexp(OSError, 'No such file or directory'):
+        with self.assertRaisesRegex(OSError, 'No such file or directory'):
             signer.generate_jwt('audience')
 
 

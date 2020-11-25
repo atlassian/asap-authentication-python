@@ -1,14 +1,12 @@
 sudo: false
 language: python
 python:
-  - "2.7"
   - "3.5"
   - "3.6"
   - "3.7"
 install:
-  - if [[ $TRAVIS_PYTHON_VERSION == 3.5 || $TRAVIS_PYTHON_VERSION == 3.6 || $TRAVIS_PYTHON_VERSION == 3.7 ]]; then pip install aiohttp==3.6.2 asynctest==0.13.0; fi
   - pip install -q pycodestyle==2.6.0 flake8==3.8.1
 script:
   - pycodestyle .
-  - if [[ $TRAVIS_PYTHON_VERSION == 3.5 || $TRAVIS_PYTHON_VERSION == 3.6 || $TRAVIS_PYTHON_VERSION == 3.7 ]]; then flake8 . ; fi
+  - flake8 .
   - python -Wd setup.py nosetests

@@ -3,7 +3,7 @@ import cgi
 import logging
 import os
 import re
-import sys
+from urllib.parse import unquote_plus
 
 import cachecontrol
 import cryptography.hazmat.backends
@@ -17,10 +17,6 @@ from atlassian_jwt_auth.exceptions import (KeyIdentifierException,
                                            PublicKeyRetrieverException,
                                            PrivateKeyRetrieverException)
 
-if sys.version_info[0] >= 3:
-    from urllib.parse import unquote_plus
-else:
-    from urllib import unquote_plus
 
 PEM_FILE_TYPE = 'application/x-pem-file'
 
@@ -159,9 +155,10 @@ class HTTPSMultiRepositoryPublicKeyRetriever(BasePublicKeyRetriever):
             except (RequestException, PublicKeyRetrieverException) as e:
                 self.handle_retrieval_exception(retriever, e)
                 logger = logging.getLogger(__name__)
-                logger.warn('Unable to retrieve public key from store',
-                            extra={'underlying_error': str(e),
-                                   'key repository': retriever.base_url})
+                logger.warning(
+                    'Unable to retrieve public key from store',
+                    extra={'underlying_error': str(e),
+                           'key repository': retriever.base_url})
         raise PublicKeyRetrieverException(
             'Cannot load key from key repositories')
 
