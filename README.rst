@@ -128,7 +128,7 @@ To verify a JWT
     verifier = atlassian_jwt_auth.JWTAuthVerifier(public_key_retriever)
     verified_claims = verifier.verify_jwt(a_jwt, 'audience')
 
-For Python versions starting from ``Python 3.5`` ``atlassian_jwt_auth.contrib.aiohttp``
+For Python versions starting from ``Python 3.5``, note this library no longer supports python 3.5, ``atlassian_jwt_auth.contrib.aiohttp``
 provides drop-in replacements for the components that
 perform HTTP requests, so that they use ``aiohttp`` instead of ``requests``:
 
