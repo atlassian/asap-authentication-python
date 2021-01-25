@@ -72,11 +72,14 @@ class JWTAuthSigner(object):
             self.issuer)
         private_key = self._obtain_private_key(
             key_identifier, private_key_pem)
-        return jwt.encode(
+        token = jwt.encode(
             self._generate_claims(audience, **kwargs),
             key=private_key,
             algorithm=self.algorithm,
             headers={'kid': key_identifier.key_id})
+        if isinstance(token, str):
+            token = token.encode('utf-8')
+        return token
 
 
 class TokenReusingJWTAuthSigner(JWTAuthSigner):
@@ -102,7 +105,8 @@ class TokenReusingJWTAuthSigner(JWTAuthSigner):
         """
         if existing_token is None:
             return False
-        existing_claims = jwt.decode(existing_token, verify=False)
+        existing_claims = jwt.decode(
+            existing_token, verify=False, options={'verify_signature': False})
         existing_lifetime = (int(existing_claims['exp']) -
                              int(existing_claims['iat']))
         this_lifetime = (claims['exp'] - claims['iat']).total_seconds()

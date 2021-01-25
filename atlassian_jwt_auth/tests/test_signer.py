@@ -77,6 +77,9 @@ class BaseJWTAuthSignerTest(object):
             algorithm=self.algorithm,
             headers={'kid': expected_key_id})
         for name, args, kwargs in m_jwt_encode.mock_calls:
+            if not kwargs:
+                self.assertEqual(args[0], 'utf-8')
+                continue
             call_private_key = kwargs['key'].private_bytes(
                 encoding=serialization.Encoding.PEM,
                 format=serialization.PrivateFormat.TraditionalOpenSSL,

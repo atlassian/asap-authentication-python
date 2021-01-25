@@ -45,6 +45,7 @@ class JWTAuthVerifier(object):
         """Decode JWT and check if it's valid"""
         options = {
             'verify_signature': True,
+            'require': ['exp', 'iat'],
             'require_exp': True,
             'require_iat': True,
         }

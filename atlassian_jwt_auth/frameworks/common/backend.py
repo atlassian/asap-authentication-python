@@ -3,7 +3,6 @@ from functools import lru_cache
 
 from atlassian_jwt_auth import HTTPSPublicKeyRetriever, JWTAuthVerifier
 
-from jwt.compat import text_type
 from .utils import SettingsDict
 
 
@@ -72,7 +71,7 @@ class Backend():
         if auth_header is None:
             return None
 
-        if isinstance(auth_header, text_type):
+        if isinstance(auth_header, str):
             # Per PEP-3333, headers must be in ISO-8859-1 or use an RFC-2047
             # MIME encoding. We don't really care about MIME encoded
             # headers, but some libraries allow sending bytes (Django tests)
