@@ -1,3 +1,6 @@
+import os
+from unittest import mock
+
 import aiohttp
 from asynctest import TestCase, Mock, CoroutineMock
 from multidict import CIMultiDict
@@ -5,6 +8,9 @@ from multidict import CIMultiDict
 from atlassian_jwt_auth.contrib.aiohttp import HTTPSPublicKeyRetriever
 from atlassian_jwt_auth.key import PEM_FILE_TYPE
 from atlassian_jwt_auth.tests import utils
+from atlassian_jwt_auth.tests.test_public_key_provider import (
+    get_expected_and_os_proxies_dict,
+)
 
 
 class DummyHTTPSPublicKeyRetriever(HTTPSPublicKeyRetriever):
@@ -64,6 +70,23 @@ class BaseHTTPSPublicKeyRetrieverTestMixin(object):
 
         with self.assertRaises(ValueError):
             await retriever.retrieve('example/eg')
+
+    async def test_retrieve_session_uses_env_proxy(self):
+        """ tests that the underlying session makes use of environmental
+            proxy configured.
+        """
+        proxy_location = 'https://example.proxy'
+        key_id = 'example/eg'
+        expected_proxies, proxy_dict = get_expected_and_os_proxies_dict(
+            proxy_location)
+        with mock.patch.dict(os.environ, proxy_dict, clear=True):
+            retriever = DummyHTTPSPublicKeyRetriever(self.base_url)
+            self.assertEqual(retriever._proxies, expected_proxies)
+            await retriever.retrieve(key_id)
+            retriever._session.get.assert_called_once_with(
+                f'{self.base_url}/{key_id}', headers={'accept': PEM_FILE_TYPE},
+                proxy=expected_proxies[self.base_url.split(':')[0]]
+            )
 
 
 class RS256HTTPSPublicKeyRetrieverTest(utils.RS256KeyTestMixin,

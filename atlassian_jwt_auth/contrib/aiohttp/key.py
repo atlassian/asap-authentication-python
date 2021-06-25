@@ -1,4 +1,5 @@
 import asyncio
+import urllib.parse
 
 import aiohttp
 
@@ -25,7 +26,22 @@ class HTTPSPublicKeyRetriever(_HTTPSPublicKeyRetriever):
                 loop=self.loop)
         return HTTPSPublicKeyRetriever._class_session
 
+    def _convert_proxies_to_proxy_arg(self, url, requests_kwargs):
+        """ returns a modified requests_kwargs dict that contains proxy
+            information in a form that aiohttp accepts
+            (it wants proxy information instead of a dict of proxies).
+        """
+        proxy = None
+        if 'proxies' in requests_kwargs:
+            scheme = urllib.parse.urlparse(url).scheme
+            proxy = requests_kwargs['proxies'].get(scheme, None)
+            del requests_kwargs['proxies']
+            requests_kwargs['proxy'] = proxy
+        return requests_kwargs
+
     async def _retrieve(self, url, requests_kwargs):
+        requests_kwargs = self._convert_proxies_to_proxy_arg(
+            url, requests_kwargs)
         try:
             resp = await self._session.get(url, headers={'accept':
                                                          PEM_FILE_TYPE},
