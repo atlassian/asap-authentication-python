@@ -1,6 +1,15 @@
 CHANGES
 =======
 
+11.0.0
+------
+
+* Sem-Ver: bugfix The aiohttp public key retriever incorrectly provided a proxies argument when it needed to provide a proxy argument
+* Sem-Ver: feature Implement public key object caching
+* Sem-Ver: api-break upgrade cryptography from using a version >= 3.3.1 < 3.4.0 to use a version >= 3.3.2 and < 3.5.0
+* Sem-Ver: bugfix upgrade PyJWT from using a version >= 1.5.2 < 2.1.0 to use a version >= 1.5.2 and < 2.2.0
+* Sem-Ver: bugfix Update the version of aiohttp used in testing from 3.6.2 to 3.7.4
+
 10.1.0
 ------
 
