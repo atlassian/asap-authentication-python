@@ -1,6 +1,12 @@
 CHANGES
 =======
 
+11.0.1
+------
+
+* Add release notes for version 11.0.1
+* Sem-Ver: bugfix Add some missing package metadata information
+
 11.0.0
 ------
 
