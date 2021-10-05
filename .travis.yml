@@ -4,6 +4,7 @@ python:
   - "3.6"
   - "3.7"
   - "3.8"
+  - "3.9"
 install:
   - pip install -q pycodestyle==2.6.0 flake8==3.8.1
 script:
