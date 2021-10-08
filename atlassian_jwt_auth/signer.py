@@ -106,7 +106,7 @@ class TokenReusingJWTAuthSigner(JWTAuthSigner):
         if existing_token is None:
             return False
         existing_claims = jwt.decode(
-            existing_token, verify=False, options={'verify_signature': False})
+            existing_token, options={'verify_signature': False})
         existing_lifetime = (int(existing_claims['exp']) -
                              int(existing_claims['iat']))
         this_lifetime = (claims['exp'] - claims['iat']).total_seconds()
