@@ -3,6 +3,7 @@ import unittest
 from unittest import mock
 
 import jwt
+import jwt.algorithms
 import jwt.exceptions
 
 import atlassian_jwt_auth
@@ -77,8 +78,13 @@ class BaseJWTAuthVerifierTest(object):
             private_key_retriever=private_key_ret,
         )
         for algorithm in ['none', 'None', 'nOne', 'nonE', 'NONE']:
+            if algorithm != 'none':
+                jwt.register_algorithm(
+                    algorithm, jwt.algorithms.NoneAlgorithm())
             jwt_token = jwt_signer.generate_jwt(
                 self._example_aud, alg_header=algorithm)
+            if algorithm != 'none':
+                jwt.unregister_algorithm(algorithm)
             jwt_headers = jwt.get_unverified_header(jwt_token)
             self.assertEqual(jwt_headers['alg'], algorithm)
             with self.assertRaises(jwt.exceptions.InvalidAlgorithmError):
@@ -213,8 +219,12 @@ class BaseJWTAuthVerifierTest(object):
         a_jwt = self._jwt_auth_signer.generate_jwt(
             self._example_aud,
             additional_claims={'aud': None})
-        with self.assertRaises(jwt.exceptions.InvalidAudienceError):
+        exceptions = (jwt.exceptions.InvalidAudienceError,
+                      jwt.exceptions.InvalidTokenError)
+        with self.assertRaises(exceptions) as cm:
             verifier.verify_jwt(a_jwt, self._example_aud)
+        if not isinstance(cm.exception, jwt.exceptions.InvalidAudienceError):
+            self.assertIn('aud', str(cm.exception))
 
     def test_verify_jwt_with_non_matching_aud(self):
         """ tests that verify_jwt rejects a jwt if the aud claim does not
