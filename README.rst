@@ -2,8 +2,6 @@
 Atlassian JWT authentication
 ============================
 
-.. image:: https://img.shields.io/travis/atlassian/asap-authentication-python/master.svg?label=Linux%20build%20%40%20Travis%20CI
-   :target: http://travis-ci.org/atlassian/asap-authentication-python
 .. image:: https://github.com/atlassian/asap-authentication-python/workflows/Tests/badge.svg
 .. image:: https://img.shields.io/pypi/v/atlassian-jwt-auth.svg
    :target: https://pypi.org/project/atlassian-jwt-auth
