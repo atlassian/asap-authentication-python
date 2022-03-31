@@ -1,6 +1,6 @@
 pytest<7.0.0
 flask>=2.0.3,<2.1.0
-Django>=2.2.8,<3.0.0
+Django>=3.2.9,<3.3.0
 atlassian-httptest==0.8
 aiohttp==3.7.4
 asynctest==0.13.0
