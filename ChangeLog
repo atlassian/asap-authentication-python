@@ -1,6 +1,14 @@
 CHANGES
 =======
 
+14.0.1
+------
+
+* Add release notes for version 14.0.1 and update the AUTHORS file
+* Sem-Ver: bugfix The wsgi tests dir was missing a \_\_init\_\_.py file
+* Sem-Ver: bugfix upgrade pyjwt to use a version >= 2.4.0 < 3.0.0
+* Sem-Ver: bugfix Update the atlassian-httptest test dep to version 1.0.0
+
 14.0.0
 ------
 
