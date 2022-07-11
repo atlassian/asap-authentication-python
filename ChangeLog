@@ -1,6 +1,17 @@
 CHANGES
 =======
 
+15.0.0
+------
+
+* Add release notes for version 15.0.0
+* Sem-Ver: bugfix Update the CodeQL configuration with regards to the new name of the default branch (main)
+* Sem-Ver: bugfix Use aiohttp version 3.8.1 for testing
+* Sem-Ver: bugfix use flask versions >= 2.0.3 < 2.2.0 for testing
+* Sem-Ver: bugfix Use pytest versions < 8.0.0 for testing
+* Sem-Ver: api-break upgrade cachecontrol from version 0.12.10 to 0.12.11
+* Sem-Ver: api-break upgrade cryptography from using a version >= 3.3.2 < 37.0.0 to using a version >= 3.3.2 < 38.0.0
+
 14.0.1
 ------
 
