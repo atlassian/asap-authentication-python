@@ -6,6 +6,26 @@ from atlassian_jwt_auth import HTTPSPublicKeyRetriever, JWTAuthVerifier
 from .utils import SettingsDict
 
 
+@lru_cache(maxsize=20)
+def _get_verifier(settings):
+    """ This has been extracted out of Backend to avoid possible memory
+        leaks via retained instance references.
+    """
+    retriever = settings.ASAP_KEY_RETRIEVER_CLASS(
+        base_url=settings.ASAP_PUBLICKEY_REPOSITORY
+    )
+    kwargs = {}
+    if settings.ASAP_SUBJECT_SHOULD_MATCH_ISSUER is not None:
+        kwargs = {'subject_should_match_issuer':
+                  settings.ASAP_SUBJECT_SHOULD_MATCH_ISSUER}
+    if settings.ASAP_CHECK_JTI_UNIQUENESS is not None:
+        kwargs['check_jti_uniqueness'] = settings.ASAP_CHECK_JTI_UNIQUENESS
+    return JWTAuthVerifier(
+        retriever,
+        **kwargs
+    )
+
+
 class Backend():
     """Abstract class representing a web framework backend
 
@@ -91,21 +111,8 @@ class Backend():
             settings = self.settings
         return self._get_verifier(settings)
 
-    @lru_cache(maxsize=20)
     def _get_verifier(self, settings):
-        retriever = settings.ASAP_KEY_RETRIEVER_CLASS(
-            base_url=settings.ASAP_PUBLICKEY_REPOSITORY
-        )
-        kwargs = {}
-        if settings.ASAP_SUBJECT_SHOULD_MATCH_ISSUER is not None:
-            kwargs = {'subject_should_match_issuer':
-                      settings.ASAP_SUBJECT_SHOULD_MATCH_ISSUER}
-        if settings.ASAP_CHECK_JTI_UNIQUENESS is not None:
-            kwargs['check_jti_uniqueness'] = settings.ASAP_CHECK_JTI_UNIQUENESS
-        return JWTAuthVerifier(
-            retriever,
-            **kwargs
-        )
+        return _get_verifier(settings)
 
     def _process_settings(self, settings):
         valid_issuers = settings.get('ASAP_VALID_ISSUERS')

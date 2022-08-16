@@ -16,6 +16,24 @@ from atlassian_jwt_auth import key
 from atlassian_jwt_auth import exceptions
 
 
+@lru_cache(maxsize=10)
+def _load_public_key(algorithms, public_key, algorithm):
+    """ Returns a public key object instance given the public key and
+        algorithm.
+
+        This has been extracted out of JWTAuthVerifier to avoid possible memory
+        leaks via retained instance references.
+    """
+    if isinstance(public_key, (RSAPublicKey, EllipticCurvePublicKey)):
+        return public_key
+    if algorithm not in algorithms:
+        raise InvalidAlgorithmError(
+            'The specified alg value is not allowed')
+    py_jws = jwt.api_jws.PyJWS(algorithms=algorithms)
+    alg_obj = py_jws._algorithms[algorithm]
+    return alg_obj.prepare_key(public_key)
+
+
 class JWTAuthVerifier(object):
 
     """ This class can be used to verify a JWT. """
@@ -51,19 +69,11 @@ class JWTAuthVerifier(object):
         return self.public_key_retriever.retrieve(
             key_identifier, **requests_kwargs)
 
-    @lru_cache(maxsize=10)
     def _load_public_key(self, public_key, algorithm):
         """ Returns a public key object instance given the public key and
             algorithm.
         """
-        if isinstance(public_key, (RSAPublicKey, EllipticCurvePublicKey)):
-            return public_key
-        if algorithm not in self.algorithms:
-            raise InvalidAlgorithmError(
-                'The specified alg value is not allowed')
-        py_jws = jwt.api_jws.PyJWS(algorithms=self.algorithms)
-        alg_obj = py_jws._algorithms[algorithm]
-        return alg_obj.prepare_key(public_key)
+        return _load_public_key(tuple(self.algorithms), public_key, algorithm)
 
     def _decode_jwt(self, a_jwt, key_identifier, jwt_key,
                     audience=None, leeway=0):
