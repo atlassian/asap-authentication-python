@@ -1,6 +1,12 @@
 CHANGES
 =======
 
+15.0.1
+------
+
+* Add release notes for version 15.0.1
+* Sem-Ver: bugfix Fix two possible memory leaks related to the use of lru\_cache on methods
+
 15.0.0
 ------
 
