@@ -1,6 +1,15 @@
 CHANGES
 =======
 
+16.0.0
+------
+
+* Add release notes for version 16.0.0
+* Sem-Ver: bugfix Update pycodestyle and flake8 in the ci build to version 2.9.1 & 5.0.4 respectively
+* Sem-Ver: bugfix use aiohttp version 3.8.3 for testing
+* Sem-Ver: bugfix use flask versions >= 2.0.3 < 2.3.0 for testing
+* Sem-Ver: api-break upgrade cryptography from using a version >= 3.3.2 < 38.0.0 to using a version >= 3.3.2 < 39.0.0
+
 15.0.1
 ------
 
