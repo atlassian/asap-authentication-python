@@ -1,6 +1,13 @@
 CHANGES
 =======
 
+17.0.0
+------
+
+* Add release notes for version 17.0.0
+* Sem-Ver: bugfix Use ubuntu 20.04 in ci so that we can test against python 3.6
+* Sem-Ver: api-break Have PyJWT specify the version ranges for the cryptography library
+
 16.0.0
 ------
 
