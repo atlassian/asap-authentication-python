@@ -119,4 +119,8 @@ class Backend():
         if valid_issuers:
             settings['ASAP_VALID_ISSUERS'] = set(valid_issuers)
 
+        valid_aud = settings.get('ASAP_VALID_AUDIENCE')
+        if valid_aud and isinstance(valid_aud, list):
+            settings['ASAP_VALID_AUDIENCE'] = set(valid_aud)
+
         return SettingsDict(settings)
