@@ -64,6 +64,25 @@ class FlaskTests(utils.RS256KeyTestMixin, unittest.TestCase):
         )
         self.assertEqual(self.send_request(token).status_code, 200)
 
+    def test_request_with_valid_token_multiple_allowed_auds(self):
+        audiences = ['server-app', 'another_one']
+        self.app.config['ASAP_VALID_AUDIENCE'] = audiences
+        for aud in audiences:
+            token = create_token(
+                'client-app', aud,
+                'client-app/key01', self._private_key_pem
+            )
+            self.assertEqual(self.send_request(token).status_code, 200)
+
+    def test_request_with_valid_token_multiple_allowed_auds_invalid_aud(self):
+        audiences = ['server-app', 'another_one']
+        self.app.config['ASAP_VALID_AUDIENCE'] = audiences
+        token = create_token(
+            'client-app', "invalid",
+            'client-app/key01', self._private_key_pem
+        )
+        self.assertEqual(self.send_request(token).status_code, 401)
+
     def test_request_with_duplicate_jti_is_rejected_as_per_setting(self):
         self.app.config['ASAP_CHECK_JTI_UNIQUENESS'] = True
         token = create_token(

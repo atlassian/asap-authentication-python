@@ -94,6 +94,17 @@ class TestAsapMiddleware(DjangoAsapMixin, RS256KeyTestMixin, SimpleTestCase):
     def test_request_with_valid_token_is_allowed(self):
         self.check_response('needed', 'one', 200)
 
+    def test_request_with_valid_token_multiple_allowed_auds(self):
+        audiences = ['server-app', 'another_one']
+        self.test_settings['ASAP_VALID_AUDIENCE'] = audiences
+        for aud in audiences:
+            self.check_response('needed', 'one', 200, audience=aud)
+
+    def test_request_with_valid_token_multiple_allowed_auds_invalid_aud(self):
+        audiences = ['server-app', 'another_one']
+        self.test_settings['ASAP_VALID_AUDIENCE'] = audiences
+        self.check_response('needed', 'Unauthorized', 401, audience="invalid")
+
     def test_request_with_duplicate_jti_is_rejected_as_per_setting(self):
         self.test_settings['ASAP_CHECK_JTI_UNIQUENESS'] = True
         token = create_token(
