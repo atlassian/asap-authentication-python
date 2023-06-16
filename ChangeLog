@@ -1,6 +1,13 @@
 CHANGES
 =======
 
+17.0.1
+------
+
+* Add release notes for version 17.0.1
+* Sem-Ver: bugfix Update CacheControl from version 0.12.11 to 0.12.14
+* Sem-Ver: bugfix Support ASAP\_VALID\_AUDIENCE being a list so that multiple auds can be accepted
+
 17.0.0
 ------
 
