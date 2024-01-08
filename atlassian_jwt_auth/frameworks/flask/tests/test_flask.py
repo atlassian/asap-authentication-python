@@ -53,8 +53,11 @@ class FlaskTests(utils.RS256KeyTestMixin, unittest.TestCase):
         """ returns the response of sending a request containing the given
             token sent in the Authorization header.
         """
+
+        # Note: We send the auth header as a string and not bytes here
+        # due to how Werkzeug's Header code works.
         return self.client.get(url, headers={
-            'Authorization': b'Bearer ' + token
+            'Authorization': (b'Bearer ' + token).decode('iso-8859-1')
         })
 
     def test_request_with_valid_token_is_allowed(self):
