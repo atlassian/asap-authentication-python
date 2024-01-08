@@ -1,6 +1,12 @@
 CHANGES
 =======
 
+18.0.1
+------
+
+* Add release notes for version 18.0.1
+* Sem-Ver: bugfix Update package classifier information to include all supported python versions
+
 18.0.0
 ------
 
