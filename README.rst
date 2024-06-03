@@ -105,6 +105,7 @@ For example:
 .. code:: python
 
     import atlassian_jwt_auth
+    import requests
     from atlassian_jwt_auth.contrib.requests import JWTAuth
 
     signer = atlassian_jwt_auth.create_signer('issuer', 'issuer/key', private_key_pem, reuse_jwts=True)
@@ -113,6 +114,26 @@ For example:
         auth=JWTAuth(signer, 'audience')
     )
 
+If you want to generate tokens with a longer lifetime than the default 1 minute period,
+you can do so via specifying a `lifetime` value to `create_signer`.
+For example:
+
+
+.. code:: python
+
+    import datetime
+
+    import atlassian_jwt_auth
+    import requests
+    from atlassian_jwt_auth.contrib.requests import JWTAuth
+
+    signer = atlassian_jwt_auth.create_signer(
+        'issuer', 'issuer/key', private_key_pem,
+        reuse_jwts=True, lifetime=datetime.timedelta(minutes=2))
+    response = requests.get(
+        'https://your-url',
+        auth=JWTAuth(signer, 'audience')
+    )
 
 
 To verify a JWT

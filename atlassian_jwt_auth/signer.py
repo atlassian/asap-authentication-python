@@ -15,7 +15,7 @@ class JWTAuthSigner(object):
     def __init__(self, issuer, private_key_retriever, **kwargs):
         self.issuer = issuer
         self.private_key_retriever = private_key_retriever
-        self.lifetime = kwargs.get('lifetime', datetime.timedelta(hours=1))
+        self.lifetime = kwargs.get('lifetime', datetime.timedelta(minutes=1))
         self.algorithm = kwargs.get('algorithm', 'RS256')
         self.subject = kwargs.get('subject', None)
         self._private_keys_cache = dict()
