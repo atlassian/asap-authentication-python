@@ -29,7 +29,7 @@ class BaseJWTAuthSignerTest(object):
         for additional_claims in [{}, {'extra': 'thing'}]:
             expected_claims = {
                 'iss': expected_iss,
-                'exp': expected_now + datetime.timedelta(hours=1),
+                'exp': expected_now + datetime.timedelta(minutes=1),
                 'iat': expected_now,
                 'aud': expected_audience,
                 'nbf': expected_now,
