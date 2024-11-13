@@ -1,6 +1,19 @@
 CHANGES
 =======
 
+
+19.1.0
+------
+
+* Add release notes for version 19.1.0 and update the AUTHORS file
+* Sem-ver: bugfix Move away from using utcnow as it is deprecated and scheduled for removal
+* Sem-ver: bugfix remove pytest-runner dependency
+* Sem-ver: bugfix install setuptools in ci for python 3.12 & 3.13
+* Sem-Ver: bugfix update ci action versions
+* Sem-ver: bugfix Update build.yml to test 3.1{2,3}
+* Sem-ver: feature add python 3.12 & 3.13 support
+* Sem-Ver: bugfix Update aiohttp from version 3.9.1 to 3.9.4
+
 19.0.0
 ------
 
