@@ -1,9 +1,9 @@
 import base64
-import cgi
 import logging
 import os
 import re
 from urllib.parse import unquote_plus
+from email.message import EmailMessage
 
 import cachecontrol
 import cryptography.hazmat.backends
@@ -114,7 +114,9 @@ class HTTPSPublicKeyRetriever(BasePublicKeyRetriever):
         return resp.text
 
     def _check_content_type(self, url, content_type):
-        media_type = cgi.parse_header(content_type)[0]
+        msg = EmailMessage()
+        msg['content-type'] = content_type
+        media_type = msg.get_content_type()
 
         if media_type.lower() != PEM_FILE_TYPE.lower():
             raise PublicKeyRetrieverException(
