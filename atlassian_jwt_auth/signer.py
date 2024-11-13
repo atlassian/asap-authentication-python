@@ -64,7 +64,7 @@ class JWTAuthSigner(object):
         return claims
 
     def _now(self):
-        return datetime.datetime.utcnow()
+        return datetime.datetime.now(datetime.timezone.utc)
 
     def generate_jwt(self, audience, **kwargs):
         """ returns a new signed jwt for use. """
