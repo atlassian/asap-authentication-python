@@ -1,22 +1,22 @@
 import asyncio
 import urllib.parse
 from asyncio import AbstractEventLoop
-from typing import Dict, Any, Optional
+from typing import Any, Dict, Optional
 
 import aiohttp
 
 from atlassian_jwt_auth.exceptions import PublicKeyRetrieverException
-from atlassian_jwt_auth.key import (
-    PEM_FILE_TYPE,
+from atlassian_jwt_auth.key import PEM_FILE_TYPE
+from atlassian_jwt_auth.key import \
     HTTPSPublicKeyRetriever as _HTTPSPublicKeyRetriever
-)
 
 
 class HTTPSPublicKeyRetriever(_HTTPSPublicKeyRetriever):
     """A class for retrieving JWT public keys with aiohttp"""
     _class_session = None
 
-    def __init__(self, base_url:str, *, loop: Optional[AbstractEventLoop]=None) -> None:
+    def __init__(self, base_url: str, *,
+                 loop: Optional[AbstractEventLoop] = None) -> None:
         if loop is None:
             loop = asyncio.get_event_loop()
         self.loop = loop
@@ -28,7 +28,8 @@ class HTTPSPublicKeyRetriever(_HTTPSPublicKeyRetriever):
                 loop=self.loop)
         return HTTPSPublicKeyRetriever._class_session
 
-    def _convert_proxies_to_proxy_arg(self, url: str, requests_kwargs: Dict[Any, Any]) -> Dict[str, Any]:
+    def _convert_proxies_to_proxy_arg(
+            self, url: str, requests_kwargs: Dict[Any, Any]) -> Dict[str, Any]:
         """ returns a modified requests_kwargs dict that contains proxy
             information in a form that aiohttp accepts
             (it wants proxy information instead of a dict of proxies).
@@ -41,7 +42,8 @@ class HTTPSPublicKeyRetriever(_HTTPSPublicKeyRetriever):
             requests_kwargs['proxy'] = proxy
         return requests_kwargs
 
-    async def _retrieve(self, url:str , requests_kwargs: Dict[Any, Any]) -> str:
+    async def _retrieve(
+            self, url: str, requests_kwargs: Dict[Any, Any]) -> str:
         requests_kwargs = self._convert_proxies_to_proxy_arg(
             url, requests_kwargs)
         try:

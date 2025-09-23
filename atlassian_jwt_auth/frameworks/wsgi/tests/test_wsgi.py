@@ -4,9 +4,7 @@ from typing import Any
 from atlassian_jwt_auth.contrib.tests.utils import get_static_retriever_class
 from atlassian_jwt_auth.frameworks.wsgi.middleware import ASAPMiddleware
 from atlassian_jwt_auth.tests import utils
-from atlassian_jwt_auth.tests.utils import (
-    create_token,
-)
+from atlassian_jwt_auth.tests.utils import create_token
 
 
 def app(environ: Any, start_response: Any) -> str:
@@ -35,7 +33,8 @@ class WsgiTests(utils.RS256KeyTestMixin, unittest.TestCase):
     def get_app_with_middleware(self, config: Any) -> ASAPMiddleware:
         return ASAPMiddleware(app, config)
 
-    def send_request(self, url: str='/', config=None, token=None, application=None) -> Any:
+    def send_request(self, url: str = '/', config=None,
+                     token=None, application=None) -> Any:
         """ returns the response of sending a request containing the given
             token sent in the Authorization header.
         """
@@ -62,7 +61,8 @@ class WsgiTests(utils.RS256KeyTestMixin, unittest.TestCase):
         self.assertEqual(resp_info['status'], '200 OK')
         self.assertIn('ATL_ASAP_CLAIMS', environ)
 
-    def test_request_with_duplicate_jti_is_rejected_as_per_setting(self) -> None:
+    def test_request_with_duplicate_jti_is_rejected_as_per_setting(
+            self) -> None:
         self.config['ASAP_CHECK_JTI_UNIQUENESS'] = True
         token = create_token(
             'client-app', 'server-app',
@@ -92,7 +92,8 @@ class WsgiTests(utils.RS256KeyTestMixin, unittest.TestCase):
     def test_request_with_duplicate_jti_is_accepted(self) -> None:
         self._assert_request_with_duplicate_jti_is_accepted()
 
-    def test_request_with_duplicate_jti_is_accepted_as_per_setting(self) -> None:
+    def test_request_with_duplicate_jti_is_accepted_as_per_setting(
+            self) -> None:
         self.config['ASAP_CHECK_JTI_UNIQUENESS'] = False
         self._assert_request_with_duplicate_jti_is_accepted()
 
@@ -120,7 +121,8 @@ class WsgiTests(utils.RS256KeyTestMixin, unittest.TestCase):
         self.assertEqual(resp_info['status'], '401 Unauthorized')
         self.assertNotIn('ATL_ASAP_CLAIMS', environ)
 
-    def test_request_subject_does_not_need_to_match_issuer_from_settings(self) -> None:
+    def test_request_subject_does_not_need_to_match_issuer_from_settings(
+            self) -> None:
         self.config['ASAP_SUBJECT_SHOULD_MATCH_ISSUER'] = False
         token = create_token(
             'client-app', 'server-app',

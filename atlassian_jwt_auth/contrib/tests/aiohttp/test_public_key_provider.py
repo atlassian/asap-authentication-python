@@ -14,9 +14,8 @@ except ImportError:
 from atlassian_jwt_auth.contrib.aiohttp import HTTPSPublicKeyRetriever
 from atlassian_jwt_auth.key import PEM_FILE_TYPE
 from atlassian_jwt_auth.tests import utils
-from atlassian_jwt_auth.tests.test_public_key_provider import (
-    get_expected_and_os_proxies_dict,
-)
+from atlassian_jwt_auth.tests.test_public_key_provider import \
+    get_expected_and_os_proxies_dict
 
 
 class DummyHTTPSPublicKeyRetriever(HTTPSPublicKeyRetriever):

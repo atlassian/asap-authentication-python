@@ -2,9 +2,9 @@ import base64
 import logging
 import os
 import re
-from typing import Union, Tuple, Iterable, Any, Generator
-from urllib.parse import unquote_plus
 from email.message import EmailMessage
+from typing import Any, Generator, Iterable, Tuple, Union
+from urllib.parse import unquote_plus
 
 import cachecontrol
 import cryptography.hazmat.backends
@@ -12,12 +12,11 @@ import jwt
 import requests
 import requests.utils
 from cryptography.hazmat.primitives import serialization
-from requests.exceptions import RequestException, ConnectionError
+from requests.exceptions import ConnectionError, RequestException
 
 from atlassian_jwt_auth.exceptions import (KeyIdentifierException,
-                                           PublicKeyRetrieverException,
-                                           PrivateKeyRetrieverException)
-
+                                           PrivateKeyRetrieverException,
+                                           PublicKeyRetrieverException)
 
 PEM_FILE_TYPE = 'application/x-pem-file'
 
@@ -91,7 +90,8 @@ class HTTPSPublicKeyRetriever(BasePublicKeyRetriever):
             HTTPSPublicKeyRetriever._class_session = session
         return HTTPSPublicKeyRetriever._class_session
 
-    def retrieve(self, key_identifier: Union[KeyIdentifier, str], **requests_kwargs: Any) -> str:
+    def retrieve(
+            self, key_identifier: Union[KeyIdentifier, str], **requests_kwargs: Any) -> str:
         """ returns the public key for given key_identifier. """
         if not isinstance(key_identifier, KeyIdentifier):
             key_identifier = KeyIdentifier(key_identifier)
@@ -107,14 +107,14 @@ class HTTPSPublicKeyRetriever(BasePublicKeyRetriever):
                 status_code = None
             raise PublicKeyRetrieverException(e, status_code=status_code)
 
-    def _retrieve(self, url:str, requests_kwargs: Any):
+    def _retrieve(self, url: str, requests_kwargs: Any):
         resp = self._session.get(url, headers={'accept': PEM_FILE_TYPE},
                                  **requests_kwargs)
         resp.raise_for_status()
         self._check_content_type(url, resp.headers['content-type'])
         return resp.text
 
-    def _check_content_type(self, url:str, content_type: str):
+    def _check_content_type(self, url: str, content_type: str):
         msg = EmailMessage()
         msg['content-type'] = content_type
         media_type = msg.get_content_type()
@@ -139,7 +139,8 @@ class HTTPSMultiRepositoryPublicKeyRetriever(BasePublicKeyRetriever):
         return [HTTPSPublicKeyRetriever(url) for url
                 in key_repository_urls]
 
-    def handle_retrieval_exception(self, retriever: BasePublicKeyRetriever, exception: Exception):
+    def handle_retrieval_exception(
+            self, retriever: BasePublicKeyRetriever, exception: Exception):
         """ Handles working with exceptions encountered during key
             retrieval.
         """
@@ -151,7 +152,8 @@ class HTTPSMultiRepositoryPublicKeyRetriever(BasePublicKeyRetriever):
             if exception.status_code is None or exception.status_code < 500:
                 raise
 
-    def retrieve(self, key_identifier: Union[KeyIdentifier, str], **requests_kwargs: Any):
+    def retrieve(
+            self, key_identifier: Union[KeyIdentifier, str], **requests_kwargs: Any):
         for retriever in self._retrievers:
             try:
                 return retriever.retrieve(key_identifier, **requests_kwargs)
@@ -208,7 +210,8 @@ class StaticPrivateKeyRetriever(BasePrivateKeyRetriever):
         initially provided to it in calls to load.
     """
 
-    def __init__(self, key_identifier: Union[KeyIdentifier, str], private_key_pem: str) -> None:
+    def __init__(
+            self, key_identifier: Union[KeyIdentifier, str], private_key_pem: str) -> None:
         if not isinstance(key_identifier, KeyIdentifier):
             key_identifier = KeyIdentifier(key_identifier)
 
@@ -250,7 +253,8 @@ class FilePrivateKeyRepository(object):
     def __init__(self, path) -> None:
         self.path = path
 
-    def find_valid_key_ids(self, issuer:str) -> Generator[KeyIdentifier, Any, None]:
+    def find_valid_key_ids(
+            self, issuer: str) -> Generator[KeyIdentifier, Any, None]:
         issuer_directory = os.path.join(self.path, issuer)
         for filename in sorted(os.listdir(issuer_directory)):
             if filename.endswith('.pem'):

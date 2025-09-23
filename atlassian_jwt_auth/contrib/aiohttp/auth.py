@@ -1,4 +1,4 @@
-from typing import Union, Any, Dict
+from typing import Any, Dict, Union
 
 from aiohttp import BasicAuth
 
@@ -14,7 +14,7 @@ class JWTAuth(BaseJWTAuth, BasicAuth):
     def __new__(cls, *args, **kwargs):
         return super().__new__(cls, '')
 
-    def encode(self) -> str :
+    def encode(self) -> str:
         return self._get_header_value().decode(self.encoding)
 
 

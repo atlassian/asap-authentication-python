@@ -2,7 +2,6 @@ from django.urls import path
 
 from atlassian_jwt_auth.frameworks.django.tests import views
 
-
 urlpatterns = [
     path('asap/expected', views.expected_view, name='expected'),
     path(r'^asap/unexpected', views.unexpected_view, name='unexpected'),

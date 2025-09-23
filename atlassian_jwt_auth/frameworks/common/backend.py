@@ -1,6 +1,6 @@
 from abc import ABCMeta, abstractmethod, abstractproperty
 from functools import lru_cache
-from typing import Optional, Any, Union, Dict
+from typing import Any, Dict, Optional, Union
 
 from atlassian_jwt_auth import HTTPSPublicKeyRetriever, JWTAuthVerifier
 
@@ -67,19 +67,21 @@ class Backend:
     }
 
     @abstractmethod
-    def get_authorization_header(self, request: Optional[Any]=None) -> bytes:
+    def get_authorization_header(self, request: Optional[Any] = None) -> bytes:
         pass
 
     @abstractmethod
-    def get_401_response(self, data:Optional[Any]=None, headers: Optional[Any]=None, request: Optional[Any]=None) -> Any:
+    def get_401_response(
+            self, data: Optional[Any] = None, headers: Optional[Any] = None, request: Optional[Any] = None) -> Any:
         pass
 
     @abstractmethod
-    def get_403_response(self, data:Optional[Any]=None, headers: Optional[Any]=None, request: Optional[Any]=None) -> Any:
+    def get_403_response(
+            self, data: Optional[Any] = None, headers: Optional[Any] = None, request: Optional[Any] = None) -> Any:
         pass
 
     @abstractmethod
-    def set_asap_claims_for_request(self, request:Any, claims: Any) -> None:
+    def set_asap_claims_for_request(self, request: Any, claims: Any) -> None:
         pass
 
     @abstractproperty
@@ -106,7 +108,8 @@ class Backend:
 
         return auth_values[1]
 
-    def get_verifier(self, settings:Optional[SettingsDict]=None) -> JWTAuthVerifier:
+    def get_verifier(
+            self, settings: Optional[SettingsDict] = None) -> JWTAuthVerifier:
         """Returns a verifier for ASAP JWT tokens"""
         if settings is None:
             settings = self.settings
@@ -115,7 +118,8 @@ class Backend:
     def _get_verifier(self, settings: SettingsDict) -> JWTAuthVerifier:
         return _get_verifier(settings)
 
-    def _process_settings(self, settings: Union[SettingsDict, Dict]) -> SettingsDict:
+    def _process_settings(
+            self, settings: Union[SettingsDict, Dict]) -> SettingsDict:
         valid_issuers = settings.get('ASAP_VALID_ISSUERS')
         if valid_issuers:
             settings['ASAP_VALID_ISSUERS'] = set(valid_issuers)

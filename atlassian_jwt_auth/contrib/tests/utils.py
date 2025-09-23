@@ -12,7 +12,8 @@ def get_static_retriever_class(keys: Dict[str, Any]):
         """ Retrieves a key from a static dict of public keys
         (for use in tests only) """
 
-        def __init__(self, *args: Any, **kwargs: Any) -> requests.PreparedRequest:
+        def __init__(self, *args: Any, **
+                     kwargs: Any) -> requests.PreparedRequest:
             self.keys: Dict[str, Any] = keys
 
         def retrieve(self, key_identifier, **requests_kwargs) -> str:

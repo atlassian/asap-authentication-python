@@ -54,7 +54,8 @@ class BaseJWTAuthVerifierTest(object):
         m_public_key_ret.retrieve.return_value = pub_key_pem.decode()
         return m_public_key_ret
 
-    def _setup_jwt_auth_verifier(self, pub_key_pem: bytes, **kwargs: Any) -> atlassian_jwt_auth.JWTAuthVerifier:
+    def _setup_jwt_auth_verifier(
+            self, pub_key_pem: bytes, **kwargs: Any) -> atlassian_jwt_auth.JWTAuthVerifier:
         m_public_key_ret = self._setup_mock_public_key_retriever(pub_key_pem)
         return atlassian_jwt_auth.JWTAuthVerifier(m_public_key_ret, **kwargs)
 
@@ -92,7 +93,8 @@ class BaseJWTAuthVerifierTest(object):
             with self.assertRaises(jwt.exceptions.InvalidAlgorithmError):
                 verifier.verify_jwt(jwt_token, self._example_aud)
 
-    def test_verify_jwt_with_key_identifier_not_starting_with_issuer(self) -> None:
+    def test_verify_jwt_with_key_identifier_not_starting_with_issuer(
+            self) -> None:
         """ tests that verify_jwt rejects a jwt if the key identifier does
             not start with the claimed issuer.
         """
@@ -106,7 +108,8 @@ class BaseJWTAuthVerifierTest(object):
             verifier.verify_jwt(a_jwt, self._example_aud)
 
     @mock.patch('atlassian_jwt_auth.verifier.jwt.decode')
-    def test_verify_jwt_with_non_matching_sub_and_iss(self, m_j_decode: Mock) -> None:
+    def test_verify_jwt_with_non_matching_sub_and_iss(
+            self, m_j_decode: Mock) -> None:
         """ tests that verify_jwt rejects a jwt if the claims
             contains a subject which does not match the issuer.
         """
@@ -125,7 +128,8 @@ class BaseJWTAuthVerifierTest(object):
                 verifier.verify_jwt(a_jwt, self._example_aud)
 
     @mock.patch('atlassian_jwt_auth.verifier.jwt.decode')
-    def test_verify_jwt_with_jwt_lasting_gt_max_time(self, m_j_decode: Mock) -> None:
+    def test_verify_jwt_with_jwt_lasting_gt_max_time(
+            self, m_j_decode: Mock) -> None:
         """ tests that verify_jwt rejects a jwt if the claims
             period of validity is greater than the allowed maximum.
         """
@@ -163,7 +167,8 @@ class BaseJWTAuthVerifierTest(object):
             self.assertIsNotNone(
                 verifier.verify_jwt(a_jwt, self._example_aud))
 
-    def test_verify_jwt_with_already_seen_jti_with_uniqueness_disabled(self) -> None:
+    def test_verify_jwt_with_already_seen_jti_with_uniqueness_disabled(
+            self) -> None:
         """ tests that verify_jwt accepts a jwt if the jti
             has already been seen and the verifier has been set
             to not check the uniqueness of jti.

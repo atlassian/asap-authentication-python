@@ -1,26 +1,20 @@
 from collections import OrderedDict
 from functools import lru_cache
-from typing import Dict, Any, Union, Sequence
+from typing import Any, Dict, Sequence, Union
 
 import jwt
 import jwt.api_jwt
-from cryptography.hazmat.primitives.asymmetric.ec import (
-    EllipticCurvePublicKey
-)
-from cryptography.hazmat.primitives.asymmetric.rsa import (
-    RSAPublicKey
-)
+from cryptography.hazmat.primitives.asymmetric.ec import EllipticCurvePublicKey
+from cryptography.hazmat.primitives.asymmetric.rsa import RSAPublicKey
 from jwt.exceptions import InvalidAlgorithmError
 
-from atlassian_jwt_auth import algorithms, KeyIdentifier
-from atlassian_jwt_auth import key
-from atlassian_jwt_auth import exceptions
-from atlassian_jwt_auth.contrib.aiohttp import HTTPSPublicKeyRetriever
+from atlassian_jwt_auth import KeyIdentifier, algorithms, exceptions, key
 from atlassian_jwt_auth.key import BasePublicKeyRetriever
 
 
 @lru_cache(maxsize=10)
-def _load_public_key(algorithms: Sequence[str], public_key: str, algorithm: str):
+def _load_public_key(
+        algorithms: Sequence[str], public_key: str, algorithm: str):
     """ Returns a public key object instance given the public key and
         algorithm.
 
@@ -41,7 +35,8 @@ class JWTAuthVerifier(object):
 
     """ This class can be used to verify a JWT. """
 
-    def __init__(self, public_key_retriever: BasePublicKeyRetriever, **kwargs: Any) -> None:
+    def __init__(self, public_key_retriever: BasePublicKeyRetriever,
+                 **kwargs: Any) -> None:
         self.public_key_retriever = public_key_retriever
         self.algorithms = algorithms.get_permitted_algorithm_names()
         self._seen_jti = OrderedDict()
@@ -50,7 +45,8 @@ class JWTAuthVerifier(object):
         self._check_jti_uniqueness = kwargs.get(
             'check_jti_uniqueness', False)
 
-    def verify_jwt(self, a_jwt: str, audience: str, leeway: int=0, **requests_kwargs: Any) -> Dict[Any, Any]:
+    def verify_jwt(self, a_jwt: str, audience: str, leeway: int = 0,
+                   **requests_kwargs: Any) -> Dict[Any, Any]:
         """Verify if the token is correct
 
         Returns:
@@ -68,7 +64,8 @@ class JWTAuthVerifier(object):
             a_jwt, key_identifier, public_key_obj,
             audience=audience, leeway=leeway)
 
-    def _retrieve_pub_key(self, key_identifier: Union[KeyIdentifier, str], requests_kwargs: Any) -> str:
+    def _retrieve_pub_key(
+            self, key_identifier: Union[KeyIdentifier, str], requests_kwargs: Any) -> str:
         return self.public_key_retriever.retrieve(
             key_identifier, **requests_kwargs)
 
@@ -79,7 +76,7 @@ class JWTAuthVerifier(object):
         return _load_public_key(tuple(self.algorithms), public_key, algorithm)
 
     def _decode_jwt(self, a_jwt, key_identifier, jwt_key,
-                    audience=None, leeway: int=0) -> Dict[Any, Any]:
+                    audience=None, leeway: int = 0) -> Dict[Any, Any]:
         """Decode JWT and check if it's valid"""
         options = {
             'verify_signature': True,

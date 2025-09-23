@@ -1,11 +1,10 @@
+from typing import Any, Optional, Union
+
 from cryptography.hazmat.backends import default_backend
-from cryptography.hazmat.primitives.asymmetric import rsa
-from cryptography.hazmat.primitives.asymmetric import ec
 from cryptography.hazmat.primitives import serialization
+from cryptography.hazmat.primitives.asymmetric import ec, rsa
 
 import atlassian_jwt_auth
-from typing import Optional, Any, Union
-
 from atlassian_jwt_auth import KeyIdentifier
 from atlassian_jwt_auth.signer import JWTAuthSigner
 
@@ -21,7 +20,7 @@ def get_new_rsa_private_key_in_pem_format() -> bytes:
     )
 
 
-def get_public_key_pem_for_private_key_pem(private_key_pem: bytes) -> bytes :
+def get_public_key_pem_for_private_key_pem(private_key_pem: bytes) -> bytes:
     private_key = serialization.load_pem_private_key(
         private_key_pem,
         password=None,
@@ -45,7 +44,8 @@ def get_example_jwt_auth_signer(**kwargs: Any) -> JWTAuthSigner:
         issuer, key_id, key, algorithm=algorithm)
 
 
-def create_token(issuer: str, audience:str, key_id: Union[KeyIdentifier, str], private_key: str, subject: Optional[str]=None):
+def create_token(issuer: str, audience: str,
+                 key_id: Union[KeyIdentifier, str], private_key: str, subject: Optional[str] = None):
     """" returns a token based upon the supplied parameters. """
     signer = atlassian_jwt_auth.create_signer(
         issuer, key_id, private_key, subject=subject)

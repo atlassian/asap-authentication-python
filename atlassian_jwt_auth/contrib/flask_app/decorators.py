@@ -3,7 +3,8 @@ from typing import Callable, Iterable, Optional
 from atlassian_jwt_auth.frameworks.flask.decorators import with_asap
 
 
-def requires_asap(f: Callable, issuers: Optional[Iterable[str]]=None, subject_should_match_issuer:Optional[bool]=None):
+def requires_asap(f: Callable, issuers: Optional[Iterable[str]]
+                  = None, subject_should_match_issuer: Optional[bool] = None):
     """
     Wrapper for Flask endpoints to make them require asap authentication to
     access.

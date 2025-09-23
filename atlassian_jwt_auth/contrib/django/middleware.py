@@ -1,11 +1,10 @@
-from typing import Optional, Any, Callable
+from typing import Any, Callable, Optional
 
 from django.conf import settings
 from django.utils.deprecation import MiddlewareMixin
 
-from atlassian_jwt_auth.frameworks.django.middleware import (
+from atlassian_jwt_auth.frameworks.django.middleware import \
     OldStyleASAPMiddleware
-)
 
 
 class ProxiedAsapMiddleware(OldStyleASAPMiddleware, MiddlewareMixin):
@@ -14,7 +13,7 @@ class ProxiedAsapMiddleware(OldStyleASAPMiddleware, MiddlewareMixin):
 
     This must come before any authentication middleware."""
 
-    def __init__(self, get_response: Optional[Any]=None) -> None:
+    def __init__(self, get_response: Optional[Any] = None) -> None:
         super(ProxiedAsapMiddleware, self).__init__()
         self.get_response = get_response
 
@@ -51,7 +50,8 @@ class ProxiedAsapMiddleware(OldStyleASAPMiddleware, MiddlewareMixin):
         if asap_auth is not None:
             request.META[self.xauth] = asap_auth
 
-    def process_view(self, request: Any, view_func: Callable, view_args: Any, view_kwargs: Any) -> None:
+    def process_view(self, request: Any, view_func: Callable,
+                     view_args: Any, view_kwargs: Any) -> None:
         if not hasattr(request, 'asap_forwarded'):
             return None
 

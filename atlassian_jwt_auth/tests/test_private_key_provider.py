@@ -2,12 +2,12 @@ import base64
 import unittest
 
 from cryptography.hazmat.backends import default_backend
-from cryptography.hazmat.primitives.serialization import load_pem_private_key
 from cryptography.hazmat.primitives import serialization
+from cryptography.hazmat.primitives.serialization import load_pem_private_key
 
+from atlassian_jwt_auth.key import DataUriPrivateKeyRetriever
 from atlassian_jwt_auth.signer import JWTAuthSigner
 from atlassian_jwt_auth.tests import utils
-from atlassian_jwt_auth.key import DataUriPrivateKeyRetriever
 
 
 def convert_key_pem_format_to_der_format(private_key_pem):

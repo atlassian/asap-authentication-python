@@ -1,19 +1,22 @@
-from typing import Optional, Any
+from typing import Any, Optional
 
-from flask import Response, current_app, g, request as current_req, Request
+from flask import Request, Response, current_app, g
+from flask import request as current_req
 
 from ..common.backend import Backend
 from ..common.utils import SettingsDict
 
 
 class FlaskBackend(Backend):
-    def get_authorization_header(self, request: Optional[Request]=None) -> str:
+    def get_authorization_header(
+            self, request: Optional[Request] = None) -> str:
         if request is None:
             request = current_req
 
         return request.headers.get('AUTHORIZATION', '')
 
-    def get_401_response(self, data:Optional[Any]=None, headers:Optional[Any]=None, request: Optional[Request]=None) -> Response:
+    def get_401_response(self, data: Optional[Any] = None, headers: Optional[Any]
+                         = None, request: Optional[Request] = None) -> Response:
         if headers is None:
             headers = {}
 
@@ -21,10 +24,12 @@ class FlaskBackend(Backend):
 
         return Response(data, status=401, headers=headers)
 
-    def get_403_response(self,data:Optional[Any]=None, headers:Optional[Any]=None, request: Optional[Request]=None) -> Response:
+    def get_403_response(self, data: Optional[Any] = None, headers: Optional[Any]
+                         = None, request: Optional[Request] = None) -> Response:
         return Response(data, status=403, headers=headers)
 
-    def set_asap_claims_for_request(self, request: Request, claims: Any) -> None:
+    def set_asap_claims_for_request(
+            self, request: Request, claims: Any) -> None:
         g.asap_claims = claims
 
     @property

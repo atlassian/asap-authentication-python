@@ -1,20 +1,20 @@
 import calendar
 import datetime
 import random
-from typing import Any, Union, Dict, Optional
+from typing import TYPE_CHECKING, Any, Dict, Optional, Union
 
 import jwt
 from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives import serialization
 
-from atlassian_jwt_auth import algorithms, KeyIdentifier
-from atlassian_jwt_auth import key
-from atlassian_jwt_auth.key import BasePrivateKeyRetriever
+from atlassian_jwt_auth import algorithms, key
+from atlassian_jwt_auth.key import BasePrivateKeyRetriever, KeyIdentifier
 
 
 class JWTAuthSigner(object):
 
-    def __init__(self, issuer: str, private_key_retriever: BasePrivateKeyRetriever, **kwargs: Any) -> None:
+    def __init__(self, issuer: str,
+                 private_key_retriever: BasePrivateKeyRetriever, **kwargs: Any) -> None:
         self.issuer = issuer
         self.private_key_retriever = private_key_retriever
         self.lifetime = kwargs.get('lifetime', datetime.timedelta(minutes=1))
@@ -30,7 +30,8 @@ class JWTAuthSigner(object):
             raise ValueError("lifetime, '%s',exceeds the allowed 1 hour max" %
                              (self.lifetime))
 
-    def _obtain_private_key(self, key_identifier: Union[KeyIdentifier, str], private_key_pem: str):
+    def _obtain_private_key(
+            self, key_identifier: Union[KeyIdentifier, str], private_key_pem: str):
         """ returns a loaded instance of the given private key either from
             cache or from the given private_key_pem.
         """
@@ -86,12 +87,13 @@ class JWTAuthSigner(object):
 
 class TokenReusingJWTAuthSigner(JWTAuthSigner):
 
-    def __init__(self, issuer: str, private_key_retriever: BasePrivateKeyRetriever, **kwargs: Any) -> None:
+    def __init__(self, issuer: str,
+                 private_key_retriever: BasePrivateKeyRetriever, **kwargs: Any) -> None:
         super(TokenReusingJWTAuthSigner, self).__init__(
             issuer, private_key_retriever, **kwargs)
         self.reuse_threshold = kwargs.get('reuse_jwt_threshold', 0.95)
 
-    def get_cached_token(self, audience:str, **kwargs: Any) -> Optional[str]:
+    def get_cached_token(self, audience: str, **kwargs: Any) -> Optional[str]:
         """ returns the cached token. If there is no matching cached token
             then None is returned.
         """
@@ -127,7 +129,7 @@ class TokenReusingJWTAuthSigner(JWTAuthSigner):
                 return False
         return True
 
-    def generate_jwt(self, audience:str, **kwargs: Any) -> str:
+    def generate_jwt(self, audience: str, **kwargs: Any) -> str:
         existing_token = self.get_cached_token(audience, **kwargs)
         claims = self._generate_claims(audience, **kwargs)
         if existing_token and self.can_reuse_token(existing_token, claims):
@@ -138,20 +140,22 @@ class TokenReusingJWTAuthSigner(JWTAuthSigner):
         return token
 
 
-def _create_signer(issuer: str, private_key_retriever: BasePrivateKeyRetriever, **kwargs: Any) -> JWTAuthSigner:
+def _create_signer(issuer: str, private_key_retriever: BasePrivateKeyRetriever,
+                   **kwargs: Any) -> JWTAuthSigner:
     signer_cls = JWTAuthSigner
     if kwargs.get('reuse_jwts', None):
         signer_cls = TokenReusingJWTAuthSigner
     return signer_cls(issuer, private_key_retriever, **kwargs)
 
 
-def create_signer(issuer: str, key_identifier: Union[KeyIdentifier, str], private_key_pem:str, **kwargs: Any) -> JWTAuthSigner:
+def create_signer(issuer: str, key_identifier: Union[KeyIdentifier, str],
+                  private_key_pem: str, **kwargs: Any) -> JWTAuthSigner:
     private_key_retriever = key.StaticPrivateKeyRetriever(
         key_identifier, private_key_pem)
     return _create_signer(issuer, private_key_retriever, **kwargs)
 
 
 def create_signer_from_file_private_key_repository(
-        issuer:str, private_key_repository: str, **kwargs: Any) -> JWTAuthSigner:
+        issuer: str, private_key_repository: str, **kwargs: Any) -> JWTAuthSigner:
     private_key_retriever = key.FilePrivateKeyRetriever(private_key_repository)
     return _create_signer(issuer, private_key_retriever, **kwargs)

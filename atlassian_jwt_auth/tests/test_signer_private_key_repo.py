@@ -3,7 +3,6 @@ import shutil
 import tempfile
 import unittest
 
-
 import atlassian_jwt_auth
 from atlassian_jwt_auth import key
 from atlassian_jwt_auth.tests import utils

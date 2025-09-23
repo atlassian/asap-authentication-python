@@ -7,9 +7,7 @@ from atlassian_jwt_auth.contrib.flask_app import requires_asap
 from atlassian_jwt_auth.contrib.tests.utils import get_static_retriever_class
 from atlassian_jwt_auth.frameworks.flask import with_asap
 from atlassian_jwt_auth.tests import utils
-from atlassian_jwt_auth.tests.utils import (
-    create_token,
-)
+from atlassian_jwt_auth.tests.utils import create_token
 
 
 def get_app():
@@ -50,7 +48,7 @@ class FlaskTests(utils.RS256KeyTestMixin, unittest.TestCase):
         })
         self.app.config['ASAP_KEY_RETRIEVER_CLASS'] = retriever
 
-    def send_request(self, token: bytes, url: str='/') -> TestResponse:
+    def send_request(self, token: bytes, url: str = '/') -> TestResponse:
         """ returns the response of sending a request containing the given
             token sent in the Authorization header.
         """
@@ -78,7 +76,8 @@ class FlaskTests(utils.RS256KeyTestMixin, unittest.TestCase):
             )
             self.assertEqual(self.send_request(token).status_code, 200)
 
-    def test_request_with_valid_token_multiple_allowed_auds_invalid_aud(self) -> None:
+    def test_request_with_valid_token_multiple_allowed_auds_invalid_aud(
+            self) -> None:
         audiences = ['server-app', 'another_one']
         self.app.config['ASAP_VALID_AUDIENCE'] = audiences
         token = create_token(
@@ -87,7 +86,8 @@ class FlaskTests(utils.RS256KeyTestMixin, unittest.TestCase):
         )
         self.assertEqual(self.send_request(token).status_code, 401)
 
-    def test_request_with_duplicate_jti_is_rejected_as_per_setting(self) -> None:
+    def test_request_with_duplicate_jti_is_rejected_as_per_setting(
+            self) -> None:
         self.app.config['ASAP_CHECK_JTI_UNIQUENESS'] = True
         token = create_token(
             'client-app', 'server-app',
@@ -107,7 +107,8 @@ class FlaskTests(utils.RS256KeyTestMixin, unittest.TestCase):
     def test_request_with_duplicate_jti_is_accepted(self) -> None:
         self._assert_request_with_duplicate_jti_is_accepted()
 
-    def test_request_with_duplicate_jti_is_accepted_as_per_setting(self) -> None:
+    def test_request_with_duplicate_jti_is_accepted_as_per_setting(
+            self) -> None:
         self.app.config['ASAP_CHECK_JTI_UNIQUENESS'] = False
         self._assert_request_with_duplicate_jti_is_accepted()
 
@@ -152,7 +153,8 @@ class FlaskTests(utils.RS256KeyTestMixin, unittest.TestCase):
         )
         self.assertEqual(self.send_request(token).status_code, 401)
 
-    def test_request_subject_does_not_need_to_match_issuer_from_settings(self) -> None:
+    def test_request_subject_does_not_need_to_match_issuer_from_settings(
+            self) -> None:
         self.app.config['ASAP_SUBJECT_SHOULD_MATCH_ISSUER'] = False
         token = create_token(
             'client-app', 'server-app',

@@ -1,4 +1,4 @@
-from typing import Optional, Any
+from typing import Any, Optional
 
 from ..common.backend import Backend
 from ..common.utils import SettingsDict
@@ -14,7 +14,8 @@ class WSGIBackend(Backend):
 
         return request.environ.get('HTTP_AUTHORIZATION', b'')
 
-    def get_401_response(self, data: Any=None, headers: Optional[Any]=None, request: Optional[Any] =None) -> str:
+    def get_401_response(self, data: Any = None,
+                         headers: Optional[Any] = None, request: Optional[Any] = None) -> str:
         if request is None:
             raise TypeError("request must have a value")
 
@@ -26,7 +27,8 @@ class WSGIBackend(Backend):
         request.start_response('401 Unauthorized', list(headers.items()), None)
         return ""
 
-    def get_403_response(self, data: Any=None, headers: Optional[Any]=None, request: Optional[Any] =None) -> str:
+    def get_403_response(self, data: Any = None,
+                         headers: Optional[Any] = None, request: Optional[Any] = None) -> str:
         if request is None:
             raise TypeError("request must have a value")
 

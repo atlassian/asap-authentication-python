@@ -30,7 +30,7 @@ class _WithStatus(object):
     details about the HTTP client library.
     """
 
-    def __init__(self, *args:Any, **kwargs: Any) -> None:
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
         status_code = kwargs.pop('status_code', None)
         super(_WithStatus, self).__init__(*args, **kwargs)
         self.status_code = status_code

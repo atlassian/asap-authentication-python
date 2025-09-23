@@ -1,13 +1,17 @@
 from collections.abc import Callable
 from functools import wraps
+from typing import Iterable, Optional, Sequence
 
 from django.http.response import HttpResponse
 
 from atlassian_jwt_auth.frameworks.django.decorators import with_asap
-from typing import Optional, Sequence, Iterable
 
 
-def validate_asap(issuers: Optional[Iterable[str]]=None, subjects: Optional[Iterable[str]]=None, required: bool=True) -> Callable[]:
+def validate_asap(
+    issuers: Optional[Iterable[str]] = None,
+    subjects: Optional[Iterable[str]] = None,
+    required: bool = True,
+) -> Callable:
     """Decorator to allow endpoint-specific ASAP authorization, assuming ASAP
     authentication has already occurred.
 
@@ -18,39 +22,47 @@ def validate_asap(issuers: Optional[Iterable[str]]=None, subjects: Optional[Iter
     :param boolean required: Whether or not to require ASAP on this endpoint.
         Note that requirements will be still be verified if claims are present.
     """
+
     def validate_asap_decorator(func):
         @wraps(func)
         def validate_asap_wrapper(request, *args, **kwargs):
-            asap_claims = getattr(request, 'asap_claims', None)
+            asap_claims = getattr(request, "asap_claims", None)
             if required and not asap_claims:
-                message = 'Unauthorized: Invalid or missing token'
+                message = "Unauthorized: Invalid or missing token"
                 response = HttpResponse(message, status=401)
-                response['WWW-Authenticate'] = 'Bearer'
+                response["WWW-Authenticate"] = "Bearer"
                 return response
 
             if asap_claims:
-                iss = asap_claims['iss']
+                iss = asap_claims["iss"]
                 if issuers and iss not in issuers:
-                    message = 'Forbidden: Invalid token issuer'
+                    message = "Forbidden: Invalid token issuer"
                     return HttpResponse(message, status=403)
 
-                sub = asap_claims.get('sub')
+                sub = asap_claims.get("sub")
                 if subjects and sub not in subjects:
-                    message = 'Forbidden: Invalid token subject'
+                    message = "Forbidden: Invalid token subject"
                     return HttpResponse(message, status=403)
 
             return func(request, *args, **kwargs)
 
         return validate_asap_wrapper
+
     return validate_asap_decorator
 
 
-def requires_asap(issuers: Optional[Iterable[str]]=None, subject_should_match_issuer: Optional[bool]=None, func: Optional[Callable]=None) ->:
+def requires_asap(
+    issuers: Optional[Iterable[str]] = None,
+    subject_should_match_issuer: Optional[bool] = None,
+    func: Optional[Callable] = None,
+) -> Callable:
     """Decorator for Django endpoints to require ASAP
 
     :param list issuers: *required The 'iss' claims that this endpoint is from.
     """
-    return with_asap(func=func,
-                     required=True,
-                     issuers=issuers,
-                     subject_should_match_issuer=subject_should_match_issuer)
+    return with_asap(
+        func=func,
+        required=True,
+        issuers=issuers,
+        subject_should_match_issuer=subject_should_match_issuer,
+    )

@@ -1,6 +1,6 @@
 from __future__ import absolute_import
 
-from typing import Any
+from typing import Any, Union
 
 import atlassian_jwt_auth
 from atlassian_jwt_auth import KeyIdentifier
@@ -10,7 +10,8 @@ from atlassian_jwt_auth.signer import JWTAuthSigner
 class BaseJWTAuth(object):
     """Adds a JWT bearer token to the request per the ASAP specification"""
 
-    def __init__(self, signer: JWTAuthSigner, audience: str, *args: Any, **kwargs: Any) -> None:
+    def __init__(self, signer: JWTAuthSigner, audience: str,
+                 *args: Any, **kwargs: Any) -> None:
         self._audience = audience
         self._signer = signer
         self._additional_claims = kwargs.get('additional_claims', {})

@@ -1,23 +1,18 @@
 import os
+from typing import Optional
 
 import django
 from django.test.testcases import SimpleTestCase
-from django.test.utils import override_settings, modify_settings
-from typing import Optional
+from django.test.utils import modify_settings, override_settings
 
 try:
     from django.urls import reverse
 except ImportError:
     from django.core.urlresolvers import reverse
 
-from atlassian_jwt_auth.contrib.tests.utils import (
-    get_static_retriever_class,
-)
+from atlassian_jwt_auth.contrib.tests.utils import get_static_retriever_class
 from atlassian_jwt_auth.tests import utils
-from atlassian_jwt_auth.tests.utils import (
-    create_token,
-    RS256KeyTestMixin,
-)
+from atlassian_jwt_auth.tests.utils import RS256KeyTestMixin, create_token
 
 
 class DjangoAsapMixin(object):
@@ -59,12 +54,12 @@ class TestAsapMiddleware(DjangoAsapMixin, RS256KeyTestMixin, SimpleTestCase):
 
     def check_response(self,
                        view_name: str,
-                       response_content: str='',
-                       status_code: int=200,
-                       issuer: str='client-app',
-                       audience: str='server-app',
-                       key_id: str='client-app/key01',
-                       subject: Optional[str]=None,
+                       response_content: str = '',
+                       status_code: int = 200,
+                       issuer: str = 'client-app',
+                       audience: str = 'server-app',
+                       key_id: str = 'client-app/key01',
+                       subject: Optional[str] = None,
                        private_key=None,
                        token=None,
                        authorization=None,
@@ -101,12 +96,14 @@ class TestAsapMiddleware(DjangoAsapMixin, RS256KeyTestMixin, SimpleTestCase):
         for aud in audiences:
             self.check_response('needed', 'one', 200, audience=aud)
 
-    def test_request_with_valid_token_multiple_allowed_auds_invalid_aud(self) -> None:
+    def test_request_with_valid_token_multiple_allowed_auds_invalid_aud(
+            self) -> None:
         audiences = ['server-app', 'another_one']
         self.test_settings['ASAP_VALID_AUDIENCE'] = audiences
         self.check_response('needed', 'Unauthorized', 401, audience="invalid")
 
-    def test_request_with_duplicate_jti_is_rejected_as_per_setting(self) -> None:
+    def test_request_with_duplicate_jti_is_rejected_as_per_setting(
+            self) -> None:
         self.test_settings['ASAP_CHECK_JTI_UNIQUENESS'] = True
         token = create_token(
             issuer='client-app', audience='server-app',
@@ -129,7 +126,8 @@ class TestAsapMiddleware(DjangoAsapMixin, RS256KeyTestMixin, SimpleTestCase):
     def test_request_with_duplicate_jti_is_accepted(self) -> None:
         self._assert_request_with_duplicate_jti_is_accepted()
 
-    def test_request_with_duplicate_jti_is_accepted_as_per_setting(self) -> None:
+    def test_request_with_duplicate_jti_is_accepted_as_per_setting(
+            self) -> None:
         self.test_settings['ASAP_CHECK_JTI_UNIQUENESS'] = False
         self._assert_request_with_duplicate_jti_is_accepted()
 
@@ -162,7 +160,8 @@ class TestAsapMiddleware(DjangoAsapMixin, RS256KeyTestMixin, SimpleTestCase):
                             key_id='something-invalid/key01',
                             retriever_key='something-invalid/key01')
 
-    def test_request_non_whitelisted_decorated_issuer_is_rejected(self) -> None:
+    def test_request_non_whitelisted_decorated_issuer_is_rejected(
+            self) -> None:
         self.check_response('needed', 'Forbidden', 403,
                             issuer='unexpected',
                             key_id='unexpected/key01',
@@ -188,7 +187,8 @@ class TestAsapMiddleware(DjangoAsapMixin, RS256KeyTestMixin, SimpleTestCase):
     def test_request_using_settings_only_is_allowed(self) -> None:
         self.check_response('unneeded', 'two')
 
-    def test_request_subject_does_not_need_to_match_issuer_from_settings(self) -> None:
+    def test_request_subject_does_not_need_to_match_issuer_from_settings(
+            self) -> None:
         self.test_settings['ASAP_SUBJECT_SHOULD_MATCH_ISSUER'] = False
         self.check_response('needed', 'one', 200, subject='different_than_is')
 
@@ -319,7 +319,8 @@ class TestAsapDecorator(DjangoAsapMixin, RS256KeyTestMixin, SimpleTestCase):
 
         self.assertContains(response, 'Subject does not need to match issuer.')
 
-    def test_request_subject_does_need_to_match_issuer_override_settings(self) -> None:
+    def test_request_subject_does_need_to_match_issuer_override_settings(
+            self) -> None:
         """ tests that the with_asap decorator can override the
             ASAP_SUBJECT_SHOULD_MATCH_ISSUER setting.
         """
@@ -339,7 +340,8 @@ class TestAsapDecorator(DjangoAsapMixin, RS256KeyTestMixin, SimpleTestCase):
                 status_code=401
             )
 
-    def test_request_subject_does_not_need_to_match_issuer_from_settings(self) -> None:
+    def test_request_subject_does_not_need_to_match_issuer_from_settings(
+            self) -> None:
         token = create_token(
             issuer='client-app', audience='server-app',
             key_id='client-app/key01', private_key=self._private_key_pem,

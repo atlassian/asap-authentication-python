@@ -1,9 +1,9 @@
 import unittest
-from typing import Any
+from typing import Any, Dict
 
-from atlassian_jwt_auth.contrib.aiohttp.auth import create_jwt_auth, JWTAuth
-from atlassian_jwt_auth.tests import utils
+from atlassian_jwt_auth.contrib.aiohttp.auth import JWTAuth, create_jwt_auth
 from atlassian_jwt_auth.contrib.tests import test_requests
+from atlassian_jwt_auth.tests import utils
 
 
 class BaseAuthTest(test_requests.BaseRequestsTest):

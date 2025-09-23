@@ -1,11 +1,12 @@
+from typing import Any, Callable, Iterable, Optional
+
 from ..common.backend import Backend
-from ..common.decorators import _with_asap, _restrict_asap
+from ..common.decorators import _restrict_asap, _with_asap
 from .backend import DjangoBackend
-from typing import Optional, Callable, Iterable, Any
 
 
-def with_asap(func: Optional[Callable]=None, issuers: Optional[Iterable[str]]=None, required: Optional[bool]=None,
-              subject_should_match_issuer:Optional[bool]=None) -> Callable:
+def with_asap(func: Optional[Callable] = None, issuers: Optional[Iterable[str]] = None, required: Optional[bool] = None,
+              subject_should_match_issuer: Optional[bool] = None) -> Callable:
     """Decorator to allow endpoint-specific ASAP authentication.
 
     If authentication fails, a 401 or 403 response will be returned. Otherwise,
@@ -28,8 +29,8 @@ def with_asap(func: Optional[Callable]=None, issuers: Optional[Iterable[str]]=No
     )
 
 
-def restrict_asap(func:Optional[Callable]=None, backend: Optional[Backend]=None, issuers: Iterable[str]=None,
-                  required: bool=True, subject_should_match_issuer: Optional[bool] = None) -> Callable:
+def restrict_asap(func: Optional[Callable] = None, backend: Optional[Backend] = None, issuers: Iterable[str] = None,
+                  required: bool = True, subject_should_match_issuer: Optional[bool] = None) -> Callable:
     """Decorator to allow endpoint-specific ASAP authorization policies.
 
     This decorator assumes that request.asap_claims has previously been set by

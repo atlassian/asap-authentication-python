@@ -1,13 +1,14 @@
 import unittest
 from datetime import timedelta
+from typing import Any
 
 import jwt
 from requests import Request
 
 import atlassian_jwt_auth
 from atlassian_jwt_auth.auth import BaseJWTAuth
-from atlassian_jwt_auth.tests import utils
 from atlassian_jwt_auth.contrib.requests import JWTAuth, create_jwt_auth
+from atlassian_jwt_auth.tests import utils
 
 
 class BaseRequestsTest(object):
