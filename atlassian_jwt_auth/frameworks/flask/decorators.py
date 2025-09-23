@@ -1,9 +1,12 @@
+from collections.abc import Callable
+
 from ..common.decorators import _with_asap
 from .backend import FlaskBackend
+from typing import Optional, Iterable
 
 
-def with_asap(func=None, issuers=None, required=None,
-              subject_should_match_issuer=None):
+def with_asap(func: Optional[Callable]=None, issuers:Optional[Iterable[str]]=None, required: Optional[bool]=None,
+              subject_should_match_issuer: Optional[bool]=None):
     """Decorator to allow endpoint-specific ASAP authentication.
 
     If authentication fails, a 401 or 403 response will be returned. Otherwise,

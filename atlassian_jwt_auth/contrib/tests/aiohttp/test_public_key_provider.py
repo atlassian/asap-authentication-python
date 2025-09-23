@@ -21,13 +21,13 @@ from atlassian_jwt_auth.tests.test_public_key_provider import (
 
 class DummyHTTPSPublicKeyRetriever(HTTPSPublicKeyRetriever):
 
-    def set_headers(self, headers):
+    def set_headers(self, headers) -> None:
         self._session.get.return_value.headers.update(headers)
 
-    def set_text(self, text):
+    def set_text(self, text: str) -> None:
         self._session.get.return_value.text.return_value = text
 
-    def _get_session(self):
+    def _get_session(self) -> Mock:
         session = Mock(spec=aiohttp.ClientSession)
         session.attach_mock(CoroutineMock(), 'get')
 
@@ -41,13 +41,13 @@ class DummyHTTPSPublicKeyRetriever(HTTPSPublicKeyRetriever):
 class BaseHTTPSPublicKeyRetrieverTestMixin(object):
     """Tests for aiohttp.HTTPSPublicKeyRetriever class for RS256 algorithm"""
 
-    def setUp(self):
+    def setUp(self) -> None:
         self._private_key_pem = self.get_new_private_key_in_pem_format()
         self._public_key_pem = utils.get_public_key_pem_for_private_key_pem(
             self._private_key_pem)
         self.base_url = 'https://example.com'
 
-    async def test_retrieve(self):
+    async def test_retrieve(self) -> None:
         """Check if retrieve method returns public key"""
         retriever = DummyHTTPSPublicKeyRetriever(self.base_url)
         retriever.set_text(self._public_key_pem)
@@ -55,7 +55,7 @@ class BaseHTTPSPublicKeyRetrieverTestMixin(object):
             await retriever.retrieve('example/eg'),
             self._public_key_pem)
 
-    async def test_retrieve_with_charset_in_content_type_h(self):
+    async def test_retrieve_with_charset_in_content_type_h(self) -> None:
         """Check if retrieve method correctly checks content-type"""
         headers = {'content-type': 'application/x-pem-file;charset=UTF-8'}
         retriever = DummyHTTPSPublicKeyRetriever(self.base_url)
@@ -66,7 +66,7 @@ class BaseHTTPSPublicKeyRetrieverTestMixin(object):
             await retriever.retrieve('example/eg'),
             self._public_key_pem)
 
-    async def test_retrieve_fails_with_different_content_type(self):
+    async def test_retrieve_fails_with_different_content_type(self) -> None:
         """
         Check if retrieve method raises an error for incorrect content-type
         """
@@ -78,7 +78,7 @@ class BaseHTTPSPublicKeyRetrieverTestMixin(object):
         with self.assertRaises(ValueError):
             await retriever.retrieve('example/eg')
 
-    async def test_retrieve_session_uses_env_proxy(self):
+    async def test_retrieve_session_uses_env_proxy(self) -> None:
         """ tests that the underlying session makes use of environmental
             proxy configured.
         """

@@ -1,9 +1,11 @@
+from typing import Optional, Any
+
 from ..common.backend import Backend
 from ..common.utils import SettingsDict
 
 
 class WSGIBackend(Backend):
-    def __init__(self, settings):
+    def __init__(self, settings) -> None:
         self._settings = SettingsDict(settings)
 
     def get_authorization_header(self, request=None):
@@ -12,7 +14,7 @@ class WSGIBackend(Backend):
 
         return request.environ.get('HTTP_AUTHORIZATION', b'')
 
-    def get_401_response(self, data=None, headers=None, request=None):
+    def get_401_response(self, data: Any=None, headers: Optional[Any]=None, request: Optional[Any] =None) -> str:
         if request is None:
             raise TypeError("request must have a value")
 
@@ -24,7 +26,7 @@ class WSGIBackend(Backend):
         request.start_response('401 Unauthorized', list(headers.items()), None)
         return ""
 
-    def get_403_response(self, data=None, headers=None, request=None):
+    def get_403_response(self, data: Any=None, headers: Optional[Any]=None, request: Optional[Any] =None) -> str:
         if request is None:
             raise TypeError("request must have a value")
 
@@ -34,11 +36,11 @@ class WSGIBackend(Backend):
         request.start_response('403 Forbidden', list(headers.items()), None)
         return ""
 
-    def set_asap_claims_for_request(self, request, claims):
+    def set_asap_claims_for_request(self, request: Any, claims: Any) -> None:
         request.environ['ATL_ASAP_CLAIMS'] = claims
 
     @property
-    def settings(self):
+    def settings(self) -> SettingsDict:
         settings = {}
         settings.update(self.default_settings)
 

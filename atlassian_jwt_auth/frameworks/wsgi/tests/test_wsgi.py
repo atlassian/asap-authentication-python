@@ -1,4 +1,5 @@
 import unittest
+from typing import Any
 
 from atlassian_jwt_auth.contrib.tests.utils import get_static_retriever_class
 from atlassian_jwt_auth.frameworks.wsgi.middleware import ASAPMiddleware
@@ -8,7 +9,7 @@ from atlassian_jwt_auth.tests.utils import (
 )
 
 
-def app(environ, start_response):
+def app(environ: Any, start_response: Any) -> str:
     start_response('200 OK', [], None)
     return "OK"
 
@@ -16,7 +17,7 @@ def app(environ, start_response):
 class WsgiTests(utils.RS256KeyTestMixin, unittest.TestCase):
     """ tests for the atlassian_jwt_auth.contrib.tests.flask """
 
-    def setUp(self):
+    def setUp(self) -> None:
         self._private_key_pem = self.get_new_private_key_in_pem_format()
         self._public_key_pem = utils.get_public_key_pem_for_private_key_pem(
             self._private_key_pem
@@ -31,17 +32,17 @@ class WsgiTests(utils.RS256KeyTestMixin, unittest.TestCase):
             'ASAP_KEY_RETRIEVER_CLASS': retriever
         }
 
-    def get_app_with_middleware(self, config):
+    def get_app_with_middleware(self, config: Any) -> ASAPMiddleware:
         return ASAPMiddleware(app, config)
 
-    def send_request(self, url='/', config=None, token=None, application=None):
+    def send_request(self, url: str='/', config=None, token=None, application=None) -> Any:
         """ returns the response of sending a request containing the given
             token sent in the Authorization header.
         """
 
         resp_info = {}
 
-        def start_response(status, response_headers, exc_info=None):
+        def start_response(status, response_headers, exc_info=None) -> None:
             resp_info['status'] = status
             resp_info['headers'] = response_headers
 
@@ -52,7 +53,7 @@ class WsgiTests(utils.RS256KeyTestMixin, unittest.TestCase):
             application = self.get_app_with_middleware(config or self.config)
         return application(environ, start_response), resp_info, environ
 
-    def test_request_with_valid_token_is_allowed(self):
+    def test_request_with_valid_token_is_allowed(self) -> None:
         token = create_token(
             'client-app', 'server-app',
             'client-app/key01', self._private_key_pem
@@ -61,7 +62,7 @@ class WsgiTests(utils.RS256KeyTestMixin, unittest.TestCase):
         self.assertEqual(resp_info['status'], '200 OK')
         self.assertIn('ATL_ASAP_CLAIMS', environ)
 
-    def test_request_with_duplicate_jti_is_rejected_as_per_setting(self):
+    def test_request_with_duplicate_jti_is_rejected_as_per_setting(self) -> None:
         self.config['ASAP_CHECK_JTI_UNIQUENESS'] = True
         token = create_token(
             'client-app', 'server-app',
@@ -75,7 +76,7 @@ class WsgiTests(utils.RS256KeyTestMixin, unittest.TestCase):
             token=token, application=application)
         self.assertEqual(resp_info['status'], '401 Unauthorized')
 
-    def _assert_request_with_duplicate_jti_is_accepted(self):
+    def _assert_request_with_duplicate_jti_is_accepted(self) -> None:
         token = create_token(
             'client-app', 'server-app',
             'client-app/key01', self._private_key_pem
@@ -88,14 +89,14 @@ class WsgiTests(utils.RS256KeyTestMixin, unittest.TestCase):
             token=token, application=application)
         self.assertEqual(resp_info['status'], '200 OK')
 
-    def test_request_with_duplicate_jti_is_accepted(self):
+    def test_request_with_duplicate_jti_is_accepted(self) -> None:
         self._assert_request_with_duplicate_jti_is_accepted()
 
-    def test_request_with_duplicate_jti_is_accepted_as_per_setting(self):
+    def test_request_with_duplicate_jti_is_accepted_as_per_setting(self) -> None:
         self.config['ASAP_CHECK_JTI_UNIQUENESS'] = False
         self._assert_request_with_duplicate_jti_is_accepted()
 
-    def test_request_with_invalid_audience_is_rejected(self):
+    def test_request_with_invalid_audience_is_rejected(self) -> None:
         token = create_token(
             'client-app', 'invalid-audience',
             'client-app/key01', self._private_key_pem
@@ -104,12 +105,12 @@ class WsgiTests(utils.RS256KeyTestMixin, unittest.TestCase):
         self.assertEqual(resp_info['status'], '401 Unauthorized')
         self.assertNotIn('ATL_ASAP_CLAIMS', environ)
 
-    def test_request_with_invalid_token_is_rejected(self):
+    def test_request_with_invalid_token_is_rejected(self) -> None:
         body, resp_info, environ = self.send_request(token=b'notavalidtoken')
         self.assertEqual(resp_info['status'], '401 Unauthorized')
         self.assertNotIn('ATL_ASAP_CLAIMS', environ)
 
-    def test_request_subject_and_issue_not_matching(self):
+    def test_request_subject_and_issue_not_matching(self) -> None:
         token = create_token(
             'client-app', 'server-app',
             'client-app/key01', self._private_key_pem,
@@ -119,7 +120,7 @@ class WsgiTests(utils.RS256KeyTestMixin, unittest.TestCase):
         self.assertEqual(resp_info['status'], '401 Unauthorized')
         self.assertNotIn('ATL_ASAP_CLAIMS', environ)
 
-    def test_request_subject_does_not_need_to_match_issuer_from_settings(self):
+    def test_request_subject_does_not_need_to_match_issuer_from_settings(self) -> None:
         self.config['ASAP_SUBJECT_SHOULD_MATCH_ISSUER'] = False
         token = create_token(
             'client-app', 'server-app',

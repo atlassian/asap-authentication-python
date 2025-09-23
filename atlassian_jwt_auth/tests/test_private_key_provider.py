@@ -24,18 +24,18 @@ def convert_key_pem_format_to_der_format(private_key_pem):
 class BaseDataUriPrivateKeyRetrieverTest(object):
     """ tests for the DataUriPrivateKeyRetriever class. """
 
-    def setUp(self):
+    def setUp(self) -> None:
         self._private_key_pem = self.get_new_private_key_in_pem_format()
         self._public_key_pem = utils.get_public_key_pem_for_private_key_pem(
             self._private_key_pem)
         self._private_key_der = convert_key_pem_format_to_der_format(
             self._private_key_pem)
 
-    def get_example_data_uri(self, private_key_der):
+    def get_example_data_uri(self, private_key_der: bytes) -> str:
         return ('data:application/pkcs8;kid=example%2Feg;base64,' +
                 base64.b64encode(private_key_der).decode('utf-8'))
 
-    def test_load_data_uri(self):
+    def test_load_data_uri(self) -> None:
         """ tests that a valid data uri is correctly loaded. """
         expected_kid = 'example/eg'
         data_uri = self.get_example_data_uri(self._private_key_der)
@@ -45,7 +45,7 @@ class BaseDataUriPrivateKeyRetrieverTest(object):
         self.assertEqual(private_key_pem,
                          self._private_key_pem.decode('utf-8'))
 
-    def test_load_data_uri_can_be_used_with_a_signer(self):
+    def test_load_data_uri_can_be_used_with_a_signer(self) -> None:
         """ tests that the data uri private key retriever can be used with a
             signer to generate a jwt.
         """

@@ -1,11 +1,13 @@
+from collections.abc import Callable
 from functools import wraps
 
 from django.http.response import HttpResponse
 
 from atlassian_jwt_auth.frameworks.django.decorators import with_asap
+from typing import Optional, Sequence, Iterable
 
 
-def validate_asap(issuers=None, subjects=None, required=True):
+def validate_asap(issuers: Optional[Iterable[str]]=None, subjects: Optional[Iterable[str]]=None, required: bool=True) -> Callable[]:
     """Decorator to allow endpoint-specific ASAP authorization, assuming ASAP
     authentication has already occurred.
 
@@ -43,7 +45,7 @@ def validate_asap(issuers=None, subjects=None, required=True):
     return validate_asap_decorator
 
 
-def requires_asap(issuers=None, subject_should_match_issuer=None, func=None):
+def requires_asap(issuers: Optional[Iterable[str]]=None, subject_should_match_issuer: Optional[bool]=None, func: Optional[Callable]=None) ->:
     """Decorator for Django endpoints to require ASAP
 
     :param list issuers: *required The 'iss' claims that this endpoint is from.

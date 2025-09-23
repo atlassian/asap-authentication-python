@@ -1,16 +1,20 @@
 import logging
+from typing import Optional, Iterable, Dict, Any
 
 from jwt.exceptions import InvalidIssuerError, InvalidTokenError
 
+from atlassian_jwt_auth import JWTAuthVerifier
 from atlassian_jwt_auth.exceptions import (
     PublicKeyRetrieverException,
     NoTokenProvidedError,
     JtiUniquenessException,
     SubjectDoesNotMatchIssuerException,
 )
+from atlassian_jwt_auth.frameworks.common.backend import Backend
+from atlassian_jwt_auth.frameworks.common.utils import SettingsDict
 
 
-def _process_asap_token(request, backend, settings, verifier=None):
+def _process_asap_token(request: Any, backend: Backend, settings: SettingsDict, verifier:Optional[JWTAuthVerifier]=None) -> Optional[str]:
     """ Verifies an ASAP token, validates the claims, and returns an error
     response"""
     logger = logging.getLogger('asap')
@@ -18,7 +22,7 @@ def _process_asap_token(request, backend, settings, verifier=None):
     error_response = None
     if token is None and not settings.ASAP_REQUIRED and (
             settings.ASAP_REQUIRED is not None):
-        return
+        return None
     try:
         if token is None:
             raise NoTokenProvidedError
@@ -78,7 +82,7 @@ def _process_asap_token(request, backend, settings, verifier=None):
         return error_response
 
 
-def _verify_issuers(asap_claims, issuers=None):
+def _verify_issuers(asap_claims: Dict[Any, Any], issuers: Optional[Iterable[str]]=None) -> None:
     """Verify that the issuer in the claims is valid and is expected."""
     claim_iss = asap_claims.get('iss')
     if issuers and claim_iss not in issuers:

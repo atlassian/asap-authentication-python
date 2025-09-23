@@ -1,17 +1,19 @@
+from typing import Any, Optional
+
 from django.conf import settings as django_settings
-from django.http import HttpResponse, HttpResponseForbidden
+from django.http import HttpResponse, HttpResponseForbidden, HttpRequest
 
 from ..common.backend import Backend
 
 
 class DjangoBackend(Backend):
-    def get_authorization_header(self, request=None):
+    def get_authorization_header(self, request: Optional[HttpRequest]=None) -> bytes:
         if request is None:
             raise ValueError('No request available')
 
         return request.META.get('HTTP_AUTHORIZATION', b'')
 
-    def get_401_response(self, data=None, headers=None, request=None):
+    def get_401_response(self,data:Optional[Any]=None, headers: Optional[Any]=None, request: Optional[HttpRequest]=None) -> HttpResponse:
         if headers is None:
             headers = {}
 
@@ -23,7 +25,7 @@ class DjangoBackend(Backend):
 
         return response
 
-    def get_403_response(self, data=None, headers=None, request=None):
+    def get_403_response(self, data:Optional[Any]=None, headers: Optional[Any]=None, request: Optional[HttpRequest]=None) -> HttpResponse:
         if headers is None:
             headers = {}
 
@@ -33,7 +35,7 @@ class DjangoBackend(Backend):
 
         return response
 
-    def set_asap_claims_for_request(self, request, claims):
+    def set_asap_claims_for_request(self, request: HttpRequest, claims: Any) -> None:
         request.asap_claims = claims
 
     @property

@@ -1,6 +1,7 @@
 import datetime
 import unittest
 from unittest import mock
+from unittest.mock import Mock
 
 from cryptography.hazmat.primitives import serialization
 
@@ -12,10 +13,10 @@ class BaseJWTAuthSignerTest(object):
 
     """ tests for the JWTAuthSigner class. """
 
-    def setUp(self):
+    def setUp(self) -> None:
         self._private_key_pem = self.get_new_private_key_in_pem_format()
 
-    def test__generate_claims(self):
+    def test__generate_claims(self) -> None:
         """ tests that _generate_claims works as expected. """
         expected_now = datetime.datetime(year=2001, day=1, month=1)
         expected_audience = 'example_aud'
@@ -43,7 +44,7 @@ class BaseJWTAuthSignerTest(object):
             del claims['jti']
             self.assertEqual(claims, expected_claims)
 
-    def test_jti_changes(self):
+    def test_jti_changes(self) -> None:
         """ tests that the jti of a claim changes. """
         expected_now = datetime.datetime(year=2001, day=1, month=1)
         aud = 'aud'
@@ -57,7 +58,7 @@ class BaseJWTAuthSignerTest(object):
         self.assertTrue(str(expected_now.strftime('%s')) in second)
 
     @mock.patch('jwt.encode')
-    def test_generate_jwt(self, m_jwt_encode):
+    def test_generate_jwt(self, m_jwt_encode: Mock) -> None:
         """ tests that generate_jwt works as expected. """
         expected_aud = 'aud_x'
         expected_claims = {'eg': 'ex'}

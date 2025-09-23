@@ -4,9 +4,13 @@ from cryptography.hazmat.primitives.asymmetric import ec
 from cryptography.hazmat.primitives import serialization
 
 import atlassian_jwt_auth
+from typing import Optional, Any, Union
+
+from atlassian_jwt_auth import KeyIdentifier
+from atlassian_jwt_auth.signer import JWTAuthSigner
 
 
-def get_new_rsa_private_key_in_pem_format():
+def get_new_rsa_private_key_in_pem_format() -> bytes:
     """ returns a new rsa key in pem format. """
     private_key = rsa.generate_private_key(
         key_size=2048, backend=default_backend(), public_exponent=65537)
@@ -17,7 +21,7 @@ def get_new_rsa_private_key_in_pem_format():
     )
 
 
-def get_public_key_pem_for_private_key_pem(private_key_pem):
+def get_public_key_pem_for_private_key_pem(private_key_pem: bytes) -> bytes :
     private_key = serialization.load_pem_private_key(
         private_key_pem,
         password=None,
@@ -30,7 +34,7 @@ def get_public_key_pem_for_private_key_pem(private_key_pem):
     )
 
 
-def get_example_jwt_auth_signer(**kwargs):
+def get_example_jwt_auth_signer(**kwargs: Any) -> JWTAuthSigner:
     """ returns an example jwt_auth_signer instance. """
     issuer = kwargs.get('issuer', 'egissuer')
     key_id = kwargs.get('key_id', '%s/a' % issuer)
@@ -41,7 +45,7 @@ def get_example_jwt_auth_signer(**kwargs):
         issuer, key_id, key, algorithm=algorithm)
 
 
-def create_token(issuer, audience, key_id, private_key, subject=None):
+def create_token(issuer: str, audience:str, key_id: Union[KeyIdentifier, str], private_key: str, subject: Optional[str]=None):
     """" returns a token based upon the supplied parameters. """
     signer = atlassian_jwt_auth.create_signer(
         issuer, key_id, private_key, subject=subject)
@@ -54,7 +58,7 @@ class BaseJWTAlgorithmTestMixin(object):
         jwt algorithms easier.
     """
 
-    def get_new_private_key_in_pem_format(self):
+    def get_new_private_key_in_pem_format(self) -> bytes:
         """ returns a new private key in pem format. """
         raise NotImplementedError("not implemented.")
 
@@ -64,7 +68,7 @@ class RS256KeyTestMixin(object):
     """ Private rs256 test mixin. """
 
     @property
-    def algorithm(self):
+    def algorithm(self) -> str:
         return 'RS256'
 
     def get_new_private_key_in_pem_format(self):
@@ -76,7 +80,7 @@ class ES256KeyTestMixin(object):
     """ Private es256 test mixin. """
 
     @property
-    def algorithm(self):
+    def algorithm(self) -> str:
         return 'ES256'
 
     def get_new_private_key_in_pem_format(self):

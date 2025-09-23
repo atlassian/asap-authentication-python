@@ -1,20 +1,23 @@
 from functools import wraps
+from typing import Optional, Iterable, Dict, Any, Callable
+
 from jwt.exceptions import InvalidIssuerError, InvalidTokenError
 
 from .asap import _process_asap_token, _verify_issuers
+from .backend import Backend
 from .utils import SettingsDict
 
 
-def _with_asap(func=None, backend=None, issuers=None, required=True,
-               subject_should_match_issuer=None):
+def _with_asap(func:Callable[]=None, backend:Backend=None, issuers:Optional[Iterable[str]]=None, required: bool=True,
+               subject_should_match_issuer:Optional[bool]=None) -> Callable:
     if backend is None:
         raise ValueError(
             'Invalid value for backend. Use a subclass instead.'
         )
 
-    def with_asap_decorator(func):
+    def with_asap_decorator(func: Callable[]):
         @wraps(func)
-        def with_asap_wrapper(*args, **kwargs):
+        def with_asap_wrapper(*args: Any, **kwargs: Any) -> Optional[str]:
             settings = _update_settings_from_kwargs(
                 backend.settings,
                 issuers=issuers, required=required,
@@ -42,15 +45,15 @@ def _with_asap(func=None, backend=None, issuers=None, required=True,
     return with_asap_decorator
 
 
-def _restrict_asap(func=None, backend=None, issuers=None,
-                   required=True, subject_should_match_issuer=None):
+def _restrict_asap(func:Callable=None, backend:Optional[Backend]=None, issuers: Optional[Iterable[str]]=None,
+                   required: bool=True, subject_should_match_issuer: Optional[bool]=None):
     """Decorator to allow endpoint-specific ASAP authorization, assuming ASAP
     authentication has already occurred.
     """
 
-    def restrict_asap_decorator(func):
+    def restrict_asap_decorator(func: Callable) -> Optional[Any] :
         @wraps(func)
-        def restrict_asap_wrapper(request, *args, **kwargs):
+        def restrict_asap_wrapper(request, *args, **kwargs) -> Any:
             settings = _update_settings_from_kwargs(
                 backend.settings,
                 issuers=issuers, required=required,
@@ -88,8 +91,8 @@ def _restrict_asap(func=None, backend=None, issuers=None,
     return restrict_asap_decorator
 
 
-def _update_settings_from_kwargs(settings, issuers=None, required=True,
-                                 subject_should_match_issuer=None):
+def _update_settings_from_kwargs(settings: Dict[Any, Any], issuers:Optional[Iterable]=None, required: bool=True,
+                                 subject_should_match_issuer:Optional[bool]=None) -> SettingsDict:
     settings = settings.copy()
 
     if issuers is not None:

@@ -7,7 +7,7 @@ class TestKeyModule(unittest.TestCase):
 
     """ tests for the key module. """
 
-    def test_key_identifier_with_invalid_keys(self):
+    def test_key_identifier_with_invalid_keys(self) -> None:
         """ test that invalid key identifiers are not permitted. """
         keys = ['../aha', '/a', r'\c:a', 'lk2j34/#$', 'a../../a', 'a/;a',
                 ' ', ' / ', ' /',
@@ -17,7 +17,7 @@ class TestKeyModule(unittest.TestCase):
             with self.assertRaises(ValueError):
                 atlassian_jwt_auth.KeyIdentifier(identifier=key)
 
-    def test_key_identifier_with_valid_keys(self):
+    def test_key_identifier_with_valid_keys(self) -> None:
         """ test that valid keys work as expected. """
         for key in ['oa.oo/a', 'oo.sasdf.asdf/yes', 'oo/o']:
             key_id = atlassian_jwt_auth.KeyIdentifier(identifier=key)

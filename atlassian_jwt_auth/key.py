@@ -2,6 +2,7 @@ import base64
 import logging
 import os
 import re
+from typing import Union, Tuple, Iterable, Any, Generator
 from urllib.parse import unquote_plus
 from email.message import EmailMessage
 
@@ -25,15 +26,15 @@ class KeyIdentifier(object):
 
     """ This class represents a key identifier """
 
-    def __init__(self, identifier):
+    def __init__(self, identifier: str) -> None:
         self.__key_id = validate_key_identifier(identifier)
 
     @property
-    def key_id(self):
+    def key_id(self) -> str:
         return self.__key_id
 
 
-def validate_key_identifier(identifier):
+def validate_key_identifier(identifier: str) -> str:
     """ returns a validated key identifier. """
     regex = re.compile(r'^[\w.\-\+/]*$')
     _error_msg = 'Invalid key identifier %s' % identifier
@@ -51,7 +52,7 @@ def validate_key_identifier(identifier):
     return identifier
 
 
-def _get_key_id_from_jwt_header(a_jwt):
+def _get_key_id_from_jwt_header(a_jwt: Union[str, bytes]) -> KeyIdentifier:
     """ returns the key identifier from a jwt header. """
     header = jwt.get_unverified_header(a_jwt)
     return KeyIdentifier(header['kid'])
@@ -60,7 +61,7 @@ def _get_key_id_from_jwt_header(a_jwt):
 class BasePublicKeyRetriever(object):
     """ Base class for retrieving a public key. """
 
-    def retrieve(self, key_identifier, **kwargs):
+    def retrieve(self, key_identifier: Union[KeyIdentifier, str], **kwargs):
         raise NotImplementedError()
 
 
@@ -73,7 +74,7 @@ class HTTPSPublicKeyRetriever(BasePublicKeyRetriever):
     # HTTPSPublicKeyRetriever:
     _class_session = None
 
-    def __init__(self, base_url):
+    def __init__(self, base_url: str) -> None:
         if base_url is None or not base_url.startswith('https://'):
             raise PublicKeyRetrieverException(
                 'The base url must start with https://')
@@ -83,14 +84,14 @@ class HTTPSPublicKeyRetriever(BasePublicKeyRetriever):
         self._session = self._get_session()
         self._proxies = requests.utils.get_environ_proxies(self.base_url)
 
-    def _get_session(self):
+    def _get_session(self) -> requests.Session:
         if HTTPSPublicKeyRetriever._class_session is None:
             session = cachecontrol.CacheControl(requests.Session())
             session.trust_env = False
             HTTPSPublicKeyRetriever._class_session = session
         return HTTPSPublicKeyRetriever._class_session
 
-    def retrieve(self, key_identifier, **requests_kwargs):
+    def retrieve(self, key_identifier: Union[KeyIdentifier, str], **requests_kwargs: Any) -> str:
         """ returns the public key for given key_identifier. """
         if not isinstance(key_identifier, KeyIdentifier):
             key_identifier = KeyIdentifier(key_identifier)
@@ -106,14 +107,14 @@ class HTTPSPublicKeyRetriever(BasePublicKeyRetriever):
                 status_code = None
             raise PublicKeyRetrieverException(e, status_code=status_code)
 
-    def _retrieve(self, url, requests_kwargs):
+    def _retrieve(self, url:str, requests_kwargs: Any):
         resp = self._session.get(url, headers={'accept': PEM_FILE_TYPE},
                                  **requests_kwargs)
         resp.raise_for_status()
         self._check_content_type(url, resp.headers['content-type'])
         return resp.text
 
-    def _check_content_type(self, url, content_type):
+    def _check_content_type(self, url:str, content_type: str):
         msg = EmailMessage()
         msg['content-type'] = content_type
         media_type = msg.get_content_type()
@@ -129,16 +130,16 @@ class HTTPSMultiRepositoryPublicKeyRetriever(BasePublicKeyRetriever):
         repository locations based upon key ids.
     """
 
-    def __init__(self, key_repository_urls):
+    def __init__(self, key_repository_urls: Iterable[str]) -> None:
         if not isinstance(key_repository_urls, list):
             raise TypeError('keystore_urls must be a list of urls.')
         self._retrievers = self._create_retrievers(key_repository_urls)
 
-    def _create_retrievers(self, key_repository_urls):
+    def _create_retrievers(self, key_repository_urls: Iterable[str]):
         return [HTTPSPublicKeyRetriever(url) for url
                 in key_repository_urls]
 
-    def handle_retrieval_exception(self, retriever, exception):
+    def handle_retrieval_exception(self, retriever: BasePublicKeyRetriever, exception: Exception):
         """ Handles working with exceptions encountered during key
             retrieval.
         """
@@ -150,7 +151,7 @@ class HTTPSMultiRepositoryPublicKeyRetriever(BasePublicKeyRetriever):
             if exception.status_code is None or exception.status_code < 500:
                 raise
 
-    def retrieve(self, key_identifier, **requests_kwargs):
+    def retrieve(self, key_identifier: Union[KeyIdentifier, str], **requests_kwargs: Any):
         for retriever in self._retrievers:
             try:
                 return retriever.retrieve(key_identifier, **requests_kwargs)
@@ -168,7 +169,7 @@ class HTTPSMultiRepositoryPublicKeyRetriever(BasePublicKeyRetriever):
 class BasePrivateKeyRetriever(object):
     """ This is the base private key retriever class. """
 
-    def load(self, issuer):
+    def load(self, issuer: str) -> Tuple[KeyIdentifier, str]:
         """ returns the key identifier and private key pem found
             for the given issuer.
         """
@@ -180,10 +181,10 @@ class DataUriPrivateKeyRetriever(BasePrivateKeyRetriever):
         private key from the supplied data uri.
     """
 
-    def __init__(self, data_uri):
+    def __init__(self, data_uri: str) -> None:
         self._data_uri = data_uri
 
-    def load(self, issuer):
+    def load(self, issuer: str) -> Tuple[KeyIdentifier, str]:
         if not self._data_uri.startswith('data:application/pkcs8;kid='):
             raise PrivateKeyRetrieverException('Unrecognised data uri format.')
         splitted = self._data_uri.split(';')
@@ -207,14 +208,14 @@ class StaticPrivateKeyRetriever(BasePrivateKeyRetriever):
         initially provided to it in calls to load.
     """
 
-    def __init__(self, key_identifier, private_key_pem):
+    def __init__(self, key_identifier: Union[KeyIdentifier, str], private_key_pem: str) -> None:
         if not isinstance(key_identifier, KeyIdentifier):
             key_identifier = KeyIdentifier(key_identifier)
 
-        self.key_identifier = key_identifier
-        self.private_key_pem = private_key_pem
+        self.key_identifier: KeyIdentifier = key_identifier
+        self.private_key_pem: str = private_key_pem
 
-    def load(self, issuer):
+    def load(self, issuer) -> Tuple[KeyIdentifier, str]:
         return self.key_identifier, self.private_key_pem
 
 
@@ -224,16 +225,16 @@ class FilePrivateKeyRetriever(BasePrivateKeyRetriever):
         repository path.
     """
 
-    def __init__(self, private_key_repository_path):
+    def __init__(self, private_key_repository_path: str) -> None:
         self.private_key_repository = FilePrivateKeyRepository(
             private_key_repository_path)
 
-    def load(self, issuer):
+    def load(self, issuer: str) -> Tuple[KeyIdentifier, str]:
         key_identifier = self._find_last_key_id(issuer)
         private_key_pem = self.private_key_repository.load_key(key_identifier)
         return key_identifier, private_key_pem
 
-    def _find_last_key_id(self, issuer):
+    def _find_last_key_id(self, issuer) -> KeyIdentifier:
         key_identifiers = list(
             self.private_key_repository.find_valid_key_ids(issuer))
 
@@ -246,16 +247,16 @@ class FilePrivateKeyRetriever(BasePrivateKeyRetriever):
 class FilePrivateKeyRepository(object):
     """ This class represents a file backed private key repository. """
 
-    def __init__(self, path):
+    def __init__(self, path) -> None:
         self.path = path
 
-    def find_valid_key_ids(self, issuer):
+    def find_valid_key_ids(self, issuer:str) -> Generator[KeyIdentifier, Any, None]:
         issuer_directory = os.path.join(self.path, issuer)
         for filename in sorted(os.listdir(issuer_directory)):
             if filename.endswith('.pem'):
                 yield KeyIdentifier('%s/%s' % (issuer, filename))
 
-    def load_key(self, key_identifier):
+    def load_key(self, key_identifier: Union[KeyIdentifier, str]) -> str:
         key_filename = os.path.join(self.path, key_identifier.key_id)
         with open(key_filename, 'rb') as f:
             return f.read().decode('utf-8')

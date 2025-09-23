@@ -5,6 +5,7 @@ import jwt
 from requests import Request
 
 import atlassian_jwt_auth
+from atlassian_jwt_auth.auth import BaseJWTAuth
 from atlassian_jwt_auth.tests import utils
 from atlassian_jwt_auth.contrib.requests import JWTAuth, create_jwt_auth
 
@@ -14,12 +15,12 @@ class BaseRequestsTest(object):
     """ tests for the contrib.requests.JWTAuth class """
     auth_cls = JWTAuth
 
-    def setUp(self):
+    def setUp(self) -> None:
         self._private_key_pem = self.get_new_private_key_in_pem_format()
         self._public_key_pem = utils.get_public_key_pem_for_private_key_pem(
             self._private_key_pem)
 
-    def assert_authorization_header_is_valid(self, auth):
+    def assert_authorization_header_is_valid(self, auth) -> Any:
         """ asserts that the given request contains a valid Authorization
             header.
         """
@@ -31,15 +32,15 @@ class BaseRequestsTest(object):
         return jwt.decode(bearer, self._public_key_pem.decode(),
                           audience='audience', algorithms=algorithms)
 
-    def _get_auth_header(self, auth):
+    def _get_auth_header(self, auth) -> str:
         request = auth(Request())
         auth_header = request.headers['Authorization']
         return auth_header
 
-    def create_jwt_auth(self, *args, **kwargs):
+    def create_jwt_auth(self, *args, **kwargs) -> BaseJWTAuth:
         return create_jwt_auth(*args, **kwargs)
 
-    def test_JWTAuth_make_authenticated_request(self):
+    def test_JWTAuth_make_authenticated_request(self) -> None:
         """Verify a valid Authorization header is added by JWTAuth"""
         jwt_auth_signer = atlassian_jwt_auth.create_signer(
             'issuer',
@@ -49,14 +50,14 @@ class BaseRequestsTest(object):
         auth = self.auth_cls(jwt_auth_signer, 'audience')
         self.assert_authorization_header_is_valid(auth)
 
-    def test_create_jwt_auth(self):
+    def test_create_jwt_auth(self) -> None:
         """Verify a valid Authorization header is added by JWTAuth"""
         auth = self.create_jwt_auth('issuer', 'issuer/key',
                                     self._private_key_pem.decode(), 'audience',
                                     algorithm=self.algorithm)
         self.assert_authorization_header_is_valid(auth)
 
-    def test_create_jwt_auth_with_additional_claims(self):
+    def test_create_jwt_auth_with_additional_claims(self) -> None:
         """ Verify a Valid Authorization header is added by JWTAuth and
             contains the additional claims when provided.
         """
@@ -70,21 +71,21 @@ class BaseRequestsTest(object):
         token = self.assert_authorization_header_is_valid(auth)
         self.assertEqual(token.get('example'), 'claim')
 
-    def test_do_not_reuse_jwts(self):
+    def test_do_not_reuse_jwts(self) -> None:
         auth = self.create_jwt_auth('issuer', 'issuer/key',
                                     self._private_key_pem.decode(), 'audience',
                                     algorithm=self.algorithm)
         auth_header = self._get_auth_header(auth)
         self.assertNotEqual(auth_header, self._get_auth_header(auth))
 
-    def test_reuse_jwts(self):
+    def test_reuse_jwts(self) -> None:
         auth = self.create_jwt_auth('issuer', 'issuer/key',
                                     self._private_key_pem.decode(), 'audience',
                                     algorithm=self.algorithm, reuse_jwts=True)
         auth_header = self._get_auth_header(auth)
         self.assertEqual(auth_header, self._get_auth_header(auth))
 
-    def test_do_not_reuse_jwt_if_audience_changes(self):
+    def test_do_not_reuse_jwt_if_audience_changes(self) -> None:
         auth = self.create_jwt_auth('issuer', 'issuer/key',
                                     self._private_key_pem.decode(), 'audience',
                                     algorithm=self.algorithm, reuse_jwts=True)
@@ -92,7 +93,7 @@ class BaseRequestsTest(object):
         auth._audience = 'not-' + auth._audience
         self.assertNotEqual(auth_header, self._get_auth_header(auth))
 
-    def test_do_not_reuse_jwt_if_issuer_changes(self):
+    def test_do_not_reuse_jwt_if_issuer_changes(self) -> None:
         auth = self.create_jwt_auth('issuer', 'issuer/key',
                                     self._private_key_pem.decode(), 'audience',
                                     algorithm=self.algorithm, reuse_jwts=True)
@@ -100,7 +101,7 @@ class BaseRequestsTest(object):
         auth._signer.issuer = 'not-' + auth._signer.issuer
         self.assertNotEqual(auth_header, self._get_auth_header(auth))
 
-    def test_do_not_reuse_jwt_if_lifetime_changes(self):
+    def test_do_not_reuse_jwt_if_lifetime_changes(self) -> None:
         auth = self.create_jwt_auth('issuer', 'issuer/key',
                                     self._private_key_pem.decode(), 'audience',
                                     algorithm=self.algorithm, reuse_jwts=True)
@@ -108,7 +109,7 @@ class BaseRequestsTest(object):
         auth._signer.lifetime = auth._signer.lifetime - timedelta(seconds=1)
         self.assertNotEqual(auth_header, self._get_auth_header(auth))
 
-    def test_do_not_reuse_jwt_if_subject_changes(self):
+    def test_do_not_reuse_jwt_if_subject_changes(self) -> None:
         auth = self.create_jwt_auth('issuer', 'issuer/key',
                                     self._private_key_pem.decode(), 'audience',
                                     algorithm=self.algorithm, reuse_jwts=True,
@@ -117,7 +118,7 @@ class BaseRequestsTest(object):
         auth._signer.subject = 'not-' + auth._signer.subject
         self.assertNotEqual(auth_header, self._get_auth_header(auth))
 
-    def test_do_not_reuse_jwt_if_additional_claims_change(self):
+    def test_do_not_reuse_jwt_if_additional_claims_change(self) -> None:
         auth = self.create_jwt_auth('issuer', 'issuer/key',
                                     self._private_key_pem.decode(), 'audience',
                                     algorithm=self.algorithm, reuse_jwts=True)
@@ -125,7 +126,7 @@ class BaseRequestsTest(object):
         auth._additional_claims['foo'] = 'bar'
         self.assertNotEqual(auth_header, self._get_auth_header(auth))
 
-    def test_reuse_jwt_with_additional_claims(self):
+    def test_reuse_jwt_with_additional_claims(self) -> None:
         # calculating the cache key with additional claims is non-trivial
         auth = self.create_jwt_auth('issuer', 'issuer/key',
                                     self._private_key_pem.decode(), 'audience',

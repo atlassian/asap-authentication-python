@@ -1,5 +1,6 @@
 from abc import ABCMeta, abstractmethod, abstractproperty
 from functools import lru_cache
+from typing import Optional, Any, Union, Dict
 
 from atlassian_jwt_auth import HTTPSPublicKeyRetriever, JWTAuthVerifier
 
@@ -7,7 +8,7 @@ from .utils import SettingsDict
 
 
 @lru_cache(maxsize=20)
-def _get_verifier(settings):
+def _get_verifier(settings) -> JWTAuthVerifier:
     """ This has been extracted out of Backend to avoid possible memory
         leaks via retained instance references.
     """
@@ -26,7 +27,7 @@ def _get_verifier(settings):
     )
 
 
-class Backend():
+class Backend:
     """Abstract class representing a web framework backend
 
     Backends allow specific implementation details of web frameworks to be
@@ -66,26 +67,26 @@ class Backend():
     }
 
     @abstractmethod
-    def get_authorization_header(self, request=None):
+    def get_authorization_header(self, request: Optional[Any]=None) -> bytes:
         pass
 
     @abstractmethod
-    def get_401_response(self, data=None, headers=None, request=None):
+    def get_401_response(self, data:Optional[Any]=None, headers: Optional[Any]=None, request: Optional[Any]=None) -> Any:
         pass
 
     @abstractmethod
-    def get_403_response(self, data=None, headers=None, request=None):
+    def get_403_response(self, data:Optional[Any]=None, headers: Optional[Any]=None, request: Optional[Any]=None) -> Any:
         pass
 
     @abstractmethod
-    def set_asap_claims_for_request(self, request, claims):
+    def set_asap_claims_for_request(self, request:Any, claims: Any) -> None:
         pass
 
     @abstractproperty
-    def settings(self):
+    def settings(self) -> SettingsDict:
         return SettingsDict(self.default_settings)
 
-    def get_asap_token(self, request):
+    def get_asap_token(self, request: Any) -> Optional[bytes]:
         auth_header = self.get_authorization_header(request)
 
         if auth_header is None:
@@ -105,16 +106,16 @@ class Backend():
 
         return auth_values[1]
 
-    def get_verifier(self, settings=None):
+    def get_verifier(self, settings:Optional[SettingsDict]=None) -> JWTAuthVerifier:
         """Returns a verifier for ASAP JWT tokens"""
         if settings is None:
             settings = self.settings
         return self._get_verifier(settings)
 
-    def _get_verifier(self, settings):
+    def _get_verifier(self, settings: SettingsDict) -> JWTAuthVerifier:
         return _get_verifier(settings)
 
-    def _process_settings(self, settings):
+    def _process_settings(self, settings: Union[SettingsDict, Dict]) -> SettingsDict:
         valid_issuers = settings.get('ASAP_VALID_ISSUERS')
         if valid_issuers:
             settings['ASAP_VALID_ISSUERS'] = set(valid_issuers)

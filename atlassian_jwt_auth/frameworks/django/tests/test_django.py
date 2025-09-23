@@ -3,6 +3,7 @@ import os
 import django
 from django.test.testcases import SimpleTestCase
 from django.test.utils import override_settings, modify_settings
+from typing import Optional
 
 try:
     from django.urls import reverse
@@ -22,7 +23,7 @@ from atlassian_jwt_auth.tests.utils import (
 class DjangoAsapMixin(object):
 
     @classmethod
-    def setUpClass(cls):
+    def setUpClass(cls) -> None:
         os.environ.setdefault(
             'DJANGO_SETTINGS_MODULE',
             'atlassian_jwt_auth.frameworks.django.tests.settings')
@@ -31,11 +32,11 @@ class DjangoAsapMixin(object):
         super(DjangoAsapMixin, cls).setUpClass()
 
     @classmethod
-    def tearDownClass(cls):
+    def tearDownClass(cls) -> None:
         super(DjangoAsapMixin, cls).tearDownClass()
         del os.environ['DJANGO_SETTINGS_MODULE']
 
-    def setUp(self):
+    def setUp(self) -> None:
         super(DjangoAsapMixin, self).setUp()
         self._private_key_pem = self.get_new_private_key_in_pem_format()
         self._public_key_pem = utils.get_public_key_pem_for_private_key_pem(
@@ -57,17 +58,17 @@ class DjangoAsapMixin(object):
 class TestAsapMiddleware(DjangoAsapMixin, RS256KeyTestMixin, SimpleTestCase):
 
     def check_response(self,
-                       view_name,
-                       response_content='',
-                       status_code=200,
-                       issuer='client-app',
-                       audience='server-app',
-                       key_id='client-app/key01',
-                       subject=None,
+                       view_name: str,
+                       response_content: str='',
+                       status_code: int=200,
+                       issuer: str='client-app',
+                       audience: str='server-app',
+                       key_id: str='client-app/key01',
+                       subject: Optional[str]=None,
                        private_key=None,
                        token=None,
                        authorization=None,
-                       retriever_key=None):
+                       retriever_key=None) -> None:
         if authorization is None:
             if token is None:
                 if private_key is None:
@@ -91,21 +92,21 @@ class TestAsapMiddleware(DjangoAsapMixin, RS256KeyTestMixin, SimpleTestCase):
         self.assertContains(response, response_content,
                             status_code=status_code)
 
-    def test_request_with_valid_token_is_allowed(self):
+    def test_request_with_valid_token_is_allowed(self) -> None:
         self.check_response('needed', 'one', 200)
 
-    def test_request_with_valid_token_multiple_allowed_auds(self):
+    def test_request_with_valid_token_multiple_allowed_auds(self) -> None:
         audiences = ['server-app', 'another_one']
         self.test_settings['ASAP_VALID_AUDIENCE'] = audiences
         for aud in audiences:
             self.check_response('needed', 'one', 200, audience=aud)
 
-    def test_request_with_valid_token_multiple_allowed_auds_invalid_aud(self):
+    def test_request_with_valid_token_multiple_allowed_auds_invalid_aud(self) -> None:
         audiences = ['server-app', 'another_one']
         self.test_settings['ASAP_VALID_AUDIENCE'] = audiences
         self.check_response('needed', 'Unauthorized', 401, audience="invalid")
 
-    def test_request_with_duplicate_jti_is_rejected_as_per_setting(self):
+    def test_request_with_duplicate_jti_is_rejected_as_per_setting(self) -> None:
         self.test_settings['ASAP_CHECK_JTI_UNIQUENESS'] = True
         token = create_token(
             issuer='client-app', audience='server-app',
@@ -116,7 +117,7 @@ class TestAsapMiddleware(DjangoAsapMixin, RS256KeyTestMixin, SimpleTestCase):
         self.check_response('needed', 'duplicate jti', 401,
                             authorization=str_auth)
 
-    def _assert_request_with_duplicate_jti_is_accepted(self):
+    def _assert_request_with_duplicate_jti_is_accepted(self) -> None:
         token = create_token(
             issuer='client-app', audience='server-app',
             key_id='client-app/key01', private_key=self._private_key_pem
@@ -125,14 +126,14 @@ class TestAsapMiddleware(DjangoAsapMixin, RS256KeyTestMixin, SimpleTestCase):
         self.check_response('needed', 'one', 200, authorization=str_auth)
         self.check_response('needed', 'one', 200, authorization=str_auth)
 
-    def test_request_with_duplicate_jti_is_accepted(self):
+    def test_request_with_duplicate_jti_is_accepted(self) -> None:
         self._assert_request_with_duplicate_jti_is_accepted()
 
-    def test_request_with_duplicate_jti_is_accepted_as_per_setting(self):
+    def test_request_with_duplicate_jti_is_accepted_as_per_setting(self) -> None:
         self.test_settings['ASAP_CHECK_JTI_UNIQUENESS'] = False
         self._assert_request_with_duplicate_jti_is_accepted()
 
-    def test_request_with_string_headers_is_allowed(self):
+    def test_request_with_string_headers_is_allowed(self) -> None:
         token = create_token(
             issuer='client-app', audience='server-app',
             key_id='client-app/key01', private_key=self._private_key_pem
@@ -140,37 +141,37 @@ class TestAsapMiddleware(DjangoAsapMixin, RS256KeyTestMixin, SimpleTestCase):
         str_auth = 'Bearer ' + token.decode(encoding='iso-8859-1')
         self.check_response('needed', 'one', 200, authorization=str_auth)
 
-    def test_request_with_invalid_audience_is_rejected(self):
+    def test_request_with_invalid_audience_is_rejected(self) -> None:
         self.check_response('needed', 'Unauthorized', 401,
                             audience='invalid')
 
-    def test_request_with_invalid_token_is_rejected(self):
+    def test_request_with_invalid_token_is_rejected(self) -> None:
         self.check_response('needed', 'Unauthorized', 401,
                             authorization='Bearer invalid')
 
-    def test_request_without_token_is_rejected(self):
+    def test_request_without_token_is_rejected(self) -> None:
         with override_settings(**self.test_settings):
             response = self.client.get(reverse('needed'))
 
         self.assertContains(response, 'Unauthorized',
                             status_code=401)
 
-    def test_request_with_invalid_issuer_is_rejected(self):
+    def test_request_with_invalid_issuer_is_rejected(self) -> None:
         self.check_response('needed', 'Forbidden', 403,
                             issuer='something-invalid',
                             key_id='something-invalid/key01',
                             retriever_key='something-invalid/key01')
 
-    def test_request_non_whitelisted_decorated_issuer_is_rejected(self):
+    def test_request_non_whitelisted_decorated_issuer_is_rejected(self) -> None:
         self.check_response('needed', 'Forbidden', 403,
                             issuer='unexpected',
                             key_id='unexpected/key01',
                             retriever_key='unexpected/key01')
 
-    def test_request_non_decorated_issuer_is_rejected(self):
+    def test_request_non_decorated_issuer_is_rejected(self) -> None:
         self.check_response('restricted_issuer', 'Forbidden', 403)
 
-    def test_request_decorated_issuer_is_allowed(self):
+    def test_request_decorated_issuer_is_allowed(self) -> None:
         self.check_response('restricted_issuer', 'three',
                             issuer='whitelist',
                             key_id='whitelist/key01',
@@ -178,20 +179,20 @@ class TestAsapMiddleware(DjangoAsapMixin, RS256KeyTestMixin, SimpleTestCase):
 
     # TODO: modify JWTAuthSigner to allow non-issuer subjects and update the
     # decorated subject test cases
-    def test_request_non_decorated_subject_is_rejected(self):
+    def test_request_non_decorated_subject_is_rejected(self) -> None:
         self.check_response('restricted_subject', 'Forbidden', 403,
                             issuer='whitelist',
                             key_id='whitelist/key01',
                             retriever_key='whitelist/key01')
 
-    def test_request_using_settings_only_is_allowed(self):
+    def test_request_using_settings_only_is_allowed(self) -> None:
         self.check_response('unneeded', 'two')
 
-    def test_request_subject_does_not_need_to_match_issuer_from_settings(self):
+    def test_request_subject_does_not_need_to_match_issuer_from_settings(self) -> None:
         self.test_settings['ASAP_SUBJECT_SHOULD_MATCH_ISSUER'] = False
         self.check_response('needed', 'one', 200, subject='different_than_is')
 
-    def test_request_subject_and_issue_not_matching(self):
+    def test_request_subject_and_issue_not_matching(self) -> None:
         self.check_response(
             'needed',
             'Subject and Issuer do not match',
@@ -201,7 +202,7 @@ class TestAsapMiddleware(DjangoAsapMixin, RS256KeyTestMixin, SimpleTestCase):
 
 
 class TestAsapDecorator(DjangoAsapMixin, RS256KeyTestMixin, SimpleTestCase):
-    def test_request_with_valid_token_is_allowed(self):
+    def test_request_with_valid_token_is_allowed(self) -> None:
         token = create_token(
             issuer='client-app', audience='server-app',
             key_id='client-app/key01', private_key=self._private_key_pem
@@ -212,7 +213,7 @@ class TestAsapDecorator(DjangoAsapMixin, RS256KeyTestMixin, SimpleTestCase):
 
         self.assertContains(response, 'Greatest Success!', status_code=200)
 
-    def test_request_with_string_headers_is_allowed(self):
+    def test_request_with_string_headers_is_allowed(self) -> None:
         token = create_token(
             issuer='client-app', audience='server-app',
             key_id='client-app/key01', private_key=self._private_key_pem
@@ -225,7 +226,7 @@ class TestAsapDecorator(DjangoAsapMixin, RS256KeyTestMixin, SimpleTestCase):
 
         self.assertContains(response, 'Greatest Success!', status_code=200)
 
-    def test_request_with_invalid_audience_is_rejected(self):
+    def test_request_with_invalid_audience_is_rejected(self) -> None:
         token = create_token(
             issuer='client-app', audience='something-invalid',
             key_id='client-app/key01', private_key=self._private_key_pem
@@ -237,7 +238,7 @@ class TestAsapDecorator(DjangoAsapMixin, RS256KeyTestMixin, SimpleTestCase):
         self.assertContains(response, 'Unauthorized: Invalid token',
                             status_code=401)
 
-    def test_request_with_invalid_token_is_rejected(self):
+    def test_request_with_invalid_token_is_rejected(self) -> None:
         with override_settings(**self.test_settings):
             response = self.client.get(
                 reverse('expected'),
@@ -246,14 +247,14 @@ class TestAsapDecorator(DjangoAsapMixin, RS256KeyTestMixin, SimpleTestCase):
         self.assertContains(response, 'Unauthorized: Invalid token',
                             status_code=401)
 
-    def test_request_without_token_is_rejected(self):
+    def test_request_without_token_is_rejected(self) -> None:
         with override_settings(**self.test_settings):
             response = self.client.get(reverse('expected'))
 
         self.assertContains(response, 'Unauthorized',
                             status_code=401)
 
-    def test_request_with_invalid_issuer_is_rejected(self):
+    def test_request_with_invalid_issuer_is_rejected(self) -> None:
         retriever = get_static_retriever_class({
             'something-invalid/key01': self._public_key_pem
         })
@@ -268,7 +269,7 @@ class TestAsapDecorator(DjangoAsapMixin, RS256KeyTestMixin, SimpleTestCase):
         self.assertContains(response, 'Forbidden: Invalid token issuer',
                             status_code=403)
 
-    def test_request_non_decorated_issuer_is_rejected(self):
+    def test_request_non_decorated_issuer_is_rejected(self) -> None:
         token = create_token(
             issuer='client-app', audience='server-app',
             key_id='client-app/key01', private_key=self._private_key_pem
@@ -280,7 +281,7 @@ class TestAsapDecorator(DjangoAsapMixin, RS256KeyTestMixin, SimpleTestCase):
         self.assertContains(response, 'Forbidden: Invalid token issuer',
                             status_code=403)
 
-    def test_request_decorated_issuer_is_allowed(self):
+    def test_request_decorated_issuer_is_allowed(self) -> None:
         retriever = get_static_retriever_class({
             'whitelist/key01': self._public_key_pem
         })
@@ -294,7 +295,7 @@ class TestAsapDecorator(DjangoAsapMixin, RS256KeyTestMixin, SimpleTestCase):
 
         self.assertContains(response, 'Only the right issuer is allowed.')
 
-    def test_request_using_settings_only_is_allowed(self):
+    def test_request_using_settings_only_is_allowed(self) -> None:
         token = create_token(
             issuer='client-app', audience='server-app',
             key_id='client-app/key01', private_key=self._private_key_pem
@@ -305,7 +306,7 @@ class TestAsapDecorator(DjangoAsapMixin, RS256KeyTestMixin, SimpleTestCase):
 
         self.assertContains(response, 'Any settings issuer is allowed.')
 
-    def test_request_subject_does_not_need_to_match_issuer(self):
+    def test_request_subject_does_not_need_to_match_issuer(self) -> None:
         token = create_token(
             issuer='client-app', audience='server-app',
             key_id='client-app/key01', private_key=self._private_key_pem,
@@ -318,7 +319,7 @@ class TestAsapDecorator(DjangoAsapMixin, RS256KeyTestMixin, SimpleTestCase):
 
         self.assertContains(response, 'Subject does not need to match issuer.')
 
-    def test_request_subject_does_need_to_match_issuer_override_settings(self):
+    def test_request_subject_does_need_to_match_issuer_override_settings(self) -> None:
         """ tests that the with_asap decorator can override the
             ASAP_SUBJECT_SHOULD_MATCH_ISSUER setting.
         """
@@ -338,7 +339,7 @@ class TestAsapDecorator(DjangoAsapMixin, RS256KeyTestMixin, SimpleTestCase):
                 status_code=401
             )
 
-    def test_request_subject_does_not_need_to_match_issuer_from_settings(self):
+    def test_request_subject_does_not_need_to_match_issuer_from_settings(self) -> None:
         token = create_token(
             issuer='client-app', audience='server-app',
             key_id='client-app/key01', private_key=self._private_key_pem,
