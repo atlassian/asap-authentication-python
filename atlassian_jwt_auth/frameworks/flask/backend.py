@@ -9,11 +9,12 @@ from ..common.utils import SettingsDict
 
 class FlaskBackend(Backend):
     def get_authorization_header(
-            self, request: Optional[Request] = None) -> str:
+            self, request: Optional[Request] = None) -> bytes:
         if request is None:
             request = current_req
 
-        return request.headers.get('AUTHORIZATION', '')
+        auth_header = request.headers.get('AUTHORIZATION', '')
+        return auth_header.encode('utf-8') if isinstance(auth_header, str) else auth_header
 
     def get_401_response(self, data: Optional[Any] = None, headers: Optional[Any]
                          = None, request: Optional[Request] = None) -> Response:

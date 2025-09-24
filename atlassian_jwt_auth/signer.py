@@ -20,7 +20,7 @@ class JWTAuthSigner(object):
         self.lifetime = kwargs.get('lifetime', datetime.timedelta(minutes=1))
         self.algorithm = kwargs.get('algorithm', 'RS256')
         self.subject = kwargs.get('subject', None)
-        self._private_keys_cache = dict()
+        self._private_keys_cache: Dict[str, Any] = dict()
 
         if self.algorithm not in set(
                 algorithms.get_permitted_algorithm_names()):
@@ -31,17 +31,20 @@ class JWTAuthSigner(object):
                              (self.lifetime))
 
     def _obtain_private_key(
-            self, key_identifier: Union[KeyIdentifier, str], private_key_pem: str):
+            self, key_identifier: KeyIdentifier, private_key_pem: str):
         """ returns a loaded instance of the given private key either from
             cache or from the given private_key_pem.
         """
         priv_key = self._private_keys_cache.get(key_identifier.key_id, None)
         if priv_key is not None:
             return priv_key
+        private_key_bytes: bytes
         if not isinstance(private_key_pem, bytes):
-            private_key_pem = private_key_pem.encode()
+            private_key_bytes = private_key_pem.encode()
+        else:
+            private_key_bytes = private_key_pem
         priv_key = serialization.load_pem_private_key(
-            private_key_pem,
+            private_key_bytes,
             password=None,
             backend=default_backend()
         )
@@ -79,9 +82,9 @@ class JWTAuthSigner(object):
             self._generate_claims(audience, **kwargs),
             key=private_key,
             algorithm=self.algorithm,
-            headers={'kid': key_identifier.key_id})
-        if isinstance(token, str):
-            token = token.encode('utf-8')
+            headers={'kid': key_identifier.key_id if isinstance(key_identifier, KeyIdentifier) else key_identifier})
+        if isinstance(token, bytes):
+            return token.decode('utf-8')
         return token
 
 

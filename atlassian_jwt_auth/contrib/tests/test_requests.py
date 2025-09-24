@@ -1,6 +1,6 @@
 import unittest
 from datetime import timedelta
-from typing import Any
+from typing import Any, Type
 
 import jwt
 from requests import Request
@@ -14,7 +14,7 @@ from atlassian_jwt_auth.tests import utils
 class BaseRequestsTest(object):
 
     """ tests for the contrib.requests.JWTAuth class """
-    auth_cls = JWTAuth
+    auth_cls: Type[BaseJWTAuth] = JWTAuth
 
     def setUp(self) -> None:
         self._private_key_pem = self.get_new_private_key_in_pem_format()
@@ -33,7 +33,7 @@ class BaseRequestsTest(object):
         return jwt.decode(bearer, self._public_key_pem.decode(),
                           audience='audience', algorithms=algorithms)
 
-    def _get_auth_header(self, auth) -> str:
+    def _get_auth_header(self, auth) -> bytes:
         request = auth(Request())
         auth_header = request.headers['Authorization']
         return auth_header

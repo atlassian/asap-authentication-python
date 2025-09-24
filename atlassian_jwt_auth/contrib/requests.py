@@ -12,8 +12,8 @@ from atlassian_jwt_auth.auth import BaseJWTAuth
 class JWTAuth(AuthBase, BaseJWTAuth):
     """Adds a JWT bearer token to the request per the ASAP specification"""
 
-    def __call__(self, r: requests.Request):
-        r.headers['Authorization'] = self._get_header_value()
+    def __call__(self, r:  requests.models.PreparedRequest) -> requests.models.PreparedRequest:
+        r.headers['Authorization'] = self._get_header_value() # type: ignore[assignment]
         return r
 
 

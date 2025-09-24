@@ -19,7 +19,7 @@ class JWTAuth(BaseJWTAuth, BasicAuth):
 
 
 def create_jwt_auth(
-        issuer: str, key_identifier: Union[KeyIdentifier, str], private_key_pem: str, audience: str, **kwargs: Any) -> JWTAuth:
+        issuer: str, key_identifier: Union[KeyIdentifier, str], private_key_pem: str, audience: str, **kwargs: Any) -> BaseJWTAuth:
     """Instantiate a JWTAuth while creating the signer inline"""
     return JWTAuth.create(
         issuer, key_identifier, private_key_pem, audience, **kwargs)

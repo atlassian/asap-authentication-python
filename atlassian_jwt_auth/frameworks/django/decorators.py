@@ -5,7 +5,7 @@ from ..common.decorators import _restrict_asap, _with_asap
 from .backend import DjangoBackend
 
 
-def with_asap(func: Optional[Callable] = None, issuers: Optional[Iterable[str]] = None, required: Optional[bool] = None,
+def with_asap(func: Optional[Callable] = None, issuers: Optional[Iterable[str]] = None, required: bool=True,
               subject_should_match_issuer: Optional[bool] = None) -> Callable:
     """Decorator to allow endpoint-specific ASAP authentication.
 
@@ -29,7 +29,7 @@ def with_asap(func: Optional[Callable] = None, issuers: Optional[Iterable[str]] 
     )
 
 
-def restrict_asap(func: Optional[Callable] = None, backend: Optional[Backend] = None, issuers: Iterable[str] = None,
+def restrict_asap(func: Optional[Callable] = None, backend: Optional[Backend] = None, issuers: Optional[Iterable[str]] = None,
                   required: bool = True, subject_should_match_issuer: Optional[bool] = None) -> Callable:
     """Decorator to allow endpoint-specific ASAP authorization policies.
 
@@ -48,6 +48,7 @@ def restrict_asap(func: Optional[Callable] = None, backend: Optional[Backend] = 
                                                 must match the issuer for a
                                                 token to be considered valid.
     """
+    issuers = issuers if issuers is not None else []
     return _restrict_asap(
         func, DjangoBackend(), issuers, required,
         subject_should_match_issuer=None

@@ -19,7 +19,7 @@ class SettingsDict(dict):
             keys_and_values.append("%s %s" % (key, hash(value)))
         return frozenset(keys_and_values)
 
-    def __hash__(self) -> int:
+    def __hash__(self) -> int: # type: ignore[override]
         return hash(self._hash_key())
 
     def __eq__(self, other) -> bool:

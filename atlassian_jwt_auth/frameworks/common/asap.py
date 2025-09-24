@@ -1,5 +1,5 @@
 import logging
-from typing import Any, Dict, Iterable, Optional
+from typing import Any, Dict, Iterable, Optional, Union
 
 from jwt.exceptions import InvalidIssuerError, InvalidTokenError
 
@@ -28,7 +28,7 @@ def _process_asap_token(request: Any, backend: Backend, settings: SettingsDict,
         if verifier is None:
             verifier = backend.get_verifier(settings=settings)
         asap_claims = verifier.verify_jwt(
-            token,
+            token.decode('utf-8') if isinstance(token, bytes) else token,
             settings.ASAP_VALID_AUDIENCE,
             leeway=settings.ASAP_VALID_LEEWAY,
         )
@@ -49,7 +49,7 @@ def _process_asap_token(request: Any, backend: Backend, settings: SettingsDict,
             # will return 403 for a missing file to avoid leaking
             # information.
             raise
-            logger.warning('Could not retrieve the matching public key')
+        logger.warning('Could not retrieve the matching public key')
         error_response = backend.get_401_response(
             'Unauthorized: Key not found', request=request
         )
@@ -79,11 +79,12 @@ def _process_asap_token(request: Any, backend: Backend, settings: SettingsDict,
 
     if error_response is not None and settings.ASAP_REQUIRED:
         return error_response
+    return None
 
 
 def _verify_issuers(
         asap_claims: Dict[Any, Any], issuers: Optional[Iterable[str]] = None) -> None:
     """Verify that the issuer in the claims is valid and is expected."""
     claim_iss = asap_claims.get('iss')
-    if issuers and claim_iss not in issuers:
+    if issuers is not None and claim_iss is not None and claim_iss not in issuers:
         raise InvalidIssuerError

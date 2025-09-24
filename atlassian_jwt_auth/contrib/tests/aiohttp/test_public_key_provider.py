@@ -23,8 +23,8 @@ class DummyHTTPSPublicKeyRetriever(HTTPSPublicKeyRetriever):
     def set_headers(self, headers) -> None:
         self._session.get.return_value.headers.update(headers)
 
-    def set_text(self, text: str) -> None:
-        self._session.get.return_value.text.return_value = text
+    def set_text(self, text: str | bytes) -> None:
+        self._session.get.return_value.text.return_value = text  # type: ignore[attr-defined]
 
     def _get_session(self) -> Mock:
         session = Mock(spec=aiohttp.ClientSession)
@@ -41,7 +41,7 @@ class BaseHTTPSPublicKeyRetrieverTestMixin(object):
     """Tests for aiohttp.HTTPSPublicKeyRetriever class for RS256 algorithm"""
 
     def setUp(self) -> None:
-        self._private_key_pem = self.get_new_private_key_in_pem_format()
+        self._private_key_pem = self.get_new_private_key_in_pem_format() # type: ignore[attr-defined]
         self._public_key_pem = utils.get_public_key_pem_for_private_key_pem(
             self._private_key_pem)
         self.base_url = 'https://example.com'
@@ -49,8 +49,8 @@ class BaseHTTPSPublicKeyRetrieverTestMixin(object):
     async def test_retrieve(self) -> None:
         """Check if retrieve method returns public key"""
         retriever = DummyHTTPSPublicKeyRetriever(self.base_url)
-        retriever.set_text(self._public_key_pem)
-        self.assertEqual(
+        retriever.set_text(self._public_key_pem) # type: ignore[misc]
+        self.assertEqual( # type: ignore[attr-defined]
             await retriever.retrieve('example/eg'),
             self._public_key_pem)
 
@@ -61,7 +61,7 @@ class BaseHTTPSPublicKeyRetrieverTestMixin(object):
         retriever.set_text(self._public_key_pem)
         retriever.set_headers(headers)
 
-        self.assertEqual(
+        self.assertEqual( # type: ignore[attr-defined]
             await retriever.retrieve('example/eg'),
             self._public_key_pem)
 
@@ -71,10 +71,10 @@ class BaseHTTPSPublicKeyRetrieverTestMixin(object):
         """
         headers = {'content-type': 'different/not-supported'}
         retriever = DummyHTTPSPublicKeyRetriever(self.base_url)
-        retriever.set_text(self._public_key_pem)
+        retriever.set_text(self._public_key_pem) # type: ignore[arg-type]
         retriever.set_headers(headers)
 
-        with self.assertRaises(ValueError):
+        with self.assertRaises(ValueError): # type: ignore[attr-defined]
             await retriever.retrieve('example/eg')
 
     async def test_retrieve_session_uses_env_proxy(self) -> None:
@@ -87,9 +87,9 @@ class BaseHTTPSPublicKeyRetrieverTestMixin(object):
             proxy_location)
         with mock.patch.dict(os.environ, proxy_dict, clear=True):
             retriever = DummyHTTPSPublicKeyRetriever(self.base_url)
-            self.assertEqual(retriever._proxies, expected_proxies)
+            self.assertEqual(retriever._proxies, expected_proxies) # type: ignore[attr-defined]
             await retriever.retrieve(key_id)
-            retriever._session.get.assert_called_once_with(
+            retriever._session.get.assert_called_once_with( #type: ignore[attr-defined]
                 f'{self.base_url}/{key_id}', headers={'accept': PEM_FILE_TYPE},
                 proxy=expected_proxies[self.base_url.split(':')[0]]
             )

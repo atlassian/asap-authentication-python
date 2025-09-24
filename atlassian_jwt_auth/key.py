@@ -60,7 +60,7 @@ def _get_key_id_from_jwt_header(a_jwt: Union[str, bytes]) -> KeyIdentifier:
 class BasePublicKeyRetriever(object):
     """ Base class for retrieving a public key. """
 
-    def retrieve(self, key_identifier: Union[KeyIdentifier, str], **kwargs):
+    def retrieve(self, key_identifier: Union[KeyIdentifier, str], **kwargs) -> Any:
         raise NotImplementedError()
 
 
@@ -91,7 +91,7 @@ class HTTPSPublicKeyRetriever(BasePublicKeyRetriever):
         return HTTPSPublicKeyRetriever._class_session
 
     def retrieve(
-            self, key_identifier: Union[KeyIdentifier, str], **requests_kwargs: Any) -> str:
+            self, key_identifier: Union[KeyIdentifier, str], **requests_kwargs: Any) -> Any:
         """ returns the public key for given key_identifier. """
         if not isinstance(key_identifier, KeyIdentifier):
             key_identifier = KeyIdentifier(key_identifier)
@@ -102,12 +102,12 @@ class HTTPSPublicKeyRetriever(BasePublicKeyRetriever):
             return self._retrieve(url, requests_kwargs)
         except requests.RequestException as e:
             try:
-                status_code = e.response.status_code
+                status_code = e.response.status_code if e.response else None
             except AttributeError:
                 status_code = None
             raise PublicKeyRetrieverException(e, status_code=status_code)
 
-    def _retrieve(self, url: str, requests_kwargs: Any):
+    def _retrieve(self, url: str, requests_kwargs: Any) -> Any:
         resp = self._session.get(url, headers={'accept': PEM_FILE_TYPE},
                                  **requests_kwargs)
         resp.raise_for_status()
@@ -135,7 +135,7 @@ class HTTPSMultiRepositoryPublicKeyRetriever(BasePublicKeyRetriever):
             raise TypeError('keystore_urls must be a list of urls.')
         self._retrievers = self._create_retrievers(key_repository_urls)
 
-    def _create_retrievers(self, key_repository_urls: Iterable[str]):
+    def _create_retrievers(self, key_repository_urls: Iterable[str]) -> Iterable[BasePublicKeyRetriever]:
         return [HTTPSPublicKeyRetriever(url) for url
                 in key_repository_urls]
 
@@ -153,7 +153,7 @@ class HTTPSMultiRepositoryPublicKeyRetriever(BasePublicKeyRetriever):
                 raise
 
     def retrieve(
-            self, key_identifier: Union[KeyIdentifier, str], **requests_kwargs: Any):
+            self, key_identifier: Union[KeyIdentifier, str], **requests_kwargs: Any) -> Any:
         for retriever in self._retrievers:
             try:
                 return retriever.retrieve(key_identifier, **requests_kwargs)
@@ -163,7 +163,7 @@ class HTTPSMultiRepositoryPublicKeyRetriever(BasePublicKeyRetriever):
                 logger.warning(
                     'Unable to retrieve public key from store',
                     extra={'underlying_error': str(e),
-                           'key repository': retriever.base_url})
+                           'key repository': getattr(retriever, 'base_url', 'unknown')})
         raise PublicKeyRetrieverException(
             'Cannot load key from key repositories')
 
@@ -260,7 +260,7 @@ class FilePrivateKeyRepository(object):
             if filename.endswith('.pem'):
                 yield KeyIdentifier('%s/%s' % (issuer, filename))
 
-    def load_key(self, key_identifier: Union[KeyIdentifier, str]) -> str:
+    def load_key(self, key_identifier: KeyIdentifier) -> str:
         key_filename = os.path.join(self.path, key_identifier.key_id)
         with open(key_filename, 'rb') as f:
             return f.read().decode('utf-8')

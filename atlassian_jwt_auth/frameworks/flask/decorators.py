@@ -24,6 +24,6 @@ def with_asap(func: Optional[Callable] = None, issuers: Optional[Iterable[str]] 
                                                 token to be considered valid.
     """
     return _with_asap(
-        func, FlaskBackend(), issuers, required,
+        func, FlaskBackend(), issuers, required or False,
         subject_should_match_issuer
     )

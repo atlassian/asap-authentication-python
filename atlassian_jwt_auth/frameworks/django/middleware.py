@@ -38,3 +38,4 @@ class OldStyleASAPMiddleware(object):
         )
         if error_response is not None:
             return error_response
+        return None

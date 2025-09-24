@@ -9,8 +9,8 @@ from .utils import SettingsDict
 
 
 def _with_asap(
-    func: Callable = None,
-    backend: Backend = None,
+    func: Optional[Callable] = None,
+    backend: Optional[Backend] = None,
     issuers: Optional[Iterable[str]] = None,
     required: bool = True,
     subject_should_match_issuer: Optional[bool] = None,
@@ -48,7 +48,7 @@ def _with_asap(
 
 
 def _restrict_asap(
-    func: Callable = None,
+    func: Optional[Callable] = None,
     backend: Optional[Backend] = None,
     issuers: Optional[Iterable[str]] = None,
     required: bool = True,
@@ -61,6 +61,8 @@ def _restrict_asap(
     def restrict_asap_decorator(func: Callable) -> Optional[Any]:
         @wraps(func)
         def restrict_asap_wrapper(request, *args, **kwargs) -> Any:
+            if backend is None:
+                raise ValueError("Backend cannot be None")
             settings = _update_settings_from_kwargs(
                 backend.settings,
                 issuers=issuers,
@@ -71,19 +73,23 @@ def _restrict_asap(
             error_response = None
 
             if required and not asap_claims:
-                return backend.get_401_response(
-                    "Unauthorized", request=request)
+                if backend is not None:
+                    return backend.get_401_response(
+                        "Unauthorized", request=request)
 
             try:
-                _verify_issuers(asap_claims, settings.ASAP_VALID_ISSUERS)
+                if asap_claims is not None:
+                    _verify_issuers(asap_claims, settings.ASAP_VALID_ISSUERS)
             except InvalidIssuerError:
-                error_response = backend.get_403_response(
-                    "Forbidden: Invalid token issuer", request=request
-                )
+                if backend is not None:
+                    error_response = backend.get_403_response(
+                        "Forbidden: Invalid token issuer", request=request
+                    )
             except InvalidTokenError:
-                error_response = backend.get_401_response(
-                    "Unauthorized: Invalid token", request=request
-                )
+                if backend is not None:
+                    error_response = backend.get_401_response(
+                        "Unauthorized: Invalid token", request=request
+                    )
 
             if error_response and required:
                 return error_response

@@ -49,6 +49,7 @@ class ProxiedAsapMiddleware(OldStyleASAPMiddleware, MiddlewareMixin):
             request.META['HTTP_AUTHORIZATION'] = orig_auth
         if asap_auth is not None:
             request.META[self.xauth] = asap_auth
+        return None
 
     def process_view(self, request: Any, view_func: Callable,
                      view_args: Any, view_kwargs: Any) -> None:

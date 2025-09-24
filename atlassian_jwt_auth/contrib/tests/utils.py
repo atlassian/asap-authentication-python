@@ -1,22 +1,23 @@
-from typing import Any, Dict
+from typing import Any, Dict, Type
 
 import requests
 
 import atlassian_jwt_auth
 from atlassian_jwt_auth import JWTAuthVerifier
+from atlassian_jwt_auth.key import BasePublicKeyRetriever
 
 
-def get_static_retriever_class(keys: Dict[str, Any]):
+def get_static_retriever_class(keys: Dict[str, Any]) -> Type[BasePublicKeyRetriever]:
 
-    class StaticPublicKeyRetriever(object):
+    class StaticPublicKeyRetriever(BasePublicKeyRetriever):
         """ Retrieves a key from a static dict of public keys
         (for use in tests only) """
 
         def __init__(self, *args: Any, **
-                     kwargs: Any) -> requests.PreparedRequest:
+                     kwargs: Any) -> None:
             self.keys: Dict[str, Any] = keys
 
-        def retrieve(self, key_identifier, **requests_kwargs) -> str:
+        def retrieve(self, key_identifier, **requests_kwargs) -> Any:
             return self.keys[key_identifier.key_id]
 
     return StaticPublicKeyRetriever

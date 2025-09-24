@@ -26,4 +26,4 @@ class BaseJWTAuth(object):
 
     def _get_header_value(self) -> bytes:
         return b'Bearer ' + self._signer.generate_jwt(
-            self._audience, additional_claims=self._additional_claims)
+            self._audience, additional_claims=self._additional_claims).encode("utf-8")

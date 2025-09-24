@@ -13,7 +13,7 @@ class BaseAuthTest(test_requests.BaseRequestsTest):
     def _get_auth_header(self, auth) -> bytes:
         return auth.encode().encode('latin1')
 
-    def create_jwt_auth(self, *args: Any, **kwargs: Dict):
+    def create_jwt_auth(self, *args: Any, **kwargs: Any):
         return create_jwt_auth(*args, **kwargs)
 
 

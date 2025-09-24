@@ -1,5 +1,5 @@
 import os
-from typing import Optional
+from typing import Optional, Dict, Any
 
 import django
 from django.test.testcases import SimpleTestCase
@@ -24,16 +24,17 @@ class DjangoAsapMixin(object):
             'atlassian_jwt_auth.frameworks.django.tests.settings')
 
         django.setup()
-        super(DjangoAsapMixin, cls).setUpClass()
+
+        super(DjangoAsapMixin, cls).setUpClass() # type: ignore[misc]
 
     @classmethod
     def tearDownClass(cls) -> None:
-        super(DjangoAsapMixin, cls).tearDownClass()
+        super(DjangoAsapMixin, cls).tearDownClass() # type: ignore[misc]
         del os.environ['DJANGO_SETTINGS_MODULE']
 
     def setUp(self) -> None:
-        super(DjangoAsapMixin, self).setUp()
-        self._private_key_pem = self.get_new_private_key_in_pem_format()
+        super(DjangoAsapMixin, self).setUp() # type: ignore[misc]
+        self._private_key_pem = self.get_new_private_key_in_pem_format() # type: ignore[attr-defined]
         self._public_key_pem = utils.get_public_key_pem_for_private_key_pem(
             self._private_key_pem
         )
@@ -42,7 +43,7 @@ class DjangoAsapMixin(object):
             'client-app/key01': self._public_key_pem
         })
 
-        self.test_settings = {
+        self.test_settings: Dict[Any, Any] = {
             'ASAP_KEY_RETRIEVER_CLASS': self.retriever
         }
 
