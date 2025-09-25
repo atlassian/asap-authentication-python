@@ -37,7 +37,7 @@ class BaseHTTPSPublicKeyRetrieverTest(object):
         return HTTPSPublicKeyRetriever(url)
 
     def setUp(self) -> None:
-        self._private_key_pem = self.get_new_private_key_in_pem_format()
+        self._private_key_pem = self.get_new_private_key_in_pem_format()  # type: ignore[attr-defined]
         self._public_key_pem = utils.get_public_key_pem_for_private_key_pem(
             self._private_key_pem)
         self.base_url = 'https://example.com'
@@ -47,7 +47,7 @@ class BaseHTTPSPublicKeyRetrieverTest(object):
         """ tests that HTTPSPublicKeyRetriever does not support http://
             base urls.
         """
-        with self.assertRaises(ValueError):
+        with self.assertRaises(ValueError):  # type: ignore[attr-defined]
             self.create_retriever('http://example.com')
 
     def test_https_public_key_retriever_does_not_support_none_url(
@@ -55,7 +55,7 @@ class BaseHTTPSPublicKeyRetrieverTest(object):
         """ tests that HTTPSPublicKeyRetriever does not support None
             base urls.
         """
-        with self.assertRaises(ValueError):
+        with self.assertRaises(ValueError):  # type: ignore[attr-defined]
             self.create_retriever(None)
 
     def test_https_public_key_retriever_session_uses_env_proxy(self) -> None:
@@ -69,9 +69,9 @@ class BaseHTTPSPublicKeyRetrieverTest(object):
             retriever = self.create_retriever(self.base_url)
             key_retrievers = [retriever]
             if isinstance(retriever, HTTPSMultiRepositoryPublicKeyRetriever):
-                key_retrievers = retriever._retrievers
+                key_retrievers = retriever._retrievers  # type: ignore[assignment]
             for key_retriever in key_retrievers:
-                self.assertEqual(key_retriever._proxies, expected_proxies)
+                self.assertEqual(key_retriever._proxies, expected_proxies)  # type: ignore[attr-defined]
 
     def test_https_public_key_retriever_supports_https_url(self) -> None:
         """ tests that HTTPSPublicKeyRetriever supports https://
@@ -83,9 +83,9 @@ class BaseHTTPSPublicKeyRetrieverTest(object):
     def test_retrieve(self, mock_get_method: Mock) -> None:
         """ tests that the retrieve method works expected. """
         _setup_mock_response_for_retriever(
-            mock_get_method, self._public_key_pem)
+            mock_get_method, self._public_key_pem)  # type: ignore[arg-type]
         retriever = self.create_retriever(self.base_url)
-        self.assertEqual(
+        self.assertEqual(  # type: ignore[attr-defined]
             retriever.retrieve('example/eg'),
             self._public_key_pem)
 
@@ -99,7 +99,7 @@ class BaseHTTPSPublicKeyRetrieverTest(object):
         expected_proxies, proxy_dict = get_expected_and_os_proxies_dict(
             proxy_location)
         _setup_mock_response_for_retriever(
-            mock_get_method, self._public_key_pem)
+            mock_get_method, self._public_key_pem)  # type: ignore[arg-type]
         with mock.patch.dict(os.environ, proxy_dict, clear=True):
             retriever = self.create_retriever(self.base_url)
             retriever.retrieve(key_id)
@@ -122,7 +122,7 @@ class BaseHTTPSPublicKeyRetrieverTest(object):
         expected_proxies, _ = get_expected_and_os_proxies_dict(
             explicit_proxy_location)
         _setup_mock_response_for_retriever(
-            mock_get_method, self._public_key_pem)
+            mock_get_method, self._public_key_pem)  # type: ignore[arg-type]
         with mock.patch.dict(os.environ, proxy_dict, clear=True):
             retriever = self.create_retriever(self.base_url)
             retriever.retrieve(key_id, proxies=expected_proxies)
@@ -140,9 +140,9 @@ class BaseHTTPSPublicKeyRetrieverTest(object):
         """
         headers = {'content-type': 'application/x-pem-file;charset=UTF-8'}
         _setup_mock_response_for_retriever(
-            mock_get_method, self._public_key_pem, headers)
+            mock_get_method, self._public_key_pem, headers)  # type: ignore[arg-type]
         retriever = self.create_retriever(self.base_url)
-        self.assertEqual(
+        self.assertEqual(  # type: ignore[attr-defined]
             retriever.retrieve('example/eg'),
             self._public_key_pem)
 
@@ -154,9 +154,9 @@ class BaseHTTPSPublicKeyRetrieverTest(object):
         """
         headers = {'content-type': 'different/not-supported'}
         _setup_mock_response_for_retriever(
-            mock_get_method, self._public_key_pem, headers)
+            mock_get_method, self._public_key_pem, headers)  # type: ignore[arg-type]
         retriever = self.create_retriever(self.base_url)
-        with self.assertRaises(ValueError):
+        with self.assertRaises(ValueError):  # type: ignore[attr-defined]
             retriever.retrieve('example/eg')
 
     @mock.patch.object(requests.Session, 'get',
@@ -169,9 +169,9 @@ class BaseHTTPSPublicKeyRetrieverTest(object):
         403 forbidden error.
         """
         _setup_mock_response_for_retriever(
-            mock_get_method, self._public_key_pem)
+            mock_get_method, self._public_key_pem)  # type: ignore[arg-type]
         retriever = self.create_retriever(self.base_url)
-        with self.assertRaises(ValueError):
+        with self.assertRaises(ValueError):  # type: ignore[attr-defined]
             retriever.retrieve('example/eg')
 
 
@@ -225,13 +225,13 @@ class BaseHTTPSMultiRepositoryPublicKeyRetrieverTest(
         BaseHTTPSPublicKeyRetrieverTest):
     """ tests for the HTTPSMultiRepositoryPublicKeyRetriever class. """
 
-    def create_retriever(
+    def create_retriever(  # type: ignore[override]
             self, url: str) -> HTTPSMultiRepositoryPublicKeyRetriever:
         """ returns a public key retriever created using the given url. """
         return HTTPSMultiRepositoryPublicKeyRetriever([url])
 
     def setUp(self) -> None:
-        self._private_key_pem = self.get_new_private_key_in_pem_format()
+        self._private_key_pem = self.get_new_private_key_in_pem_format()  # type: ignore[attr-defined]
         self._public_key_pem = utils.get_public_key_pem_for_private_key_pem(
             self._private_key_pem)
         self.keystore_urls = ['https://example.com', 'https://example.ly']
@@ -242,16 +242,16 @@ class BaseHTTPSMultiRepositoryPublicKeyRetrieverTest(
         """ tests that HTTPSMultiRepositoryPublicKeyRetriever does not
             support a string key repository url.
         """
-        with self.assertRaises(TypeError):
+        with self.assertRaises(TypeError):  # type: ignore[attr-defined]
             HTTPSMultiRepositoryPublicKeyRetriever('https://example.com')
 
     @mock.patch.object(requests.Session, 'get')
     def test_retrieve(self, mock_get_method: Mock) -> None:
         """ tests that the retrieve method works expected. """
         _setup_mock_response_for_retriever(
-            mock_get_method, self._public_key_pem)
+            mock_get_method, self._public_key_pem)  # type: ignore[arg-type]
         retriever = HTTPSMultiRepositoryPublicKeyRetriever(self.keystore_urls)
-        self.assertEqual(
+        self.assertEqual(  # type: ignore[attr-defined]
             retriever.retrieve('example/eg'),
             self._public_key_pem)
 
@@ -262,13 +262,13 @@ class BaseHTTPSMultiRepositoryPublicKeyRetrieverTest(
         """
         retriever = HTTPSMultiRepositoryPublicKeyRetriever(self.keystore_urls)
         _setup_mock_response_for_retriever(
-            mock_get_method, self._public_key_pem)
+            mock_get_method, self._public_key_pem)  # type: ignore[arg-type]
         valid_response = mock_get_method.return_value
         del mock_get_method.return_value
         server_exception = requests.exceptions.HTTPError(
             response=mock.Mock(status_code=500))
         mock_get_method.side_effect = [server_exception, valid_response]
-        self.assertEqual(
+        self.assertEqual(  # type: ignore[attr-defined]
             retriever.retrieve('example/eg'),
             self._public_key_pem)
 
@@ -280,13 +280,13 @@ class BaseHTTPSMultiRepositoryPublicKeyRetrieverTest(
         """
         retriever = HTTPSMultiRepositoryPublicKeyRetriever(self.keystore_urls)
         _setup_mock_response_for_retriever(
-            mock_get_method, self._public_key_pem)
+            mock_get_method, self._public_key_pem)  # type: ignore[arg-type]
         valid_response = mock_get_method.return_value
         del mock_get_method.return_value
         connection_exception = requests.exceptions.ConnectionError(
             response=mock.Mock(status_code=None))
         mock_get_method.side_effect = [connection_exception, valid_response]
-        self.assertEqual(
+        self.assertEqual(  # type: ignore[attr-defined]
             retriever.retrieve('example/eg'),
             self._public_key_pem)
 

@@ -36,9 +36,9 @@ class BaseJWTAuthVerifierTest(object):
     """ tests for the JWTAuthVerifier class. """
 
     def setUp(self) -> None:
-        self._private_key_pem = self.get_new_private_key_in_pem_format()
+        self._private_key_pem = self.get_new_private_key_in_pem_format() # type: ignore [attr-defined]
         self._public_key_pem = utils.get_public_key_pem_for_private_key_pem(
-            self._private_key_pem)
+            self._private_key_pem) # type: ignore [attr-defined]
         self._example_aud = 'aud_x'
         self._example_issuer = 'egissuer'
         self._example_key_id = '%s/a' % self._example_issuer
@@ -46,7 +46,7 @@ class BaseJWTAuthVerifierTest(object):
             self._example_issuer,
             self._example_key_id,
             self._private_key_pem.decode(),
-            algorithm=self.algorithm
+            algorithm=self.algorithm, # type: ignore[attr-defined]
         )
 
     def _setup_mock_public_key_retriever(self, pub_key_pem: bytes) -> Mock:
@@ -65,9 +65,9 @@ class BaseJWTAuthVerifierTest(object):
         signed_jwt = self._jwt_auth_signer.generate_jwt(
             self._example_aud)
         v_claims = verifier.verify_jwt(signed_jwt, self._example_aud)
-        self.assertIsNotNone(v_claims)
-        self.assertEqual(v_claims['aud'], self._example_aud)
-        self.assertEqual(v_claims['iss'], self._example_issuer)
+        self.assertIsNotNone(v_claims)  # type: ignore[attr-defined]
+        self.assertEqual(v_claims['aud'], self._example_aud) # type: ignore[attr-defined] 
+        self.assertEqual(v_claims['iss'], self._example_issuer) # type: ignore[attr-defined]
 
     def test_verify_jwt_with_none_algorithm(self) -> None:
         """ tests that verify_jwt does not accept jwt that use the none
@@ -89,8 +89,8 @@ class BaseJWTAuthVerifierTest(object):
             if algorithm != 'none':
                 jwt.unregister_algorithm(algorithm)
             jwt_headers = jwt.get_unverified_header(jwt_token)
-            self.assertEqual(jwt_headers['alg'], algorithm)
-            with self.assertRaises(jwt.exceptions.InvalidAlgorithmError):
+            self.assertEqual(jwt_headers['alg'], algorithm) # type: ignore [attr-defined]
+            with self.assertRaises(jwt.exceptions.InvalidAlgorithmError): # type: ignore [attr-defined]
                 verifier.verify_jwt(jwt_token, self._example_aud)
 
     def test_verify_jwt_with_key_identifier_not_starting_with_issuer(
@@ -101,10 +101,10 @@ class BaseJWTAuthVerifierTest(object):
         verifier = self._setup_jwt_auth_verifier(self._public_key_pem)
         signer = atlassian_jwt_auth.create_signer(
             'issuer', 'issuerx', self._private_key_pem.decode(),
-            algorithm=self.algorithm,
+            algorithm=self.algorithm, # type: ignore [attr-defined]
         )
         a_jwt = signer.generate_jwt(self._example_aud)
-        with self.assertRaisesRegex(ValueError, 'Issuer does not own'):
+        with self.assertRaisesRegex(ValueError, 'Issuer does not own'): # type: ignore [attr-defined]
             verifier.verify_jwt(a_jwt, self._example_aud)
 
     @mock.patch('atlassian_jwt_auth.verifier.jwt.decode')
@@ -124,7 +124,7 @@ class BaseJWTAuthVerifierTest(object):
             ValueError,
             atlassian_jwt_auth.exceptions.SubjectDoesNotMatchIssuerException,
         ]:
-            with self.assertRaisesRegex(exception, expected_msg):
+            with self.assertRaisesRegex(exception, expected_msg): # type: ignore [attr-defined]
                 verifier.verify_jwt(a_jwt, self._example_aud)
 
     @mock.patch('atlassian_jwt_auth.verifier.jwt.decode')
@@ -141,7 +141,7 @@ class BaseJWTAuthVerifierTest(object):
         m_j_decode.return_value = claims
         a_jwt = self._jwt_auth_signer.generate_jwt(self._example_aud)
         verifier = self._setup_jwt_auth_verifier(self._public_key_pem)
-        with self.assertRaisesRegex(ValueError, expected_msg):
+        with self.assertRaisesRegex(ValueError, expected_msg): # type: ignore [attr-defined]
             verifier.verify_jwt(a_jwt, self._example_aud)
 
     def test_verify_jwt_with_jwt_with_already_seen_jti(self) -> None:
@@ -152,19 +152,19 @@ class BaseJWTAuthVerifierTest(object):
             self._public_key_pem, check_jti_uniqueness=True)
         a_jwt = self._jwt_auth_signer.generate_jwt(
             self._example_aud)
-        self.assertIsNotNone(verifier.verify_jwt(
+        self.assertIsNotNone(verifier.verify_jwt( # type: ignore [attr-defined]
             a_jwt,
             self._example_aud))
         for exception in [
                 ValueError,
                 atlassian_jwt_auth.exceptions.JtiUniquenessException]:
-            with self.assertRaisesRegex(exception, 'has already been used'):
+            with self.assertRaisesRegex(exception, 'has already been used'): # type: ignore [attr-defined]
                 verifier.verify_jwt(a_jwt, self._example_aud)
 
     def assert_jwt_accepted_more_than_once(self, verifier, a_jwt) -> None:
         """ asserts that the given jwt is accepted more than once. """
         for i in range(0, 3):
-            self.assertIsNotNone(
+            self.assertIsNotNone( # type: ignore [attr-defined]
                 verifier.verify_jwt(a_jwt, self._example_aud))
 
     def test_verify_jwt_with_already_seen_jti_with_uniqueness_disabled(
@@ -193,7 +193,7 @@ class BaseJWTAuthVerifierTest(object):
         a_jwt = self._jwt_auth_signer.generate_jwt(
             self._example_aud,
             additional_claims={'sub': 'not-' + self._example_issuer})
-        with self.assertRaisesRegex(ValueError,
+        with self.assertRaisesRegex(ValueError, # type: ignore [attr-defined]
                                     'Issuer does not match the subject.'):
             verifier.verify_jwt(a_jwt, self._example_aud)
 
@@ -203,7 +203,7 @@ class BaseJWTAuthVerifierTest(object):
         a_jwt = self._jwt_auth_signer.generate_jwt(
             self._example_aud,
             additional_claims={'sub': 'not-' + self._example_issuer})
-        self.assertIsNotNone(verifier.verify_jwt(a_jwt, self._example_aud))
+        self.assertIsNotNone(verifier.verify_jwt(a_jwt, self._example_aud)) # type: ignore [attr-defined]
 
     @mock.patch('atlassian_jwt_auth.verifier.jwt.decode')
     def test_verify_jwt_with_missing_aud_claim(self, m_j_decode) -> None:
@@ -217,7 +217,7 @@ class BaseJWTAuthVerifierTest(object):
         m_j_decode.return_value = claims
         a_jwt = self._jwt_auth_signer.generate_jwt(self._example_aud)
         verifier = self._setup_jwt_auth_verifier(self._public_key_pem)
-        with self.assertRaisesRegex(KeyError, expected_msg):
+        with self.assertRaisesRegex(KeyError, expected_msg): # type: ignore [attr-defined]
             verifier.verify_jwt(a_jwt, self._example_aud)
 
     def test_verify_jwt_with_none_aud(self) -> None:
@@ -228,10 +228,10 @@ class BaseJWTAuthVerifierTest(object):
             additional_claims={'aud': None})
         exceptions = (jwt.exceptions.InvalidAudienceError,
                       jwt.exceptions.InvalidTokenError)
-        with self.assertRaises(exceptions) as cm:
+        with self.assertRaises(exceptions) as cm: # type: ignore [attr-defined]
             verifier.verify_jwt(a_jwt, self._example_aud)
-        if not isinstance(cm.exception, jwt.exceptions.InvalidAudienceError):
-            self.assertIn('aud', str(cm.exception))
+        if not isinstance(cm.exception, jwt.exceptions.InvalidAudienceError): # type: ignore [attr-defined]
+            self.assertIn('aud', str(cm.exception)) # type: ignore [attr-defined]
 
     def test_verify_jwt_with_non_matching_aud(self) -> None:
         """ tests that verify_jwt rejects a jwt if the aud claim does not
@@ -241,7 +241,7 @@ class BaseJWTAuthVerifierTest(object):
         a_jwt = self._jwt_auth_signer.generate_jwt(
             self._example_aud,
             additional_claims={'aud': self._example_aud + '-different'})
-        with self.assertRaises(jwt.exceptions.InvalidAudienceError):
+        with self.assertRaises(jwt.exceptions.InvalidAudienceError): # type: ignore [attr-defined]
             verifier.verify_jwt(a_jwt, self._example_aud)
 
 

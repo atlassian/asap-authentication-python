@@ -7,7 +7,7 @@ try:
     from unittest.mock import AsyncMock as CoroutineMock
     from unittest.mock import Mock
 except ImportError:
-    from asynctest import TestCase, CoroutineMock
+    from asynctest import TestCase, CoroutineMock  # type: ignore[import-untyped, no-redef]
 
 from atlassian_jwt_auth.contrib.aiohttp import (HTTPSPublicKeyRetriever,
                                                 JWTAuthVerifier)
@@ -32,13 +32,13 @@ class SyncJWTAuthVerifier(JWTAuthVerifier):
 class JWTAuthVerifierTestMixin(test_verifier.BaseJWTAuthVerifierTest):
     loop = None
 
-    def _setup_mock_public_key_retriever(self, pub_key_pem: str) -> Mock:
+    def _setup_mock_public_key_retriever(self, pub_key_pem: str) -> Mock:  # type: ignore[override]
         m_public_key_ret = CoroutineMock(spec=HTTPSPublicKeyRetriever)
-        m_public_key_ret.retrieve.return_value = pub_key_pem.decode()
+        m_public_key_ret.retrieve.return_value = pub_key_pem.decode()  # type: ignore[attr-defined]
         return m_public_key_ret
 
     def _setup_jwt_auth_verifier(
-            self, pub_key_pem: str, **kwargs: Any) -> SyncJWTAuthVerifier:
+            self, pub_key_pem: str, **kwargs: Any) -> SyncJWTAuthVerifier:  # type: ignore[override]
         m_public_key_ret = self._setup_mock_public_key_retriever(pub_key_pem)
         return SyncJWTAuthVerifier(m_public_key_ret, loop=self.loop, **kwargs)
 

@@ -17,7 +17,7 @@ class BaseRequestsTest(object):
     auth_cls: Type[BaseJWTAuth] = JWTAuth
 
     def setUp(self) -> None:
-        self._private_key_pem = self.get_new_private_key_in_pem_format()
+        self._private_key_pem = self.get_new_private_key_in_pem_format()  # type: ignore[attr-defined]
         self._public_key_pem = utils.get_public_key_pem_for_private_key_pem(
             self._private_key_pem)
 
@@ -47,7 +47,7 @@ class BaseRequestsTest(object):
             'issuer',
             'issuer/key',
             self._private_key_pem.decode(),
-            algorithm=self.algorithm)
+            algorithm=self.algorithm)  # type: ignore[attr-defined]
         auth = self.auth_cls(jwt_auth_signer, 'audience')
         self.assert_authorization_header_is_valid(auth)
 
@@ -55,7 +55,7 @@ class BaseRequestsTest(object):
         """Verify a valid Authorization header is added by JWTAuth"""
         auth = self.create_jwt_auth('issuer', 'issuer/key',
                                     self._private_key_pem.decode(), 'audience',
-                                    algorithm=self.algorithm)
+                                    algorithm=self.algorithm)  # type: ignore[attr-defined]
         self.assert_authorization_header_is_valid(auth)
 
     def test_create_jwt_auth_with_additional_claims(self) -> None:
@@ -66,77 +66,77 @@ class BaseRequestsTest(object):
             'issuer',
             'issuer/key',
             self._private_key_pem.decode(),
-            algorithm=self.algorithm)
+            algorithm=self.algorithm)  # type: ignore[attr-defined]
         auth = self.auth_cls(jwt_auth_signer, 'audience',
                              additional_claims={'example': 'claim'})
         token = self.assert_authorization_header_is_valid(auth)
-        self.assertEqual(token.get('example'), 'claim')
+        self.assertEqual(token.get('example'), 'claim')  # type: ignore[attr-defined]
 
     def test_do_not_reuse_jwts(self) -> None:
         auth = self.create_jwt_auth('issuer', 'issuer/key',
                                     self._private_key_pem.decode(), 'audience',
-                                    algorithm=self.algorithm)
+                                    algorithm=self.algorithm)  # type: ignore[attr-defined]
         auth_header = self._get_auth_header(auth)
-        self.assertNotEqual(auth_header, self._get_auth_header(auth))
+        self.assertNotEqual(auth_header, self._get_auth_header(auth))  # type: ignore[attr-defined]
 
     def test_reuse_jwts(self) -> None:
         auth = self.create_jwt_auth('issuer', 'issuer/key',
                                     self._private_key_pem.decode(), 'audience',
-                                    algorithm=self.algorithm, reuse_jwts=True)
+                                    algorithm=self.algorithm, reuse_jwts=True)  # type: ignore[attr-defined]
         auth_header = self._get_auth_header(auth)
-        self.assertEqual(auth_header, self._get_auth_header(auth))
+        self.assertEqual(auth_header, self._get_auth_header(auth))  # type: ignore[attr-defined]
 
     def test_do_not_reuse_jwt_if_audience_changes(self) -> None:
         auth = self.create_jwt_auth('issuer', 'issuer/key',
                                     self._private_key_pem.decode(), 'audience',
-                                    algorithm=self.algorithm, reuse_jwts=True)
+                                    algorithm=self.algorithm, reuse_jwts=True)  # type: ignore[attr-defined]
         auth_header = self._get_auth_header(auth)
         auth._audience = 'not-' + auth._audience
-        self.assertNotEqual(auth_header, self._get_auth_header(auth))
+        self.assertNotEqual(auth_header, self._get_auth_header(auth))  # type: ignore[attr-defined]
 
     def test_do_not_reuse_jwt_if_issuer_changes(self) -> None:
         auth = self.create_jwt_auth('issuer', 'issuer/key',
                                     self._private_key_pem.decode(), 'audience',
-                                    algorithm=self.algorithm, reuse_jwts=True)
+                                    algorithm=self.algorithm, reuse_jwts=True)  # type: ignore[attr-defined]
         auth_header = self._get_auth_header(auth)
         auth._signer.issuer = 'not-' + auth._signer.issuer
-        self.assertNotEqual(auth_header, self._get_auth_header(auth))
+        self.assertNotEqual(auth_header, self._get_auth_header(auth))  # type: ignore[attr-defined]
 
     def test_do_not_reuse_jwt_if_lifetime_changes(self) -> None:
         auth = self.create_jwt_auth('issuer', 'issuer/key',
                                     self._private_key_pem.decode(), 'audience',
-                                    algorithm=self.algorithm, reuse_jwts=True)
+                                    algorithm=self.algorithm, reuse_jwts=True)  # type: ignore[attr-defined]
         auth_header = self._get_auth_header(auth)
         auth._signer.lifetime = auth._signer.lifetime - timedelta(seconds=1)
-        self.assertNotEqual(auth_header, self._get_auth_header(auth))
+        self.assertNotEqual(auth_header, self._get_auth_header(auth))  # type: ignore[attr-defined]
 
     def test_do_not_reuse_jwt_if_subject_changes(self) -> None:
         auth = self.create_jwt_auth('issuer', 'issuer/key',
                                     self._private_key_pem.decode(), 'audience',
-                                    algorithm=self.algorithm, reuse_jwts=True,
+                                    algorithm=self.algorithm, reuse_jwts=True,  # type: ignore[attr-defined]
                                     subject='subject')
         auth_header = self._get_auth_header(auth)
-        auth._signer.subject = 'not-' + auth._signer.subject
-        self.assertNotEqual(auth_header, self._get_auth_header(auth))
+        auth._signer.subject = 'not-' + auth._signer.subject  # type: ignore[operator]
+        self.assertNotEqual(auth_header, self._get_auth_header(auth))  # type: ignore[attr-defined]
 
     def test_do_not_reuse_jwt_if_additional_claims_change(self) -> None:
         auth = self.create_jwt_auth('issuer', 'issuer/key',
                                     self._private_key_pem.decode(), 'audience',
-                                    algorithm=self.algorithm, reuse_jwts=True)
+                                    algorithm=self.algorithm, reuse_jwts=True)  # type: ignore[attr-defined]
         auth_header = self._get_auth_header(auth)
         auth._additional_claims['foo'] = 'bar'
-        self.assertNotEqual(auth_header, self._get_auth_header(auth))
+        self.assertNotEqual(auth_header, self._get_auth_header(auth))  # type: ignore[attr-defined]
 
     def test_reuse_jwt_with_additional_claims(self) -> None:
         # calculating the cache key with additional claims is non-trivial
         auth = self.create_jwt_auth('issuer', 'issuer/key',
                                     self._private_key_pem.decode(), 'audience',
-                                    algorithm=self.algorithm, reuse_jwts=True)
+                                    algorithm=self.algorithm, reuse_jwts=True)  # type: ignore[attr-defined]
         auth._additional_claims['foo'] = 'bar'
         auth._additional_claims['fool'] = 'blah'
         auth._additional_claims['foot'] = 'quux'
         auth_header = self._get_auth_header(auth)
-        self.assertEqual(auth_header, self._get_auth_header(auth))
+        self.assertEqual(auth_header, self._get_auth_header(auth))  # type: ignore[attr-defined]
 
 
 class RequestsRS256Test(BaseRequestsTest,

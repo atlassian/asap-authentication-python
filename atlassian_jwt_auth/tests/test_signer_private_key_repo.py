@@ -18,7 +18,7 @@ class BaseJWTAuthSignerWithFilePrivateKeyRetrieverTest(object):
         for dir in ['invalid-issuer', 'issuer-with-many-keys',
                     'valid-issuer']:
             os.makedirs(os.path.join(self.key_dir, dir))
-        self._private_key_pem = self.get_new_private_key_in_pem_format()
+        self._private_key_pem = self.get_new_private_key_in_pem_format()  # type: ignore[attr-defined]
         for file_loc in [
             'invalid-issuer/key-tests-pem.new',
             'issuer-with-many-keys/key1.pem.new',
@@ -38,28 +38,28 @@ class BaseJWTAuthSignerWithFilePrivateKeyRetrieverTest(object):
     def create_signer_for_issuer(self, issuer: str):
         return \
             atlassian_jwt_auth.create_signer_from_file_private_key_repository(
-                issuer, self.key_dir, algorithm=self.algorithm)
+                issuer, self.key_dir, algorithm=self.algorithm)  # type: ignore[attr-defined]
 
     def test_succeeds_if_issuer_has_one_valid_key(self) -> None:
         signer = self.create_signer_for_issuer('valid-issuer')
         token = signer.generate_jwt('audience')
-        self.assertIsNotNone(token)
+        self.assertIsNotNone(token)  # type: ignore[attr-defined]
 
     def test_picks_last_valid_key_id(self) -> None:
         signer = self.create_signer_for_issuer('issuer-with-many-keys')
         token = signer.generate_jwt('audience')
         key_identifier = key._get_key_id_from_jwt_header(token)
         expected_key_id = 'issuer-with-many-keys/key3.pem'
-        self.assertEqual(key_identifier.key_id, expected_key_id)
+        self.assertEqual(key_identifier.key_id, expected_key_id)  # type: ignore[attr-defined]
 
     def test_fails_if_issuer_has_no_valid_keys(self) -> None:
         signer = self.create_signer_for_issuer('invalid-issuer')
-        with self.assertRaisesRegex(IOError, 'Issuer has no valid keys'):
+        with self.assertRaisesRegex(IOError, 'Issuer has no valid keys'):  # type: ignore[attr-defined]
             signer.generate_jwt('audience')
 
     def test_fails_if_issuer_does_not_exist(self) -> None:
         signer = self.create_signer_for_issuer('this-does-not-exist')
-        with self.assertRaisesRegex(OSError, 'No such file or directory'):
+        with self.assertRaisesRegex(OSError, 'No such file or directory'):  # type: ignore[attr-defined]
             signer.generate_jwt('audience')
 
 

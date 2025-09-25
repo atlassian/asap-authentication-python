@@ -9,7 +9,7 @@ try:
     from unittest.mock import AsyncMock as CoroutineMock
     from unittest.mock import Mock
 except ImportError:
-    from asynctest import CoroutineMock, TestCase, Mock
+    from asynctest import CoroutineMock, TestCase, Mock  # type: ignore[import-untyped, no-redef]
 
 from atlassian_jwt_auth.contrib.aiohttp import HTTPSPublicKeyRetriever
 from atlassian_jwt_auth.key import PEM_FILE_TYPE
@@ -21,7 +21,7 @@ from atlassian_jwt_auth.tests.test_public_key_provider import \
 class DummyHTTPSPublicKeyRetriever(HTTPSPublicKeyRetriever):
 
     def set_headers(self, headers) -> None:
-        self._session.get.return_value.headers.update(headers)
+        self._session.get.return_value.headers.update(headers)  # type: ignore[attr-defined]
 
     def set_text(self, text: str | bytes) -> None:
         self._session.get.return_value.text.return_value = text  # type: ignore[attr-defined]
