@@ -56,7 +56,10 @@ def restrict_asap(
                                                 must match the issuer for a
                                                 token to be considered valid.
     """
-    issuers = issuers if issuers is not None else []
     return _restrict_asap(
-        func, DjangoBackend(), issuers, required, subject_should_match_issuer=None
+        func,
+        DjangoBackend(),
+        issuers,
+        required,
+        subject_should_match_issuer=None,
     )

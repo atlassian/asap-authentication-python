@@ -26,7 +26,7 @@ class BaseJWTAuth(object):
         cls,
         issuer: str,
         key_identifier: Union[KeyIdentifier, str],
-        private_key_pem: str,
+        private_key_pem: Union[str, bytes],
         audience: Union[str, Iterable[str]],
         **kwargs: Any,
     ) -> "BaseJWTAuth":
@@ -39,4 +39,4 @@ class BaseJWTAuth(object):
     def _get_header_value(self) -> bytes:
         return b"Bearer " + self._signer.generate_jwt(
             self._audience, additional_claims=self._additional_claims
-        ).encode("utf-8")
+        )
