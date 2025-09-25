@@ -19,11 +19,12 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip wheel setuptools
-        pip install -q ruff
+        pip install -q ruff mypy
     - name: Lint
       run: |
         ruff check .
         ruff format --check .
+        mypy .
     - name: Test
       run: |
         pip install wheel

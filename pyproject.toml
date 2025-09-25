@@ -15,3 +15,13 @@ line-ending = "auto"
 [tool.ruff.lint]
 extend-select = ["I"]
 
+[tool.mypy]
+warn_unused_configs = true
+
+[[tool.mypy.overrides]]
+module = "django.*"
+ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+module = "httptest.*"
+ignore_missing_imports = true
