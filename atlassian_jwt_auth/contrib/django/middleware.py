@@ -1,3 +1,5 @@
+from typing import Any, Callable, Optional
+
 from django.conf import settings
 from django.utils.deprecation import MiddlewareMixin
 
@@ -10,7 +12,7 @@ class ProxiedAsapMiddleware(OldStyleASAPMiddleware, MiddlewareMixin):
 
     This must come before any authentication middleware."""
 
-    def __init__(self, get_response=None):
+    def __init__(self, get_response: Optional[Any] = None) -> None:
         super(ProxiedAsapMiddleware, self).__init__()
         self.get_response = get_response
 
@@ -25,7 +27,7 @@ class ProxiedAsapMiddleware(OldStyleASAPMiddleware, MiddlewareMixin):
             settings, "ASAP_PROXIED_AUTHORIZATION_HEADER", "HTTP_X_ASAP_AUTHORIZATION"
         )
 
-    def process_request(self, request):
+    def process_request(self, request) -> Optional[str]:
         error_response = super(ProxiedAsapMiddleware, self).process_request(request)
 
         if error_response:
@@ -33,7 +35,7 @@ class ProxiedAsapMiddleware(OldStyleASAPMiddleware, MiddlewareMixin):
 
         forwarded_for = request.META.pop(self.xfwd, None)
         if forwarded_for is None:
-            return
+            return None
 
         request.asap_forwarded = True
         request.META["HTTP_X_FORWARDED_FOR"] = forwarded_for
@@ -46,10 +48,13 @@ class ProxiedAsapMiddleware(OldStyleASAPMiddleware, MiddlewareMixin):
             request.META["HTTP_AUTHORIZATION"] = orig_auth
         if asap_auth is not None:
             request.META[self.xauth] = asap_auth
+        return None
 
-    def process_view(self, request, view_func, view_args, view_kwargs):
+    def process_view(
+        self, request: Any, view_func: Callable, view_args: Any, view_kwargs: Any
+    ) -> None:
         if not hasattr(request, "asap_forwarded"):
-            return
+            return None
 
         # swap headers back into place
         asap_auth = request.META.pop(self.xauth, None)

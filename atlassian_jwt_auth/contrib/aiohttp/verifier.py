@@ -1,4 +1,5 @@
 import asyncio
+from typing import Any, Dict, Iterable, Union
 
 import jwt
 
@@ -6,8 +7,14 @@ from atlassian_jwt_auth import key
 from atlassian_jwt_auth.verifier import JWTAuthVerifier as _JWTAuthVerifier
 
 
-class JWTAuthVerifier(_JWTAuthVerifier):
-    async def verify_jwt(self, a_jwt, audience, leeway=0, **requests_kwargs):
+class JWTAuthVerifier(_JWTAuthVerifier):  # type: ignore[override]
+    async def verify_jwt(  # type: ignore[override]
+        self,
+        a_jwt: str,
+        audience: Union[str, Iterable[str]],
+        leeway: int = 0,
+        **requests_kwargs: Any,
+    ) -> Dict[Any, Any]:
         """Verify if the token is correct
 
         Returns:
