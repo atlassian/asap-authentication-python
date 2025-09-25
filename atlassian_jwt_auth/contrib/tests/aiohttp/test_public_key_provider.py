@@ -1,15 +1,11 @@
 import os
+from unittest import IsolatedAsyncioTestCase as TestCase
 from unittest import mock
+from unittest.mock import AsyncMock as CoroutineMock
+from unittest.mock import Mock
 
 import aiohttp
 from multidict import CIMultiDict
-
-try:
-    from unittest import IsolatedAsyncioTestCase as TestCase
-    from unittest.mock import AsyncMock as CoroutineMock
-    from unittest.mock import Mock
-except ImportError:
-    from asynctest import CoroutineMock, Mock, TestCase
 
 from atlassian_jwt_auth.contrib.aiohttp import HTTPSPublicKeyRetriever
 from atlassian_jwt_auth.key import PEM_FILE_TYPE
@@ -26,7 +22,7 @@ class DummyHTTPSPublicKeyRetriever(HTTPSPublicKeyRetriever):
     def set_text(self, text):
         self._session.get.return_value.text.return_value = text
 
-    def _get_session(self):
+    def _get_session(self) -> Mock:
         session = Mock(spec=aiohttp.ClientSession)
         session.attach_mock(CoroutineMock(), "get")
 

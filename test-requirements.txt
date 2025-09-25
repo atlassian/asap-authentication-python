@@ -3,4 +3,3 @@ flask>=2.0.3,<4.0.0
 Django>=3.2.9,<5.0.0
 atlassian-httptest==1.0.0
 aiohttp==3.12.14
-asynctest==0.13.0
