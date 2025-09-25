@@ -7,9 +7,9 @@ from ..common.backend import Backend
 class DjangoBackend(Backend):
     def get_authorization_header(self, request=None):
         if request is None:
-            raise ValueError('No request available')
+            raise ValueError("No request available")
 
-        return request.META.get('HTTP_AUTHORIZATION', b'')
+        return request.META.get("HTTP_AUTHORIZATION", b"")
 
     def get_401_response(self, data=None, headers=None, request=None):
         if headers is None:

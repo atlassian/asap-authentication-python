@@ -6,7 +6,7 @@ class SettingsDict(dict):
         return self[name]
 
     def __setitem__(self, key, value):
-        raise AttributeError('SettingsDict properties are immutable')
+        raise AttributeError("SettingsDict properties are immutable")
 
     def _hash_key(self):
         keys_and_values = []

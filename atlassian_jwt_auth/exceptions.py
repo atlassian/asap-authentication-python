@@ -13,10 +13,8 @@ class _WrappedException(object):
         if args:
             orig = args[0]
             if isinstance(orig, Exception):
-
                 wrapped_args[0] = str(orig)
-                self.original_exception = getattr(orig, 'original_exception',
-                                                  orig)
+                self.original_exception = getattr(orig, "original_exception", orig)
         super(_WrappedException, self).__init__(*wrapped_args, **kwargs)
 
 
@@ -28,7 +26,7 @@ class _WithStatus(object):
     """
 
     def __init__(self, *args, **kwargs):
-        status_code = kwargs.pop('status_code', None)
+        status_code = kwargs.pop("status_code", None)
         super(_WithStatus, self).__init__(*args, **kwargs)
         self.status_code = status_code
 
@@ -54,13 +52,14 @@ class KeyIdentifierException(ASAPAuthenticationException):
 
 
 class JtiUniquenessException(ASAPAuthenticationException):
-    """Raise when a JTI is seen more than once. """
+    """Raise when a JTI is seen more than once."""
 
 
 class SubjectDoesNotMatchIssuerException(ASAPAuthenticationException):
-    """Raise when the subject and issuer differ. """
+    """Raise when the subject and issuer differ."""
 
 
 class NoTokenProvidedError(ASAPAuthenticationException):
     """Raise when no token is provided"""
+
     pass

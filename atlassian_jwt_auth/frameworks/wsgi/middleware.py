@@ -1,8 +1,9 @@
 from collections import namedtuple
+
 from ..common.asap import _process_asap_token
 from .backend import WSGIBackend
 
-Request = namedtuple('Request', ['environ', 'start_response'])
+Request = namedtuple("Request", ["environ", "start_response"])
 
 
 class ASAPMiddleware(object):

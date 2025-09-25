@@ -7,7 +7,9 @@ def requires_asap(f, issuers=None, subject_should_match_issuer=None):
     access.
     """
 
-    return with_asap(func=f,
-                     required=True,
-                     issuers=issuers,
-                     subject_should_match_issuer=subject_should_match_issuer)
+    return with_asap(
+        func=f,
+        required=True,
+        issuers=issuers,
+        subject_should_match_issuer=subject_should_match_issuer,
+    )

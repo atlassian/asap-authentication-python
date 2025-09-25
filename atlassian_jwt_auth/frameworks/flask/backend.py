@@ -1,4 +1,5 @@
-from flask import Response, current_app, g, request as current_req
+from flask import Response, current_app, g
+from flask import request as current_req
 
 from ..common.backend import Backend
 
@@ -8,7 +9,7 @@ class FlaskBackend(Backend):
         if request is None:
             request = current_req
 
-        return request.headers.get('AUTHORIZATION', '')
+        return request.headers.get("AUTHORIZATION", "")
 
     def get_401_response(self, data=None, headers=None, request=None):
         if headers is None:
