@@ -1,4 +1,7 @@
-def get_permitted_algorithm_names():
+from typing import List
+
+
+def get_permitted_algorithm_names() -> List[str]:
     """returns permitted algorithm names."""
     return [
         "RS256",

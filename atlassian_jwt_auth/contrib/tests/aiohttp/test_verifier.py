@@ -2,8 +2,7 @@ import asyncio
 from unittest import IsolatedAsyncioTestCase as TestCase
 from unittest.mock import AsyncMock as CoroutineMock
 
-from atlassian_jwt_auth.contrib.aiohttp import (HTTPSPublicKeyRetriever,
-                                                JWTAuthVerifier)
+from atlassian_jwt_auth.contrib.aiohttp import HTTPSPublicKeyRetriever, JWTAuthVerifier
 from atlassian_jwt_auth.tests import test_verifier, utils
 
 

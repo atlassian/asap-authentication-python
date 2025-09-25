@@ -1,16 +1,25 @@
 import logging
+from typing import Any, Dict, Iterable, Optional
 
 from jwt.exceptions import InvalidIssuerError, InvalidTokenError
 
+from atlassian_jwt_auth import JWTAuthVerifier
 from atlassian_jwt_auth.exceptions import (
     JtiUniquenessException,
     NoTokenProvidedError,
     PublicKeyRetrieverException,
     SubjectDoesNotMatchIssuerException,
 )
+from atlassian_jwt_auth.frameworks.common.backend import Backend
+from atlassian_jwt_auth.frameworks.common.utils import SettingsDict
 
 
-def _process_asap_token(request, backend, settings, verifier=None):
+def _process_asap_token(
+    request: Any,
+    backend: Backend,
+    settings: SettingsDict,
+    verifier: Optional[JWTAuthVerifier] = None,
+) -> Optional[str]:
     """Verifies an ASAP token, validates the claims, and returns an error
     response"""
     logger = logging.getLogger("asap")
@@ -21,14 +30,14 @@ def _process_asap_token(request, backend, settings, verifier=None):
         and not settings.ASAP_REQUIRED
         and (settings.ASAP_REQUIRED is not None)
     ):
-        return
+        return None
     try:
         if token is None:
             raise NoTokenProvidedError
         if verifier is None:
             verifier = backend.get_verifier(settings=settings)
         asap_claims = verifier.verify_jwt(
-            token,
+            token.decode("utf-8") if isinstance(token, bytes) else token,
             settings.ASAP_VALID_AUDIENCE,
             leeway=settings.ASAP_VALID_LEEWAY,
         )
@@ -47,7 +56,7 @@ def _process_asap_token(request, backend, settings, verifier=None):
             # will return 403 for a missing file to avoid leaking
             # information.
             raise
-            logger.warning("Could not retrieve the matching public key")
+        logger.warning("Could not retrieve the matching public key")
         error_response = backend.get_401_response(
             "Unauthorized: Key not found", request=request
         )
@@ -77,10 +86,13 @@ def _process_asap_token(request, backend, settings, verifier=None):
 
     if error_response is not None and settings.ASAP_REQUIRED:
         return error_response
+    return None
 
 
-def _verify_issuers(asap_claims, issuers=None):
+def _verify_issuers(
+    asap_claims: Dict[Any, Any], issuers: Optional[Iterable[str]] = None
+) -> None:
     """Verify that the issuer in the claims is valid and is expected."""
     claim_iss = asap_claims.get("iss")
-    if issuers and claim_iss not in issuers:
+    if issuers is not None and claim_iss is not None and claim_iss not in issuers:
         raise InvalidIssuerError
