@@ -74,8 +74,7 @@ def _restrict_asap(
 
             if required and not asap_claims:
                 if backend is not None:
-                    return backend.get_401_response(
-                        "Unauthorized", request=request)
+                    return backend.get_401_response("Unauthorized", request=request)
 
             try:
                 if asap_claims is not None:

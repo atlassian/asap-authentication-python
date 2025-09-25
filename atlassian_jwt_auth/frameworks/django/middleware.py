@@ -13,8 +13,9 @@ def asap_middleware(get_response: Any) -> Callable:
     _verifier = backend.get_verifier(settings=settings)
 
     def middleware(request: HttpRequest) -> Any:
-        error_response = _process_asap_token(request, backend, settings,
-                                             verifier=_verifier)
+        error_response = _process_asap_token(
+            request, backend, settings, verifier=_verifier
+        )
         if error_response is not None:
             return error_response
 

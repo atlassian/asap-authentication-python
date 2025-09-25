@@ -9,7 +9,7 @@ class SettingsDict(dict):
         return self[name]
 
     def __setitem__(self, key: Any, value: Any) -> None:
-        raise AttributeError('SettingsDict properties are immutable')
+        raise AttributeError("SettingsDict properties are immutable")
 
     def _hash_key(self) -> frozenset[Any]:
         keys_and_values = []
@@ -19,7 +19,7 @@ class SettingsDict(dict):
             keys_and_values.append("%s %s" % (key, hash(value)))
         return frozenset(keys_and_values)
 
-    def __hash__(self) -> int: # type: ignore[override]
+    def __hash__(self) -> int:  # type: ignore[override]
         return hash(self._hash_key())
 
     def __eq__(self, other) -> bool:

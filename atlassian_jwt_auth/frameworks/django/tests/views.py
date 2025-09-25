@@ -1,7 +1,6 @@
 from django.http import HttpRequest, HttpResponse
 
-from atlassian_jwt_auth.contrib.django.decorators import (requires_asap,
-                                                          validate_asap)
+from atlassian_jwt_auth.contrib.django.decorators import requires_asap, validate_asap
 from atlassian_jwt_auth.frameworks.django import restrict_asap, with_asap
 
 
@@ -26,8 +25,7 @@ def settings_view(request: HttpRequest):
 
 
 @with_asap(subject_should_match_issuer=False)
-def subject_does_not_need_to_match_issuer_view(
-        request: HttpRequest) -> HttpResponse:
+def subject_does_not_need_to_match_issuer_view(request: HttpRequest) -> HttpResponse:
     return HttpResponse("Subject does not need to match issuer.")
 
 
@@ -37,8 +35,7 @@ def subject_does_need_to_match_issuer_view(request: HttpRequest):
 
 
 @with_asap()
-def subject_does_not_need_to_match_issuer_from_settings_view(
-        request: HttpRequest):
+def subject_does_not_need_to_match_issuer_from_settings_view(request: HttpRequest):
     return HttpResponse("Subject does not need to match issuer (settings).")
 
 

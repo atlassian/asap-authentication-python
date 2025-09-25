@@ -1,6 +1,6 @@
 from collections.abc import Callable
 from functools import wraps
-from typing import Iterable, Optional, Sequence
+from typing import Iterable, Optional
 
 from django.http.response import HttpResponse
 

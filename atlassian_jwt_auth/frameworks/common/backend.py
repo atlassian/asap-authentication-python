@@ -9,22 +9,20 @@ from .utils import SettingsDict
 
 @lru_cache(maxsize=20)
 def _get_verifier(settings) -> JWTAuthVerifier:
-    """ This has been extracted out of Backend to avoid possible memory
-        leaks via retained instance references.
+    """This has been extracted out of Backend to avoid possible memory
+    leaks via retained instance references.
     """
     retriever = settings.ASAP_KEY_RETRIEVER_CLASS(
         base_url=settings.ASAP_PUBLICKEY_REPOSITORY
     )
     kwargs = {}
     if settings.ASAP_SUBJECT_SHOULD_MATCH_ISSUER is not None:
-        kwargs = {'subject_should_match_issuer':
-                  settings.ASAP_SUBJECT_SHOULD_MATCH_ISSUER}
+        kwargs = {
+            "subject_should_match_issuer": settings.ASAP_SUBJECT_SHOULD_MATCH_ISSUER
+        }
     if settings.ASAP_CHECK_JTI_UNIQUENESS is not None:
-        kwargs['check_jti_uniqueness'] = settings.ASAP_CHECK_JTI_UNIQUENESS
-    return JWTAuthVerifier(
-        retriever,
-        **kwargs
-    )
+        kwargs["check_jti_uniqueness"] = settings.ASAP_CHECK_JTI_UNIQUENESS
+    return JWTAuthVerifier(retriever, **kwargs)
 
 
 class Backend:
@@ -33,37 +31,31 @@ class Backend:
     Backends allow specific implementation details of web frameworks to be
     abstracted away from the underlying logic of ASAP.
     """
+
     __metaclass__ = ABCMeta
 
-    default_headers_401 = {'WWW-Authenticate': 'Bearer'}
+    default_headers_401 = {"WWW-Authenticate": "Bearer"}
     default_settings = {
         # The class to be instantiated to retrieve public keys
-        'ASAP_KEY_RETRIEVER_CLASS': HTTPSPublicKeyRetriever,
-
+        "ASAP_KEY_RETRIEVER_CLASS": HTTPSPublicKeyRetriever,
         # The repository URL where the key retriever can fetch public keys
-        'ASAP_PUBLICKEY_REPOSITORY': None,
-
+        "ASAP_PUBLICKEY_REPOSITORY": None,
         # Whether or not ASAP authentication is required
         # This is primarily useful when phasing in ASAP authentication
-        'ASAP_REQUIRED': True,
-
+        "ASAP_REQUIRED": True,
         # The valid audience value expected when authenticating tokens
-        'ASAP_VALID_AUDIENCE': None,
-
+        "ASAP_VALID_AUDIENCE": None,
         # The amount of leeway to apply when evaluating token expiration
         # timestamps
-        'ASAP_VALID_LEEWAY': 0,
-
+        "ASAP_VALID_LEEWAY": 0,
         # An iterable of valid token issuers allowed to authenticate
         # (this can be overridden at the decorator level)
-        'ASAP_VALID_ISSUERS': None,
-
+        "ASAP_VALID_ISSUERS": None,
         # Enforce that the ASAP subject must match the issuer
-        'ASAP_SUBJECT_SHOULD_MATCH_ISSUER': None,
-
+        "ASAP_SUBJECT_SHOULD_MATCH_ISSUER": None,
         # Enforce that tokens have a unique JTI
         # Set this to True to enforce JTI uniqueness checking.
-        'ASAP_CHECK_JTI_UNIQUENESS': None,
+        "ASAP_CHECK_JTI_UNIQUENESS": None,
     }
 
     @abstractmethod
@@ -72,12 +64,20 @@ class Backend:
 
     @abstractmethod
     def get_401_response(
-            self, data: Optional[Any] = None, headers: Optional[Any] = None, request: Optional[Any] = None) -> Any:
+        self,
+        data: Optional[Any] = None,
+        headers: Optional[Any] = None,
+        request: Optional[Any] = None,
+    ) -> Any:
         pass
 
     @abstractmethod
     def get_403_response(
-            self, data: Optional[Any] = None, headers: Optional[Any] = None, request: Optional[Any] = None) -> Any:
+        self,
+        data: Optional[Any] = None,
+        headers: Optional[Any] = None,
+        request: Optional[Any] = None,
+    ) -> Any:
         pass
 
     @abstractmethod
@@ -100,16 +100,15 @@ class Backend:
             # headers, but some libraries allow sending bytes (Django tests)
             # and some (requests) always send str so we need to convert if
             # that is the case to properly support Python 3.
-            auth_header = auth_header.encode(encoding='iso-8859-1')
+            auth_header = auth_header.encode(encoding="iso-8859-1")
 
-        auth_values = auth_header.split(b' ')
-        if len(auth_values) != 2 or auth_values[0].lower() != b'bearer':
+        auth_values = auth_header.split(b" ")
+        if len(auth_values) != 2 or auth_values[0].lower() != b"bearer":
             return None
 
         return auth_values[1]
 
-    def get_verifier(
-            self, settings: Optional[SettingsDict] = None) -> JWTAuthVerifier:
+    def get_verifier(self, settings: Optional[SettingsDict] = None) -> JWTAuthVerifier:
         """Returns a verifier for ASAP JWT tokens"""
         if settings is None:
             settings = self.settings
@@ -118,14 +117,13 @@ class Backend:
     def _get_verifier(self, settings: SettingsDict) -> JWTAuthVerifier:
         return _get_verifier(settings)
 
-    def _process_settings(
-            self, settings: Union[SettingsDict, Dict]) -> SettingsDict:
-        valid_issuers = settings.get('ASAP_VALID_ISSUERS')
+    def _process_settings(self, settings: Union[SettingsDict, Dict]) -> SettingsDict:
+        valid_issuers = settings.get("ASAP_VALID_ISSUERS")
         if valid_issuers:
-            settings['ASAP_VALID_ISSUERS'] = set(valid_issuers)
+            settings["ASAP_VALID_ISSUERS"] = set(valid_issuers)
 
-        valid_aud = settings.get('ASAP_VALID_AUDIENCE')
+        valid_aud = settings.get("ASAP_VALID_AUDIENCE")
         if valid_aud and isinstance(valid_aud, list):
-            settings['ASAP_VALID_AUDIENCE'] = set(valid_aud)
+            settings["ASAP_VALID_AUDIENCE"] = set(valid_aud)
 
         return SettingsDict(settings)
