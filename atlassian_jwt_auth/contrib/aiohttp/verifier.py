@@ -22,8 +22,8 @@ class JWTAuthVerifier(_JWTAuthVerifier):
         if asyncio.iscoroutine(public_key):
             public_key = await public_key
 
-        alg = jwt.get_unverified_header(a_jwt).get('alg', None)
+        alg = jwt.get_unverified_header(a_jwt).get("alg", None)
         public_key_obj = self._load_public_key(public_key, alg)
         return self._decode_jwt(
-            a_jwt, key_identifier, public_key_obj,
-            audience=audience, leeway=leeway)
+            a_jwt, key_identifier, public_key_obj, audience=audience, leeway=leeway
+        )

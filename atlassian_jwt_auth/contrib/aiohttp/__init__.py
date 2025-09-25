@@ -1,4 +1,5 @@
 """Provide asyncio support"""
+
 import sys
 
 if sys.version_info >= (3, 5):
@@ -9,6 +10,7 @@ if sys.version_info >= (3, 5):
         from .verifier import JWTAuthVerifier  # noqa
     except ImportError as e:
         import warnings
+
         warnings.warn(str(e))
 
 

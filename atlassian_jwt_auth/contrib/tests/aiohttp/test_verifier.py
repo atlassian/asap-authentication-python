@@ -4,15 +4,13 @@ try:
     from unittest import IsolatedAsyncioTestCase as TestCase
     from unittest.mock import AsyncMock as CoroutineMock
 except ImportError:
-    from asynctest import TestCase, CoroutineMock
+    from asynctest import CoroutineMock, TestCase
 
-from atlassian_jwt_auth.contrib.aiohttp import (HTTPSPublicKeyRetriever,
-                                                JWTAuthVerifier)
+from atlassian_jwt_auth.contrib.aiohttp import HTTPSPublicKeyRetriever, JWTAuthVerifier
 from atlassian_jwt_auth.tests import test_verifier, utils
 
 
 class SyncJWTAuthVerifier(JWTAuthVerifier):
-
     def __init__(self, *args, loop=None, **kwargs):
         if loop is None:
             loop = asyncio.get_event_loop()
@@ -20,9 +18,7 @@ class SyncJWTAuthVerifier(JWTAuthVerifier):
         super().__init__(*args, **kwargs)
 
     def verify_jwt(self, *args, **kwargs):
-        return self.loop.run_until_complete(
-            super().verify_jwt(*args, **kwargs)
-        )
+        return self.loop.run_until_complete(super().verify_jwt(*args, **kwargs))
 
 
 class JWTAuthVerifierTestMixin(test_verifier.BaseJWTAuthVerifierTest):
@@ -39,10 +35,12 @@ class JWTAuthVerifierTestMixin(test_verifier.BaseJWTAuthVerifierTest):
 
 
 class JWTAuthVerifierRS256Test(
-        utils.RS256KeyTestMixin, JWTAuthVerifierTestMixin, TestCase):
+    utils.RS256KeyTestMixin, JWTAuthVerifierTestMixin, TestCase
+):
     """Tests for aiohttp.JWTAuthVerifier class for RS256 algorithm"""
 
 
 class JWTAuthVerifierES256Test(
-        utils.ES256KeyTestMixin, JWTAuthVerifierTestMixin, TestCase):
+    utils.ES256KeyTestMixin, JWTAuthVerifierTestMixin, TestCase
+):
     """Tests for aiohttp.JWTAuthVerifier class for ES256 algorithm"""

@@ -8,15 +8,14 @@ class JWTAuth(BaseJWTAuth, BasicAuth):
 
     It should be aiohttp.BasicAuth subclass, so redefine its `__new__` method.
     """
+
     def __new__(cls, *args, **kwargs):
-        return super().__new__(cls, '')
+        return super().__new__(cls, "")
 
     def encode(self):
         return self._get_header_value().decode(self.encoding)
 
 
-def create_jwt_auth(
-        issuer, key_identifier, private_key_pem, audience, **kwargs):
+def create_jwt_auth(issuer, key_identifier, private_key_pem, audience, **kwargs):
     """Instantiate a JWTAuth while creating the signer inline"""
-    return JWTAuth.create(
-        issuer, key_identifier, private_key_pem, audience, **kwargs)
+    return JWTAuth.create(issuer, key_identifier, private_key_pem, audience, **kwargs)
