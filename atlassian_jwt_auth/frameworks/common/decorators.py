@@ -1,24 +1,26 @@
 from functools import wraps
+from typing import Any, Callable, Dict, Iterable, Optional
 
 from jwt.exceptions import InvalidIssuerError, InvalidTokenError
 
 from .asap import _process_asap_token, _verify_issuers
+from .backend import Backend
 from .utils import SettingsDict
 
 
 def _with_asap(
-    func=None,
-    backend=None,
-    issuers=None,
-    required=True,
-    subject_should_match_issuer=None,
-):
+    func: Optional[Callable] = None,
+    backend: Optional[Backend] = None,
+    issuers: Optional[Iterable[str]] = None,
+    required: bool = True,
+    subject_should_match_issuer: Optional[bool] = None,
+) -> Callable:
     if backend is None:
         raise ValueError("Invalid value for backend. Use a subclass instead.")
 
-    def with_asap_decorator(func):
+    def with_asap_decorator(func: Callable):
         @wraps(func)
-        def with_asap_wrapper(*args, **kwargs):
+        def with_asap_wrapper(*args: Any, **kwargs: Any) -> Optional[str]:
             settings = _update_settings_from_kwargs(
                 backend.settings,
                 issuers=issuers,
@@ -46,19 +48,21 @@ def _with_asap(
 
 
 def _restrict_asap(
-    func=None,
-    backend=None,
-    issuers=None,
-    required=True,
-    subject_should_match_issuer=None,
+    func: Optional[Callable] = None,
+    backend: Optional[Backend] = None,
+    issuers: Optional[Iterable[str]] = None,
+    required: bool = True,
+    subject_should_match_issuer: Optional[bool] = None,
 ):
     """Decorator to allow endpoint-specific ASAP authorization, assuming ASAP
     authentication has already occurred.
     """
 
-    def restrict_asap_decorator(func):
+    def restrict_asap_decorator(func: Callable) -> Optional[Any]:
         @wraps(func)
-        def restrict_asap_wrapper(request, *args, **kwargs):
+        def restrict_asap_wrapper(request, *args, **kwargs) -> Any:
+            if backend is None:
+                raise ValueError("Backend cannot be None")
             settings = _update_settings_from_kwargs(
                 backend.settings,
                 issuers=issuers,
@@ -69,18 +73,22 @@ def _restrict_asap(
             error_response = None
 
             if required and not asap_claims:
-                return backend.get_401_response("Unauthorized", request=request)
+                if backend is not None:
+                    return backend.get_401_response("Unauthorized", request=request)
 
             try:
-                _verify_issuers(asap_claims, settings.ASAP_VALID_ISSUERS)
+                if asap_claims is not None:
+                    _verify_issuers(asap_claims, settings.ASAP_VALID_ISSUERS)
             except InvalidIssuerError:
-                error_response = backend.get_403_response(
-                    "Forbidden: Invalid token issuer", request=request
-                )
+                if backend is not None:
+                    error_response = backend.get_403_response(
+                        "Forbidden: Invalid token issuer", request=request
+                    )
             except InvalidTokenError:
-                error_response = backend.get_401_response(
-                    "Unauthorized: Invalid token", request=request
-                )
+                if backend is not None:
+                    error_response = backend.get_401_response(
+                        "Unauthorized: Invalid token", request=request
+                    )
 
             if error_response and required:
                 return error_response
@@ -96,8 +104,11 @@ def _restrict_asap(
 
 
 def _update_settings_from_kwargs(
-    settings, issuers=None, required=True, subject_should_match_issuer=None
-):
+    settings: Dict[Any, Any],
+    issuers: Optional[Iterable] = None,
+    required: bool = True,
+    subject_should_match_issuer: Optional[bool] = None,
+) -> SettingsDict:
     settings = settings.copy()
 
     if issuers is not None:

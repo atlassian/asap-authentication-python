@@ -1,5 +1,6 @@
 import unittest
 from datetime import timedelta
+from typing import Any
 
 import jwt
 from requests import Request
@@ -12,7 +13,7 @@ from atlassian_jwt_auth.tests import utils
 class BaseRequestsTest(object):
     """tests for the contrib.requests.JWTAuth class"""
 
-    auth_cls = JWTAuth
+    auth_cls: Any = JWTAuth
 
     def setUp(self):
         self._private_key_pem = self.get_new_private_key_in_pem_format()

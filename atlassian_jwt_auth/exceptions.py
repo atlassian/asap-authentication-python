@@ -1,3 +1,6 @@
+from typing import Any
+
+
 class _WrappedException(object):
     """Allow wrapping exceptions in a new class while preserving the original
     as an attribute.
@@ -7,7 +10,7 @@ class _WrappedException(object):
     should be sufficient for most use cases.
     """
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
         wrapped_args = [arg for arg in args]
 
         if args:
@@ -25,7 +28,7 @@ class _WithStatus(object):
     details about the HTTP client library.
     """
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
         status_code = kwargs.pop("status_code", None)
         super(_WithStatus, self).__init__(*args, **kwargs)
         self.status_code = status_code
