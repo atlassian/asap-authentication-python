@@ -37,7 +37,7 @@ def _process_asap_token(
         if verifier is None:
             verifier = backend.get_verifier(settings=settings)
         asap_claims = verifier.verify_jwt(
-            token.decode("utf-8") if isinstance(token, bytes) else token,
+            token,
             settings.ASAP_VALID_AUDIENCE,
             leeway=settings.ASAP_VALID_LEEWAY,
         )
@@ -94,5 +94,9 @@ def _verify_issuers(
 ) -> None:
     """Verify that the issuer in the claims is valid and is expected."""
     claim_iss = asap_claims.get("iss")
-    if issuers is not None and claim_iss is not None and claim_iss not in issuers:
+    if issuers is None:
+        return None
+
+    if claim_iss is None or claim_iss not in issuers:
         raise InvalidIssuerError
+    return None

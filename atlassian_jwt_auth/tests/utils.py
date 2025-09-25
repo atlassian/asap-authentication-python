@@ -45,7 +45,7 @@ def create_token(
     issuer: str,
     audience: Union[str, Iterable[str]],
     key_id: Union[KeyIdentifier, str],
-    private_key: str,
+    private_key: Union[str, bytes],
     subject: Optional[str] = None,
 ):
     """ " returns a token based upon the supplied parameters."""
@@ -63,18 +63,6 @@ class BaseJWTAlgorithmTestMixin(object):
     def get_new_private_key_in_pem_format(self) -> bytes:
         """returns a new private key in pem format."""
         raise NotImplementedError("not implemented.")
-
-
-class UnitTestProtocol(Protocol):
-    def assertEqual(self, a, b): ...
-
-    def assertIsNotNone(self, a): ...
-
-    def assertTrue(self, a): ...
-
-    def assertIn(self, a, b): ...
-
-    def assertNotEqual(self, a, b): ...
 
 
 class KeyMixInProtocol(Protocol):
