@@ -18,12 +18,15 @@ jobs:
         python-version: ${{ matrix.python-version }}
     - name: Install dependencies
       run: |
+        pip install -r requirements.txt
+        pip install -r test-requirements.txt
         python -m pip install --upgrade pip wheel setuptools
-        pip install -q ruff
+        pip install -q ruff mypy
     - name: Lint
       run: |
         ruff check .
         ruff format --check .
+        mypy .
     - name: Test
       run: |
         pip install wheel

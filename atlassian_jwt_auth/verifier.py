@@ -1,17 +1,28 @@
 from collections import OrderedDict
 from functools import lru_cache
+from typing import Any, Dict, Iterable, Optional, Sequence, Union
 
 import jwt
 import jwt.api_jwt
 from cryptography.hazmat.primitives.asymmetric.ec import EllipticCurvePublicKey
+from cryptography.hazmat.primitives.asymmetric.ed448 import Ed448PublicKey
+from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PublicKey
 from cryptography.hazmat.primitives.asymmetric.rsa import RSAPublicKey
+from jwt import PyJWK
 from jwt.exceptions import InvalidAlgorithmError
 
-from atlassian_jwt_auth import algorithms, exceptions, key
+from atlassian_jwt_auth import KeyIdentifier, algorithms, exceptions, key
+from atlassian_jwt_auth.key import BasePublicKeyRetriever
+
+AllowedPublicKeys = Union[
+    RSAPublicKey, EllipticCurvePublicKey, Ed25519PublicKey, Ed448PublicKey
+]
 
 
 @lru_cache(maxsize=10)
-def _load_public_key(algorithms, public_key, algorithm):
+def _load_public_key(
+    algorithms: Sequence[str], public_key: str, algorithm: Optional[str]
+) -> Any:
     """Returns a public key object instance given the public key and
     algorithm.
 
@@ -20,7 +31,7 @@ def _load_public_key(algorithms, public_key, algorithm):
     """
     if isinstance(public_key, (RSAPublicKey, EllipticCurvePublicKey)):
         return public_key
-    if algorithm not in algorithms:
+    if algorithm is None or algorithm not in algorithms:
         raise InvalidAlgorithmError("The specified alg value is not allowed")
     py_jws = jwt.api_jws.PyJWS(algorithms=algorithms)
     alg_obj = py_jws._algorithms[algorithm]
@@ -30,16 +41,20 @@ def _load_public_key(algorithms, public_key, algorithm):
 class JWTAuthVerifier(object):
     """This class can be used to verify a JWT."""
 
-    def __init__(self, public_key_retriever, **kwargs):
+    def __init__(
+        self, public_key_retriever: BasePublicKeyRetriever, **kwargs: Any
+    ) -> None:
         self.public_key_retriever = public_key_retriever
         self.algorithms = algorithms.get_permitted_algorithm_names()
-        self._seen_jti = OrderedDict()
+        self._seen_jti: OrderedDict[str, None] = OrderedDict()
         self._subject_should_match_issuer = kwargs.get(
             "subject_should_match_issuer", True
         )
         self._check_jti_uniqueness = kwargs.get("check_jti_uniqueness", False)
 
-    def verify_jwt(self, a_jwt, audience, leeway=0, **requests_kwargs):
+    def verify_jwt(
+        self, a_jwt: str, audience: str, leeway: int = 0, **requests_kwargs: Any
+    ) -> Dict[Any, Any]:
         """Verify if the token is correct
 
         Returns:
@@ -52,21 +67,30 @@ class JWTAuthVerifier(object):
         public_key = self._retrieve_pub_key(key_identifier, requests_kwargs)
 
         alg = jwt.get_unverified_header(a_jwt).get("alg", None)
-        public_key_obj = self._load_public_key(public_key, alg)
+        public_key_obj = self._load_public_key(public_key, alg or "RS256")
         return self._decode_jwt(
             a_jwt, key_identifier, public_key_obj, audience=audience, leeway=leeway
         )
 
-    def _retrieve_pub_key(self, key_identifier, requests_kwargs):
+    def _retrieve_pub_key(
+        self, key_identifier: Union[KeyIdentifier, str], requests_kwargs: Any
+    ) -> str:
         return self.public_key_retriever.retrieve(key_identifier, **requests_kwargs)
 
-    def _load_public_key(self, public_key, algorithm):
+    def _load_public_key(self, public_key: str, algorithm: Optional[str]) -> Any:
         """Returns a public key object instance given the public key and
         algorithm.
         """
         return _load_public_key(tuple(self.algorithms), public_key, algorithm)
 
-    def _decode_jwt(self, a_jwt, key_identifier, jwt_key, audience=None, leeway=0):
+    def _decode_jwt(
+        self,
+        a_jwt: str,
+        key_identifier: KeyIdentifier,
+        jwt_key: Union[AllowedPublicKeys, PyJWK, str, bytes],
+        audience: Optional[Union[str, Iterable[str]]] = None,
+        leeway: int = 0,
+    ) -> Dict[Any, Any]:
         """Decode JWT and check if it's valid"""
         options = {
             "verify_signature": True,
@@ -113,7 +137,7 @@ class JWTAuthVerifier(object):
             self._check_jti(_jti)
         return claims
 
-    def _check_jti(self, jti):
+    def _check_jti(self, jti: str) -> None:
         """Checks that the given jti has not been already been used."""
         if jti in self._seen_jti:
             raise exceptions.JtiUniquenessException(

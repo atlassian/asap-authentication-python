@@ -6,7 +6,7 @@ from atlassian_jwt_auth.frameworks.common import utils
 class SettingsDictTest(unittest.TestCase):
     """Tests for the SettingsDict class."""
 
-    def test_hash(self):
+    def test_hash(self) -> None:
         """Test that SettingsDict instances can be hashed."""
         dictionary_one = {"a": "b", "3": set([1]), "f": None}
         dictionary_two = {"a": "b", "3": set([1]), "f": None}
