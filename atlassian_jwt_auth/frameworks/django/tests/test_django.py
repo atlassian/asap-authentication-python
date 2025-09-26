@@ -68,7 +68,7 @@ class TestAsapMiddleware(DjangoAsapMixin, RS256KeyTestMixin, SimpleTestCase):
         token=None,
         authorization=None,
         retriever_key=None,
-    ):
+    ) -> None:
         if authorization is None:
             if token is None:
                 if private_key is None:
@@ -211,7 +211,7 @@ class TestAsapMiddleware(DjangoAsapMixin, RS256KeyTestMixin, SimpleTestCase):
     def test_request_using_settings_only_is_allowed(self):
         self.check_response("unneeded", "two")
 
-    def test_request_subject_does_not_need_to_match_issuer_from_settings(self):
+    def test_request_subject_does_not_need_to_match_issuer_from_settings(self) -> None:
         self.test_settings["ASAP_SUBJECT_SHOULD_MATCH_ISSUER"] = False
         self.check_response("needed", "one", 200, subject="different_than_is")
 

@@ -72,11 +72,11 @@ class JWTAuthSigner(object):
     def _now(self) -> datetime.datetime:
         return datetime.datetime.now(datetime.timezone.utc)
 
-    def generate_jwt(self, audience: Union[str, Iterable[str]], **kwargs: Any) -> str:
+    def generate_jwt(self, audience: Union[str, Iterable[str]], **kwargs: Any) -> bytes:
         """returns a new signed jwt for use."""
         key_identifier, private_key_pem = self.private_key_retriever.load(self.issuer)
         private_key = self._obtain_private_key(key_identifier, private_key_pem)
-        token = jwt.encode(
+        token: str = jwt.encode(
             self._generate_claims(audience, **kwargs),
             key=private_key,
             algorithm=self.algorithm,
@@ -86,9 +86,7 @@ class JWTAuthSigner(object):
                 else key_identifier
             },
         )
-        if isinstance(token, bytes):
-            return token.decode("utf-8")
-        return token
+        return token.encode("utf-8")
 
 
 class TokenReusingJWTAuthSigner(JWTAuthSigner):
@@ -102,7 +100,7 @@ class TokenReusingJWTAuthSigner(JWTAuthSigner):
 
     def get_cached_token(
         self, audience: Union[str, Iterable[str]], **kwargs: Any
-    ) -> Optional[str]:
+    ) -> Optional[bytes]:
         """returns the cached token. If there is no matching cached token
         then None is returned.
         """
@@ -139,7 +137,7 @@ class TokenReusingJWTAuthSigner(JWTAuthSigner):
                 return False
         return True
 
-    def generate_jwt(self, audience: Union[str, Iterable[str]], **kwargs: Any) -> str:
+    def generate_jwt(self, audience: Union[str, Iterable[str]], **kwargs: Any) -> bytes:
         existing_token = self.get_cached_token(audience, **kwargs)
         claims = self._generate_claims(audience, **kwargs)
         if existing_token and self.can_reuse_token(existing_token, claims):

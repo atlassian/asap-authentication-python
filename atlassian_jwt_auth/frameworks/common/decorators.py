@@ -72,23 +72,22 @@ def _restrict_asap(
             asap_claims = getattr(request, "asap_claims", None)
             error_response = None
 
-            if required and not asap_claims:
-                if backend is not None:
+            if not asap_claims:
+                if required:
                     return backend.get_401_response("Unauthorized", request=request)
-
+                else:
+                    # Claims are not required and asap claims are not present.
+                    return func(request, *args, **kwargs)
             try:
-                if asap_claims is not None:
-                    _verify_issuers(asap_claims, settings.ASAP_VALID_ISSUERS)
+                _verify_issuers(asap_claims, settings.ASAP_VALID_ISSUERS)
             except InvalidIssuerError:
-                if backend is not None:
-                    error_response = backend.get_403_response(
-                        "Forbidden: Invalid token issuer", request=request
-                    )
+                error_response = backend.get_403_response(
+                    "Forbidden: Invalid token issuer", request=request
+                )
             except InvalidTokenError:
-                if backend is not None:
-                    error_response = backend.get_401_response(
-                        "Unauthorized: Invalid token", request=request
-                    )
+                error_response = backend.get_401_response(
+                    "Unauthorized: Invalid token", request=request
+                )
 
             if error_response and required:
                 return error_response

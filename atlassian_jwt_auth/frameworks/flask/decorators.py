@@ -27,6 +27,8 @@ def with_asap(
                                                 must match the issuer for a
                                                 token to be considered valid.
     """
+    if required is None:
+        required = True
     return _with_asap(
-        func, FlaskBackend(), issuers, required or False, subject_should_match_issuer
+        func, FlaskBackend(), issuers, required, subject_should_match_issuer
     )

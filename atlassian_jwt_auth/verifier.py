@@ -53,7 +53,11 @@ class JWTAuthVerifier(object):
         self._check_jti_uniqueness = kwargs.get("check_jti_uniqueness", False)
 
     def verify_jwt(
-        self, a_jwt: str, audience: str, leeway: int = 0, **requests_kwargs: Any
+        self,
+        a_jwt: Union[str, bytes],
+        audience: str,
+        leeway: int = 0,
+        **requests_kwargs: Any,
     ) -> Dict[Any, Any]:
         """Verify if the token is correct
 
@@ -85,7 +89,7 @@ class JWTAuthVerifier(object):
 
     def _decode_jwt(
         self,
-        a_jwt: str,
+        a_jwt: Union[str, bytes],
         key_identifier: KeyIdentifier,
         jwt_key: Union[AllowedPublicKeys, PyJWK, str, bytes],
         audience: Optional[Union[str, Iterable[str]]] = None,

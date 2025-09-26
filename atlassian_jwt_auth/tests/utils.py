@@ -45,7 +45,7 @@ def create_token(
     issuer: str,
     audience: Union[str, Iterable[str]],
     key_id: Union[KeyIdentifier, str],
-    private_key: str,
+    private_key: Union[str, bytes],
     subject: Optional[str] = None,
 ):
     """ " returns a token based upon the supplied parameters."""
