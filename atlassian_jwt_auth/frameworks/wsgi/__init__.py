@@ -1,1 +1,3 @@
-from .middleware import ASAPMiddleware  # noqa
+from .middleware import ASAPMiddleware
+
+__all__ = ["ASAPMiddleware"]
