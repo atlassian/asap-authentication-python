@@ -1,6 +1,19 @@
 CHANGES
 =======
 
+21.0.0
+------
+
+* Add release notes for version 21.0.0
+* Sem-ver: bugfix Use \_\_all\_\_ instead of noqa
+* Sem-ver: feature Provide type information to consumers of the library Signed-off-by: David Black <dblack@atlassian.com>
+* Sem-ver: bugfix Configure mypy and run it in ci
+* Sem-ver: api-break Add type hints to the code base
+* Sem-ver: bugfix Remove the need and use of asynctest during testing
+* Bump aiohttp from 3.11.6 to 3.12.14
+* Sem-ver: bugfix Move to ubuntu 24.04 for ci agents
+* Sem-ver: bugfix Apply ruff formatting and use ruff for linting
+
 20.0.0
 ------
 
