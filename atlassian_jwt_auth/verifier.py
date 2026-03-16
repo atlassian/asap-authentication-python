@@ -10,6 +10,7 @@ from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PublicKey
 from cryptography.hazmat.primitives.asymmetric.rsa import RSAPublicKey
 from jwt import PyJWK
 from jwt.exceptions import InvalidAlgorithmError
+from jwt.types import Options
 
 from atlassian_jwt_auth import KeyIdentifier, algorithms, exceptions, key
 from atlassian_jwt_auth.key import BasePublicKeyRetriever
@@ -96,12 +97,12 @@ class JWTAuthVerifier(object):
         leeway: int = 0,
     ) -> Dict[Any, Any]:
         """Decode JWT and check if it's valid"""
-        options = {
-            "verify_signature": True,
-            "require": ["exp", "iat"],
-            "require_exp": True,
-            "require_iat": True,
-        }
+        options: Options = Options(
+            verify_signature=True,
+            require=["exp", "iat"],
+            verify_exp=True,
+            verify_iat=True,
+        )
 
         claims = jwt.decode(
             a_jwt,
