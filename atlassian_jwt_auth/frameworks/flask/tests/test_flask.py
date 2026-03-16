@@ -2,9 +2,8 @@ import unittest
 
 from flask import Flask
 
-from atlassian_jwt_auth.contrib.flask_app import requires_asap
 from atlassian_jwt_auth.contrib.tests.utils import get_static_retriever_class
-from atlassian_jwt_auth.frameworks.flask import with_asap
+from atlassian_jwt_auth.frameworks.flask import requires_asap, with_asap
 from atlassian_jwt_auth.tests import utils
 from atlassian_jwt_auth.tests.utils import (
     create_token,

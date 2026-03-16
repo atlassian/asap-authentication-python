@@ -29,9 +29,4 @@ urlpatterns = [
         views.restricted_issuer_view,
         name="restricted_issuer",
     ),
-    path(
-        "asap/restricted_subject",
-        views.restricted_subject_view,
-        name="restricted_subject",
-    ),
 ]

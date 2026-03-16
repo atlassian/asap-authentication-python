@@ -63,3 +63,20 @@ def restrict_asap(
         required,
         subject_should_match_issuer=None,
     )
+
+
+def requires_asap(
+    issuers: Optional[Iterable[str]] = None,
+    subject_should_match_issuer: Optional[bool] = None,
+    func: Optional[Callable] = None,
+) -> Callable:
+    """Decorator for Django endpoints to require ASAP
+
+    :param list issuers: *required The 'iss' claims that this endpoint is from.
+    """
+    return with_asap(
+        func=func,
+        required=True,
+        issuers=issuers,
+        subject_should_match_issuer=subject_should_match_issuer,
+    )

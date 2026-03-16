@@ -32,3 +32,21 @@ def with_asap(
     return _with_asap(
         func, FlaskBackend(), issuers, required, subject_should_match_issuer
     )
+
+
+def requires_asap(
+    f: Callable,
+    issuers: Optional[Iterable[str]] = None,
+    subject_should_match_issuer: Optional[bool] = None,
+) -> Callable:
+    """
+    Wrapper for Flask endpoints to make them require asap authentication to
+    access.
+    """
+
+    return with_asap(
+        func=f,
+        required=True,
+        issuers=issuers,
+        subject_should_match_issuer=subject_should_match_issuer,
+    )
