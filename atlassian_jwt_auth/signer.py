@@ -6,6 +6,7 @@ from typing import Any, Dict, Iterable, Optional, Union
 import jwt
 from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives import serialization
+from jwt.types import Options
 
 from atlassian_jwt_auth import algorithms, key
 from atlassian_jwt_auth.key import BasePrivateKeyRetriever, KeyIdentifier
@@ -116,8 +117,9 @@ class TokenReusingJWTAuthSigner(JWTAuthSigner):
         """
         if existing_token is None:
             return False
+
         existing_claims = jwt.decode(
-            existing_token, options={"verify_signature": False}
+            existing_token, options=Options(verify_signature=False)
         )
         existing_lifetime = int(existing_claims["exp"]) - int(existing_claims["iat"])
         this_lifetime = (claims["exp"] - claims["iat"]).total_seconds()
