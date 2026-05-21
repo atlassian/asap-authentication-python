@@ -1,6 +1,12 @@
 CHANGES
 =======
 
+22.0.1
+------
+
+* Add release notes for version 22.0.1
+* Sem-ver: bugfix Require the PyJWT version to be >= 2.11.0 & < 3.0.0
+
 22.0.0
 ------
 
