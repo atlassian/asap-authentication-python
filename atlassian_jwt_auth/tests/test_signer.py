@@ -25,7 +25,7 @@ class BaseJWTAuthSignerTest:
         jwt_auth_signer = atlassian_jwt_auth.create_signer(
             expected_iss, expected_key_id, self._private_key_pem
         )
-        jwt_auth_signer._now = lambda: expected_now
+        jwt_auth_signer._now = lambda: expected_now  # type: ignore[method-assign]
         for additional_claims in [{}, {"extra": "thing"}]:
             expected_claims = {
                 "iss": expected_iss,
@@ -39,9 +39,9 @@ class BaseJWTAuthSignerTest:
             claims = jwt_auth_signer._generate_claims(
                 expected_audience, additional_claims=additional_claims
             )
-            self.assertIsNotNone(claims["jti"])
+            self.assertIsNotNone(claims["jti"])  # type: ignore[attr-defined]
             del claims["jti"]
-            self.assertEqual(claims, expected_claims)
+            self.assertEqual(claims, expected_claims)  # type: ignore[attr-defined]
 
     def test_jti_changes(self):
         """tests that the jti of a claim changes."""
