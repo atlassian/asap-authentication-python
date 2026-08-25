@@ -1,7 +1,8 @@
 import calendar
 import datetime
 import random
-from typing import Any, Dict, Iterable, Optional, Union
+from collections.abc import Iterable
+from typing import Any, Optional, Union
 
 import jwt
 from cryptography.hazmat.backends import default_backend
@@ -12,7 +13,7 @@ from atlassian_jwt_auth import algorithms, key
 from atlassian_jwt_auth.key import BasePrivateKeyRetriever, KeyIdentifier
 
 
-class JWTAuthSigner(object):
+class JWTAuthSigner:
     def __init__(
         self, issuer: str, private_key_retriever: BasePrivateKeyRetriever, **kwargs: Any
     ) -> None:
@@ -21,7 +22,7 @@ class JWTAuthSigner(object):
         self.lifetime = kwargs.get("lifetime", datetime.timedelta(minutes=1))
         self.algorithm = kwargs.get("algorithm", "RS256")
         self.subject = kwargs.get("subject", None)
-        self._private_keys_cache: Dict[str, Any] = dict()
+        self._private_keys_cache: dict[str, Any] = dict()
 
         if self.algorithm not in set(algorithms.get_permitted_algorithm_names()):
             raise ValueError("Algorithm, '%s', is not permitted." % self.algorithm)
@@ -54,7 +55,7 @@ class JWTAuthSigner(object):
 
     def _generate_claims(
         self, audience: Union[str, Iterable[str]], **kwargs: Any
-    ) -> Dict[Any, Any]:
+    ) -> dict[Any, Any]:
         """returns a new dictionary of claims."""
         now = self._now()
         claims = {
@@ -94,9 +95,7 @@ class TokenReusingJWTAuthSigner(JWTAuthSigner):
     def __init__(
         self, issuer: str, private_key_retriever: BasePrivateKeyRetriever, **kwargs: Any
     ) -> None:
-        super(TokenReusingJWTAuthSigner, self).__init__(
-            issuer, private_key_retriever, **kwargs
-        )
+        super().__init__(issuer, private_key_retriever, **kwargs)
         self.reuse_threshold = kwargs.get("reuse_jwt_threshold", 0.95)
 
     def get_cached_token(
@@ -144,7 +143,7 @@ class TokenReusingJWTAuthSigner(JWTAuthSigner):
         claims = self._generate_claims(audience, **kwargs)
         if existing_token and self.can_reuse_token(existing_token, claims):
             return existing_token
-        token = super(TokenReusingJWTAuthSigner, self).generate_jwt(audience, **kwargs)
+        token = super().generate_jwt(audience, **kwargs)
         self.set_cached_token(token)
         return token
 

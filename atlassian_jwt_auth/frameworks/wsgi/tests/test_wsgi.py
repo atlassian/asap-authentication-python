@@ -56,7 +56,7 @@ class WsgiTests(utils.RS256KeyTestMixin, unittest.TestCase):
         token = create_token(
             "client-app", "server-app", "client-app/key01", self._private_key_pem
         )
-        body, resp_info, environ = self.send_request(token=token)
+        _body, resp_info, environ = self.send_request(token=token)
         self.assertEqual(resp_info["status"], "200 OK")
         self.assertIn("ATL_ASAP_CLAIMS", environ)
 
@@ -66,11 +66,11 @@ class WsgiTests(utils.RS256KeyTestMixin, unittest.TestCase):
             "client-app", "server-app", "client-app/key01", self._private_key_pem
         )
         application = self.get_app_with_middleware(self.config)
-        body, resp_info, environ = self.send_request(
+        _body, resp_info, _environ = self.send_request(
             token=token, application=application
         )
         self.assertEqual(resp_info["status"], "200 OK")
-        body, resp_info, environ = self.send_request(
+        _body, resp_info, _environ = self.send_request(
             token=token, application=application
         )
         self.assertEqual(resp_info["status"], "401 Unauthorized")
@@ -80,11 +80,11 @@ class WsgiTests(utils.RS256KeyTestMixin, unittest.TestCase):
             "client-app", "server-app", "client-app/key01", self._private_key_pem
         )
         application = self.get_app_with_middleware(self.config)
-        body, resp_info, environ = self.send_request(
+        _body, resp_info, _environ = self.send_request(
             token=token, application=application
         )
         self.assertEqual(resp_info["status"], "200 OK")
-        body, resp_info, environ = self.send_request(
+        _body, resp_info, _environ = self.send_request(
             token=token, application=application
         )
         self.assertEqual(resp_info["status"], "200 OK")
@@ -100,12 +100,12 @@ class WsgiTests(utils.RS256KeyTestMixin, unittest.TestCase):
         token = create_token(
             "client-app", "invalid-audience", "client-app/key01", self._private_key_pem
         )
-        body, resp_info, environ = self.send_request(token=token)
+        _body, resp_info, environ = self.send_request(token=token)
         self.assertEqual(resp_info["status"], "401 Unauthorized")
         self.assertNotIn("ATL_ASAP_CLAIMS", environ)
 
     def test_request_with_invalid_token_is_rejected(self):
-        body, resp_info, environ = self.send_request(token=b"notavalidtoken")
+        _body, resp_info, environ = self.send_request(token=b"notavalidtoken")
         self.assertEqual(resp_info["status"], "401 Unauthorized")
         self.assertNotIn("ATL_ASAP_CLAIMS", environ)
 
@@ -117,7 +117,7 @@ class WsgiTests(utils.RS256KeyTestMixin, unittest.TestCase):
             self._private_key_pem,
             subject="different",
         )
-        body, resp_info, environ = self.send_request(token=token)
+        _body, resp_info, environ = self.send_request(token=token)
         self.assertEqual(resp_info["status"], "401 Unauthorized")
         self.assertNotIn("ATL_ASAP_CLAIMS", environ)
 
@@ -130,6 +130,6 @@ class WsgiTests(utils.RS256KeyTestMixin, unittest.TestCase):
             self._private_key_pem,
             subject="different",
         )
-        body, resp_info, environ = self.send_request(token=token)
+        _body, resp_info, environ = self.send_request(token=token)
         self.assertEqual(resp_info["status"], "200 OK")
         self.assertIn("ATL_ASAP_CLAIMS", environ)

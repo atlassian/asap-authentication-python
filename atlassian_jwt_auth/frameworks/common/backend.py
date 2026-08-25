@@ -1,6 +1,7 @@
+import typing
 from abc import ABCMeta, abstractmethod, abstractproperty
 from functools import lru_cache
-from typing import Any, Dict, Optional, Union
+from typing import Any, Optional, Union
 
 from atlassian_jwt_auth import HTTPSPublicKeyRetriever, JWTAuthVerifier
 
@@ -34,8 +35,8 @@ class Backend:
 
     __metaclass__ = ABCMeta
 
-    default_headers_401 = {"WWW-Authenticate": "Bearer"}
-    default_settings = {
+    default_headers_401: typing.ClassVar = {"WWW-Authenticate": "Bearer"}
+    default_settings: typing.ClassVar = {
         # The class to be instantiated to retrieve public keys
         "ASAP_KEY_RETRIEVER_CLASS": HTTPSPublicKeyRetriever,
         # The repository URL where the key retriever can fetch public keys
@@ -117,7 +118,7 @@ class Backend:
     def _get_verifier(self, settings: SettingsDict) -> JWTAuthVerifier:
         return _get_verifier(settings)
 
-    def _process_settings(self, settings: Union[SettingsDict, Dict]) -> SettingsDict:
+    def _process_settings(self, settings: Union[SettingsDict, dict]) -> SettingsDict:
         valid_issuers = settings.get("ASAP_VALID_ISSUERS")
         if valid_issuers:
             settings["ASAP_VALID_ISSUERS"] = set(valid_issuers)

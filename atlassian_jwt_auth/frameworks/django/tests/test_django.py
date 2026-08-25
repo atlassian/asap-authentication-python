@@ -19,7 +19,7 @@ from atlassian_jwt_auth.tests.utils import (
 )
 
 
-class DjangoAsapMixin(object):
+class DjangoAsapMixin:
     @classmethod
     def setUpClass(cls):
         os.environ.setdefault(
@@ -28,15 +28,15 @@ class DjangoAsapMixin(object):
         )
 
         django.setup()
-        super(DjangoAsapMixin, cls).setUpClass()
+        super().setUpClass()
 
     @classmethod
     def tearDownClass(cls):
-        super(DjangoAsapMixin, cls).tearDownClass()
+        super().tearDownClass()
         del os.environ["DJANGO_SETTINGS_MODULE"]
 
     def setUp(self):
-        super(DjangoAsapMixin, self).setUp()
+        super().setUp()
         self._private_key_pem = self.get_new_private_key_in_pem_format()
         self._public_key_pem = utils.get_public_key_pem_for_private_key_pem(
             self._private_key_pem

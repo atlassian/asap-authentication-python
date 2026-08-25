@@ -33,7 +33,7 @@ class DummyHTTPSPublicKeyRetriever(HTTPSPublicKeyRetriever):
         return session
 
 
-class BaseHTTPSPublicKeyRetrieverTestMixin(object):
+class BaseHTTPSPublicKeyRetrieverTestMixin:
     """Tests for aiohttp.HTTPSPublicKeyRetriever class for RS256 algorithm"""
 
     def setUp(self):

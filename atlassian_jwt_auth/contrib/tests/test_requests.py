@@ -10,7 +10,7 @@ from atlassian_jwt_auth.contrib.requests import JWTAuth, create_jwt_auth
 from atlassian_jwt_auth.tests import utils
 
 
-class BaseRequestsTest(object):
+class BaseRequestsTest:
     """tests for the contrib.requests.JWTAuth class"""
 
     auth_cls: Any = JWTAuth

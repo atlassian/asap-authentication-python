@@ -1,5 +1,6 @@
 import asyncio
-from typing import Any, Dict, Iterable, Union
+from collections.abc import Iterable
+from typing import Any, Union
 
 import jwt
 
@@ -14,7 +15,7 @@ class JWTAuthVerifier(_JWTAuthVerifier):  # type: ignore[override]
         audience: Union[str, Iterable[str]],
         leeway: int = 0,
         **requests_kwargs: Any,
-    ) -> Dict[Any, Any]:
+    ) -> dict[Any, Any]:
         """Verify if the token is correct
 
         Returns:

@@ -2,8 +2,9 @@ import base64
 import logging
 import os
 import re
+from collections.abc import Generator, Iterable
 from email.message import EmailMessage
-from typing import Any, Generator, Iterable, Tuple, Union
+from typing import Any, Union
 from urllib.parse import unquote_plus
 
 import cachecontrol
@@ -23,7 +24,7 @@ from atlassian_jwt_auth.exceptions import (
 PEM_FILE_TYPE = "application/x-pem-file"
 
 
-class KeyIdentifier(object):
+class KeyIdentifier:
     """This class represents a key identifier"""
 
     def __init__(self, identifier: str) -> None:
@@ -58,7 +59,7 @@ def _get_key_id_from_jwt_header(a_jwt: Union[str, bytes]) -> KeyIdentifier:
     return KeyIdentifier(header["kid"])
 
 
-class BasePublicKeyRetriever(object):
+class BasePublicKeyRetriever:
     """Base class for retrieving a public key."""
 
     def retrieve(self, key_identifier: Union[KeyIdentifier, str], **kwargs) -> Any:
@@ -174,10 +175,10 @@ class HTTPSMultiRepositoryPublicKeyRetriever(BasePublicKeyRetriever):
         raise PublicKeyRetrieverException("Cannot load key from key repositories")
 
 
-class BasePrivateKeyRetriever(object):
+class BasePrivateKeyRetriever:
     """This is the base private key retriever class."""
 
-    def load(self, issuer: str) -> Tuple[Union[KeyIdentifier], Union[str, bytes]]:
+    def load(self, issuer: str) -> tuple[Union[KeyIdentifier], Union[str, bytes]]:
         """returns the key identifier and private key pem found
         for the given issuer.
         """
@@ -192,7 +193,7 @@ class DataUriPrivateKeyRetriever(BasePrivateKeyRetriever):
     def __init__(self, data_uri: str) -> None:
         self._data_uri = data_uri
 
-    def load(self, issuer: str) -> Tuple[Union[KeyIdentifier], Union[str, bytes]]:
+    def load(self, issuer: str) -> tuple[Union[KeyIdentifier], Union[str, bytes]]:
         if not self._data_uri.startswith("data:application/pkcs8;kid="):
             raise PrivateKeyRetrieverException("Unrecognised data uri format.")
         splitted = self._data_uri.split(";")
@@ -227,7 +228,7 @@ class StaticPrivateKeyRetriever(BasePrivateKeyRetriever):
         self.key_identifier: KeyIdentifier = key_identifier
         self.private_key_pem: Union[str, bytes] = private_key_pem
 
-    def load(self, issuer: str) -> Tuple[Union[KeyIdentifier], Union[str, bytes]]:
+    def load(self, issuer: str) -> tuple[Union[KeyIdentifier], Union[str, bytes]]:
         return self.key_identifier, self.private_key_pem
 
 
@@ -242,7 +243,7 @@ class FilePrivateKeyRetriever(BasePrivateKeyRetriever):
             private_key_repository_path
         )
 
-    def load(self, issuer: str) -> Tuple[KeyIdentifier, str]:
+    def load(self, issuer: str) -> tuple[KeyIdentifier, str]:
         key_identifier = self._find_last_key_id(issuer)
         private_key_pem = self.private_key_repository.load_key(key_identifier)
         return key_identifier, private_key_pem
@@ -256,7 +257,7 @@ class FilePrivateKeyRetriever(BasePrivateKeyRetriever):
             raise IOError("Issuer has no valid keys: %s" % issuer)
 
 
-class FilePrivateKeyRepository(object):
+class FilePrivateKeyRepository:
     """This class represents a file backed private key repository."""
 
     def __init__(self, path) -> None:

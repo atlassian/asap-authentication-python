@@ -26,7 +26,7 @@ def get_expected_and_os_proxies_dict(proxy_location):
     return expected_proxies, os_proxy_dict
 
 
-class BaseHTTPSPublicKeyRetrieverTest(object):
+class BaseHTTPSPublicKeyRetrieverTest:
     """tests for the HTTPSPublicKeyRetriever class."""
 
     def create_retriever(self, url):
@@ -169,13 +169,11 @@ class CachedHTTPPublicKeyRetrieverTest(utils.ES256KeyTestMixin, unittest.TestCas
 
         def __init__(self, base_url):
             # pretend to the super class that this is an HTTPS url
-            super(
-                CachedHTTPPublicKeyRetrieverTest.HTTPPublicKeyRetriever, self
-            ).__init__(re.sub(r"^http", "https", base_url, flags=re.IGNORECASE))
+            super().__init__(re.sub(r"^http", "https", base_url, flags=re.IGNORECASE))
             self.base_url = base_url
 
     def setUp(self):
-        super(CachedHTTPPublicKeyRetrieverTest, self).setUp()
+        super().setUp()
         self._private_key_pem = self.get_new_private_key_in_pem_format()
         self._public_key_pem = utils.get_public_key_pem_for_private_key_pem(
             self._private_key_pem
@@ -194,8 +192,10 @@ class CachedHTTPPublicKeyRetrieverTest(utils.ES256KeyTestMixin, unittest.TestCas
                     ("content-type", "application/x-pem-file;charset=UTF-8"),
                     (
                         "Cache-Control",
-                        "public,max-age=300,stale-while-revalidate="
-                        "300,stale-if-error=300",
+                        (
+                            "public,max-age=300,stale-while-revalidate="
+                            "300,stale-if-error=300"
+                        ),
                     ),
                     ("Last-Modified", "Sun, 18 Jan 1970 18:14:21 GMT"),
                 ],

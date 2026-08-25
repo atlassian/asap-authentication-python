@@ -8,15 +8,17 @@ import atlassian_jwt_auth
 from atlassian_jwt_auth.tests import utils
 
 
-class BaseJWTAuthSignerTest(object):
+class BaseJWTAuthSignerTest:
     """tests for the JWTAuthSigner class."""
 
     def setUp(self):
         self._private_key_pem = self.get_new_private_key_in_pem_format()
 
-    def test__generate_claims(self):
+    def test__generate_claims(self) -> None:
         """tests that _generate_claims works as expected."""
-        expected_now = datetime.datetime(year=2001, day=1, month=1)
+        expected_now = datetime.datetime(
+            year=2001, day=1, month=1, tzinfo=datetime.timezone.utc
+        )
         expected_audience = "example_aud"
         expected_iss = "eg"
         expected_key_id = "eg/ex"
@@ -43,7 +45,9 @@ class BaseJWTAuthSignerTest(object):
 
     def test_jti_changes(self):
         """tests that the jti of a claim changes."""
-        expected_now = datetime.datetime(year=2001, day=1, month=1)
+        expected_now = datetime.datetime(
+            year=2001, day=1, month=1, tzinfo=datetime.timezone.utc
+        )
         aud = "aud"
         jwt_auth_signer = utils.get_example_jwt_auth_signer(
             algorithm=self.algorithm, private_key_pem=self._private_key_pem

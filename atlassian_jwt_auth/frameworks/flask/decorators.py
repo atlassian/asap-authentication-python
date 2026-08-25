@@ -1,5 +1,5 @@
-from collections.abc import Callable
-from typing import Iterable, Optional
+from collections.abc import Callable, Iterable
+from typing import Optional
 
 from ..common.decorators import _with_asap
 from .backend import FlaskBackend

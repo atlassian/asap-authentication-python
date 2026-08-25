@@ -21,7 +21,7 @@ def convert_key_pem_format_to_der_format(private_key_pem):
     )
 
 
-class BaseDataUriPrivateKeyRetrieverTest(object):
+class BaseDataUriPrivateKeyRetrieverTest:
     """tests for the DataUriPrivateKeyRetriever class."""
 
     def setUp(self):

@@ -1,4 +1,5 @@
-from typing import Callable, Iterable, Optional
+from collections.abc import Callable, Iterable
+from typing import Optional
 
 from ..common.backend import Backend
 from ..common.decorators import _restrict_asap, _with_asap

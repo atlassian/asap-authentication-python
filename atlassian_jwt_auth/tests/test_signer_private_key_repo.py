@@ -8,7 +8,7 @@ from atlassian_jwt_auth import key
 from atlassian_jwt_auth.tests import utils
 
 
-class BaseJWTAuthSignerWithFilePrivateKeyRetrieverTest(object):
+class BaseJWTAuthSignerWithFilePrivateKeyRetrieverTest:
     """tests for the JWTAuthSigner using the FilePrivateKeyRetriever."""
 
     def setUp(self):
