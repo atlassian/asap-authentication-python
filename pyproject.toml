@@ -14,6 +14,7 @@ line-ending = "auto"
 
 [tool.ruff.lint]
 extend-select = ["I"]
+ignore = ["UP045", "UP007", "UP032", "C405", "SIM118", "C408", "RET501", "PIE808", "UP024", "UP031"]
 
 [tool.mypy]
 warn_unused_configs = true
