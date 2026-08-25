@@ -1,4 +1,5 @@
-from typing import Any, Iterable, Optional, Protocol, Union
+from collections.abc import Iterable
+from typing import Any, Optional, Protocol, Union
 
 from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives import serialization
@@ -55,7 +56,7 @@ def create_token(
     return signer.generate_jwt(audience)
 
 
-class BaseJWTAlgorithmTestMixin(object):
+class BaseJWTAlgorithmTestMixin:
     """A mixin class to make testing different support for different
     jwt algorithms easier.
     """

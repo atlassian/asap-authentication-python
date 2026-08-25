@@ -1,13 +1,12 @@
-from __future__ import absolute_import
-
-from typing import Any, Iterable, Union
+from collections.abc import Iterable
+from typing import Any, Union
 
 import atlassian_jwt_auth
 from atlassian_jwt_auth import KeyIdentifier
 from atlassian_jwt_auth.signer import JWTAuthSigner
 
 
-class BaseJWTAuth(object):
+class BaseJWTAuth:
     """Adds a JWT bearer token to the request per the ASAP specification"""
 
     def __init__(

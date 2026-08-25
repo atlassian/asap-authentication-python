@@ -1,6 +1,7 @@
 from collections import OrderedDict
+from collections.abc import Iterable, Sequence
 from functools import lru_cache
-from typing import Any, Dict, Iterable, Optional, Sequence, Union
+from typing import Any, Optional, Union
 
 import jwt
 import jwt.api_jwt
@@ -39,7 +40,7 @@ def _load_public_key(
     return alg_obj.prepare_key(public_key)
 
 
-class JWTAuthVerifier(object):
+class JWTAuthVerifier:
     """This class can be used to verify a JWT."""
 
     def __init__(
@@ -59,7 +60,7 @@ class JWTAuthVerifier(object):
         audience: str,
         leeway: int = 0,
         **requests_kwargs: Any,
-    ) -> Dict[Any, Any]:
+    ) -> dict[Any, Any]:
         """Verify if the token is correct
 
         Returns:
@@ -95,7 +96,7 @@ class JWTAuthVerifier(object):
         jwt_key: Union[AllowedPublicKeys, PyJWK, str, bytes],
         audience: Optional[Union[str, Iterable[str]]] = None,
         leeway: int = 0,
-    ) -> Dict[Any, Any]:
+    ) -> dict[Any, Any]:
         """Decode JWT and check if it's valid"""
         options: Options = Options(
             verify_signature=True,

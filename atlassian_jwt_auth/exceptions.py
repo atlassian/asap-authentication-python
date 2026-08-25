@@ -1,7 +1,7 @@
 from typing import Any
 
 
-class _WrappedException(object):
+class _WrappedException:
     """Allow wrapping exceptions in a new class while preserving the original
     as an attribute.
 
@@ -18,10 +18,10 @@ class _WrappedException(object):
             if isinstance(orig, Exception):
                 wrapped_args[0] = str(orig)
                 self.original_exception = getattr(orig, "original_exception", orig)
-        super(_WrappedException, self).__init__(*wrapped_args, **kwargs)
+        super().__init__(*wrapped_args, **kwargs)
 
 
-class _WithStatus(object):
+class _WithStatus:
     """Allow an optional status_code attribute on wrapped exceptions.
 
     This should allow inspecting HTTP-related errors without having to know
@@ -30,7 +30,7 @@ class _WithStatus(object):
 
     def __init__(self, *args: Any, **kwargs: Any) -> None:
         status_code = kwargs.pop("status_code", None)
-        super(_WithStatus, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         self.status_code = status_code
 
 
@@ -64,5 +64,3 @@ class SubjectDoesNotMatchIssuerException(ASAPAuthenticationException):
 
 class NoTokenProvidedError(ASAPAuthenticationException):
     """Raise when no token is provided"""
-
-    pass

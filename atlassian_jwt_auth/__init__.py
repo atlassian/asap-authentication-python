@@ -10,10 +10,10 @@ from atlassian_jwt_auth.signer import (
 from atlassian_jwt_auth.verifier import JWTAuthVerifier
 
 __all__ = [
-    "get_permitted_algorithm_names",
     "HTTPSPublicKeyRetriever",
+    "JWTAuthVerifier",
     "KeyIdentifier",
     "create_signer",
     "create_signer_from_file_private_key_repository",
-    "JWTAuthVerifier",
+    "get_permitted_algorithm_names",
 ]

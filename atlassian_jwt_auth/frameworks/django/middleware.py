@@ -1,4 +1,5 @@
-from typing import Any, Callable, Optional
+from collections.abc import Callable
+from typing import Any, Optional
 
 from django.http import HttpRequest
 
@@ -24,7 +25,7 @@ def asap_middleware(get_response: Any) -> Callable:
     return middleware
 
 
-class OldStyleASAPMiddleware(object):
+class OldStyleASAPMiddleware:
     """Middleware to enable ASAP for all requests (for legacy applications
     using MIDDLEWARE_CLASSES)"""
 

@@ -1,5 +1,6 @@
 import logging
-from typing import Any, Dict, Iterable, Optional
+from collections.abc import Iterable
+from typing import Any, Optional
 
 from jwt.exceptions import InvalidIssuerError, InvalidTokenError
 
@@ -90,7 +91,7 @@ def _process_asap_token(
 
 
 def _verify_issuers(
-    asap_claims: Dict[Any, Any], issuers: Optional[Iterable[str]] = None
+    asap_claims: dict[Any, Any], issuers: Optional[Iterable[str]] = None
 ) -> None:
     """Verify that the issuer in the claims is valid and is expected."""
     claim_iss = asap_claims.get("iss")

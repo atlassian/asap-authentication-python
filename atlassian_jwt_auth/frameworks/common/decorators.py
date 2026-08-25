@@ -1,5 +1,6 @@
+from collections.abc import Callable, Iterable
 from functools import wraps
-from typing import Any, Callable, Dict, Iterable, Optional
+from typing import Any, Optional
 
 from jwt.exceptions import InvalidIssuerError, InvalidTokenError
 
@@ -103,7 +104,7 @@ def _restrict_asap(
 
 
 def _update_settings_from_kwargs(
-    settings: Dict[Any, Any],
+    settings: dict[Any, Any],
     issuers: Optional[Iterable] = None,
     required: bool = True,
     subject_should_match_issuer: Optional[bool] = None,

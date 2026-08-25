@@ -7,7 +7,7 @@ from .backend import WSGIBackend
 Request = namedtuple("Request", ["environ", "start_response"])
 
 
-class ASAPMiddleware(object):
+class ASAPMiddleware:
     def __init__(self, handler: Any, settings: Any) -> None:
         self._next = handler
         self._backend = WSGIBackend(settings)

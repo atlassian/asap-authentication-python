@@ -20,7 +20,7 @@ class NoneAlgorithmJwtAuthSigner(atlassian_jwt_auth.signer.JWTAuthSigner):
 
     def generate_jwt(self, audience, **kwargs):
         alg_header = kwargs.get("alg_header", "none")
-        key_identifier, private_key_pem = self.private_key_retriever.load(self.issuer)
+        key_identifier, _ = self.private_key_retriever.load(self.issuer)
         return jwt.encode(
             self._generate_claims(audience, **kwargs),
             algorithm=None,
@@ -29,7 +29,7 @@ class NoneAlgorithmJwtAuthSigner(atlassian_jwt_auth.signer.JWTAuthSigner):
         )
 
 
-class BaseJWTAuthVerifierTest(object):
+class BaseJWTAuthVerifierTest:
     """tests for the JWTAuthVerifier class."""
 
     def setUp(self):
