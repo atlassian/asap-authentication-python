@@ -104,7 +104,7 @@ class HTTPSPublicKeyRetriever(BasePublicKeyRetriever):
             return self._retrieve(url, requests_kwargs)
         except requests.RequestException as e:
             try:
-                status_code = e.response.status_code if e.response else None
+                status_code = e.response.status_code if e.response is not None else None
             except AttributeError:
                 status_code = None
             raise PublicKeyRetrieverException(e, status_code=status_code)

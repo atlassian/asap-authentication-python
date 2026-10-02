@@ -6,6 +6,7 @@ from unittest import mock
 import httptest
 import requests
 
+from atlassian_jwt_auth.exceptions import PublicKeyRetrieverException
 from atlassian_jwt_auth.key import (
     PEM_FILE_TYPE,
     HTTPSMultiRepositoryPublicKeyRetriever,
@@ -272,6 +273,42 @@ class BaseHTTPSMultiRepositoryPublicKeyRetrieverTest(BaseHTTPSPublicKeyRetriever
         )
         mock_get_method.side_effect = [connection_exception, valid_response]
         self.assertEqual(retriever.retrieve("example/eg"), self._public_key_pem)
+
+
+class HTTPErrorStatusTest(unittest.TestCase):
+    @mock.patch.object(requests.Session, "get")
+    def test_server_error_tries_next_repository(self, mock_get):
+        error = requests.Response()
+        error.status_code = 503
+        success = requests.Response()
+        success.status_code = 200
+        success.headers["content-type"] = PEM_FILE_TYPE
+        success._content = b"public-key"
+        mock_get.side_effect = [error, success]
+        retriever = HTTPSMultiRepositoryPublicKeyRetriever(
+            ["https://first.example", "https://second.example"]
+        )
+
+        self.assertEqual(retriever.retrieve("example/key"), "public-key")
+        self.assertEqual(mock_get.call_count, 2)
+        self.assertEqual(
+            mock_get.call_args.args[0], "https://second.example/example/key"
+        )
+
+    @mock.patch.object(requests.Session, "get")
+    def test_client_error_preserves_status_without_failover(self, mock_get):
+        response = requests.Response()
+        response.status_code = 403
+        mock_get.return_value = response
+        retriever = HTTPSMultiRepositoryPublicKeyRetriever(
+            ["https://first.example", "https://second.example"]
+        )
+
+        with self.assertRaises(PublicKeyRetrieverException) as caught:
+            retriever.retrieve("example/key")
+        self.assertEqual(caught.exception.status_code, 403)
+        self.assertIs(caught.exception.original_exception.response, response)
+        mock_get.assert_called_once()
 
 
 def _setup_mock_response_for_retriever(mock_method, public_key_pem, headers=None):
