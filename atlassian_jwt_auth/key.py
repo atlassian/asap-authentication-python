@@ -1,6 +1,7 @@
 import base64
 import logging
 import os
+import posixpath
 import re
 from collections.abc import Generator, Iterable
 from email.message import EmailMessage
@@ -43,7 +44,7 @@ def validate_key_identifier(identifier: str) -> str:
         raise KeyIdentifierException(_error_msg)
     if not regex.match(identifier):
         raise KeyIdentifierException(_error_msg)
-    normalised = os.path.normpath(identifier)
+    normalised = posixpath.normpath(identifier)
     if normalised != identifier:
         raise KeyIdentifierException(_error_msg)
     if normalised.startswith("/"):

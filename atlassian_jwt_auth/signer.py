@@ -64,7 +64,10 @@ class JWTAuthSigner:
             "iat": now,
             "aud": audience,
             "jti": "%s:%s"
-            % (now.strftime("%s"), random.SystemRandom().getrandbits(32)),
+            % (
+                calendar.timegm(now.utctimetuple()),
+                random.SystemRandom().getrandbits(32),
+            ),
             "nbf": now,
             "sub": self.subject or self.issuer,
         }

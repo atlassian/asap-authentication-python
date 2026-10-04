@@ -56,8 +56,21 @@ class BaseJWTAuthSignerTest:
         first = jwt_auth_signer._generate_claims(aud)["jti"]
         second = jwt_auth_signer._generate_claims(aud)["jti"]
         self.assertNotEqual(first, second)
-        self.assertTrue(str(expected_now.strftime("%s")) in first)
-        self.assertTrue(str(expected_now.strftime("%s")) in second)
+        self.assertTrue(first.startswith("978307200:"))
+        self.assertTrue(second.startswith("978307200:"))
+
+    def test_generate_claims_without_platform_strftime_extensions(self):
+        class PortableDatetime(datetime.datetime):
+            def strftime(self, fmt):
+                if "%s" in fmt:
+                    raise ValueError("Invalid format string")
+                return super().strftime(fmt)
+
+        signer = utils.get_example_jwt_auth_signer(
+            algorithm=self.algorithm, private_key_pem=self._private_key_pem
+        )
+        signer._now = lambda: PortableDatetime(2001, 1, 1, tzinfo=datetime.timezone.utc)
+        self.assertTrue(signer._generate_claims("aud")["jti"].startswith("978307200:"))
 
     @mock.patch("jwt.encode")
     def test_generate_jwt(self, m_jwt_encode):
