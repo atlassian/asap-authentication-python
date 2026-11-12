@@ -1,10 +1,13 @@
+import asyncio
 import os
+import unittest
 from unittest import IsolatedAsyncioTestCase as TestCase
 from unittest import mock
 from unittest.mock import AsyncMock as CoroutineMock
 from unittest.mock import Mock
 
 import aiohttp
+from aiohttp import web
 from multidict import CIMultiDict
 
 from atlassian_jwt_auth.contrib.aiohttp import HTTPSPublicKeyRetriever
@@ -98,3 +101,110 @@ class ES256HTTPSPublicKeyRetrieverTest(
     utils.RS256KeyTestMixin, BaseHTTPSPublicKeyRetrieverTestMixin, TestCase
 ):
     """Tests for aiohttp.HTTPSPublicKeyRetriever class for ES256 algorithm"""
+
+
+class HTTPSPublicKeyRetrieverSessionLifecycleTest(unittest.TestCase):
+    """Tests for aiohttp.HTTPSPublicKeyRetriever session reuse and invalidation."""
+
+    def setUp(self):
+        self.base_url = "https://example.com"
+        self._reset_class_session()
+
+    def tearDown(self):
+        self._reset_class_session()
+
+    @staticmethod
+    def _reset_class_session():
+        HTTPSPublicKeyRetriever._class_session = None
+        HTTPSPublicKeyRetriever._class_session_loop = None
+
+    def test_reuses_session_within_same_event_loop(self):
+        async def run():
+            first = HTTPSPublicKeyRetriever(self.base_url)
+            second = HTTPSPublicKeyRetriever(self.base_url)
+            try:
+                self.assertIs(first._session, second._session)
+            finally:
+                await first._session.close()
+
+        asyncio.run(run())
+
+    def test_recreates_session_when_cached_session_is_closed(self):
+        async def run():
+            first = HTTPSPublicKeyRetriever(self.base_url)
+            first_session = first._session
+            await first_session.close()
+
+            second = HTTPSPublicKeyRetriever(self.base_url)
+            try:
+                self.assertIsNot(second._session, first_session)
+                self.assertFalse(second._session.closed)
+            finally:
+                await second._session.close()
+
+        asyncio.run(run())
+
+    def test_recreates_session_when_loop_differs(self):
+        loop_one = asyncio.new_event_loop()
+        loop_two = asyncio.new_event_loop()
+        try:
+            first = HTTPSPublicKeyRetriever(self.base_url, loop=loop_one)
+            second = HTTPSPublicKeyRetriever(self.base_url, loop=loop_two)
+            self.assertIsNot(first._session, second._session)
+        finally:
+            loop_one.run_until_complete(first._session.close())
+            loop_two.run_until_complete(second._session.close())
+            loop_one.close()
+            loop_two.close()
+
+    def test_recreates_session_when_cached_loop_is_closed(self):
+        loop_one = asyncio.new_event_loop()
+        loop_two = asyncio.new_event_loop()
+        first = None
+        second = None
+        try:
+            first = HTTPSPublicKeyRetriever(self.base_url, loop=loop_one)
+            loop_one.close()
+            self.assertFalse(first._session.closed)
+
+            second = HTTPSPublicKeyRetriever(self.base_url, loop=loop_two)
+            self.assertIsNot(first._session, second._session)
+            self.assertFalse(second._session.closed)
+        finally:
+            if first is not None and not first._session.closed:
+                if first._session.connector is not None:
+                    first._session.connector._close()
+                first._session._connector = None
+            if second is not None:
+                loop_two.run_until_complete(second._session.close())
+            if not loop_one.is_closed():
+                loop_one.close()
+            loop_two.close()
+
+    def test_recreates_session_across_sequential_event_loops(self):
+        async def fetch_key():
+            async def handler(_request):
+                return web.Response(text="public-key", content_type=PEM_FILE_TYPE)
+
+            app = web.Application()
+            app.router.add_get("/key", handler)
+            runner = web.AppRunner(app)
+            await runner.setup()
+            site = web.TCPSite(runner, "127.0.0.1", 0)
+            await site.start()
+            port = site._server.sockets[0].getsockname()[1]
+
+            retriever = HTTPSPublicKeyRetriever(self.base_url)
+            try:
+                body = await retriever._retrieve(f"http://127.0.0.1:{port}/key", {})
+                return body, retriever._session
+            finally:
+                await retriever._session.close()
+                await runner.cleanup()
+
+        first_body, first_session = asyncio.run(fetch_key())
+        second_body, second_session = asyncio.run(fetch_key())
+
+        self.assertEqual(first_body, "public-key")
+        self.assertEqual(second_body, "public-key")
+        self.assertIsNot(first_session, second_session)

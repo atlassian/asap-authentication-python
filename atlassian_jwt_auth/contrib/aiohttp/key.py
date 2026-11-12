@@ -14,22 +14,34 @@ from atlassian_jwt_auth.key import HTTPSPublicKeyRetriever as _HTTPSPublicKeyRet
 class HTTPSPublicKeyRetriever(_HTTPSPublicKeyRetriever):
     """A class for retrieving JWT public keys with aiohttp"""
 
-    _class_session = None
+    _class_session: Optional[aiohttp.ClientSession] = None  # type: ignore[assignment]
+    _class_session_loop: Optional[AbstractEventLoop] = None
 
     def __init__(
         self, base_url: str, *, loop: Optional[AbstractEventLoop] = None
     ) -> None:
         if loop is None:
-            loop = asyncio.get_event_loop()
+            try:
+                loop = asyncio.get_running_loop()
+            except RuntimeError:
+                loop = asyncio.get_event_loop()
         self.loop = loop
         super().__init__(base_url)
 
     def _get_session(self) -> aiohttp.ClientSession:  # type: ignore[override]
-        if HTTPSPublicKeyRetriever._class_session is None:
-            HTTPSPublicKeyRetriever._class_session = aiohttp.ClientSession(
-                loop=self.loop
-            )
-        return HTTPSPublicKeyRetriever._class_session
+        session = HTTPSPublicKeyRetriever._class_session
+        session_loop = HTTPSPublicKeyRetriever._class_session_loop
+        if (
+            session is None
+            or session.closed
+            or session_loop is None
+            or session_loop.is_closed()
+            or session_loop is not self.loop
+        ):
+            session = aiohttp.ClientSession(loop=self.loop)
+            HTTPSPublicKeyRetriever._class_session = session
+            HTTPSPublicKeyRetriever._class_session_loop = self.loop
+        return session
 
     def _convert_proxies_to_proxy_arg(
         self, url: str, requests_kwargs: dict[Any, Any]
