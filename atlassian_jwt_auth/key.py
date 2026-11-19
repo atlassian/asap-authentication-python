@@ -150,11 +150,16 @@ class HTTPSMultiRepositoryPublicKeyRetriever(BasePublicKeyRetriever):
         retrieval.
         """
         if isinstance(exception, PublicKeyRetrieverException):
-            original_exception = getattr(exception, "original_exception", None)
-            if isinstance(original_exception, ConnectionError):
+            if exception.status_code is not None:
+                if exception.status_code < 500:
+                    raise exception
                 return
-            if exception.status_code is None or exception.status_code < 500:
-                raise exception
+            original_exception = getattr(exception, "original_exception", None)
+            if isinstance(
+                original_exception, (RequestException, ConnectionError, OSError)
+            ):
+                return
+            raise exception
 
     def retrieve(
         self, key_identifier: Union[KeyIdentifier, str], **requests_kwargs: Any
