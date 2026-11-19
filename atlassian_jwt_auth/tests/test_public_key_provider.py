@@ -6,6 +6,7 @@ from unittest import mock
 import httptest
 import requests
 
+from atlassian_jwt_auth.exceptions import PublicKeyRetrieverException
 from atlassian_jwt_auth.key import (
     PEM_FILE_TYPE,
     HTTPSMultiRepositoryPublicKeyRetriever,
@@ -272,6 +273,30 @@ class BaseHTTPSMultiRepositoryPublicKeyRetrieverTest(BaseHTTPSPublicKeyRetriever
         )
         mock_get_method.side_effect = [connection_exception, valid_response]
         self.assertEqual(retriever.retrieve("example/eg"), self._public_key_pem)
+
+    @mock.patch.object(requests.Session, "get")
+    def test_retrieve_with_timeout_error(self, mock_get_method):
+        """tests that the retrieve method fails over to the next repository
+        when the first key repository encounters a timeout.
+        """
+        retriever = HTTPSMultiRepositoryPublicKeyRetriever(self.keystore_urls)
+        _setup_mock_response_for_retriever(mock_get_method, self._public_key_pem)
+        valid_response = mock_get_method.return_value
+        del mock_get_method.return_value
+        timeout_exception = requests.exceptions.Timeout("Connection timed out")
+        mock_get_method.side_effect = [timeout_exception, valid_response]
+        self.assertEqual(retriever.retrieve("example/eg"), self._public_key_pem)
+
+    @mock.patch.object(requests.Session, "get")
+    def test_retrieve_with_404_error_raises(self, mock_get_method):
+        """tests that the retrieve method raises when a repository returns a 404."""
+        retriever = HTTPSMultiRepositoryPublicKeyRetriever(self.keystore_urls)
+        not_found_exception = requests.exceptions.HTTPError(
+            response=mock.Mock(status_code=404)
+        )
+        mock_get_method.side_effect = not_found_exception
+        with self.assertRaises(PublicKeyRetrieverException):
+            retriever.retrieve("example/eg")
 
 
 def _setup_mock_response_for_retriever(mock_method, public_key_pem, headers=None):
